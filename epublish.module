@@ -206,7 +206,7 @@ function epublish_block($op = 'list', $delta = 0) {
   } else if ($op == 'view') {
     if ($delta) {
       $section = epublish_get_section($delta);
-      $topics = epublish_topic_selection_list($delta, false);
+      $topics = epublish_topic_selection_list($delta);
       $data['subject'] = l(t($section->title), "headlines/$delta");
       $items = array();
 	  foreach ($topics as $tid => $name) {
@@ -693,7 +693,7 @@ function epublish_headlines_page() {
   if ($section->timeframe) {
     $timeframe = " AND (n.created >= '" . strtotime('-' . $section->timeframe) . "' OR n.sticky=1)";
   }
-  $result = db_query("SELECT et.tid, et.count, et.node_types, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid, $node->tid);
+  $result = db_query("SELECT et.tid, et.count, et.node_types, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid);
   $all_nodes = array();
   $topics = array();
   while ($topic = db_fetch_object($result)) {
@@ -746,7 +746,7 @@ function theme_epublish_format_volume($volume, $pid, $edition_blocks = array()) 
 }
 
 /** 
- * theme_epublish_format_edition: A themeable layout that lists the issues of a single publication.
+ * theme_epublish_format_edition: A themeable layout that lists the nodes in a single edition of a publication.
  *
  * @param $edition
  *   An edition object.
@@ -866,13 +866,11 @@ function epublish_assign_section(&$edition) {
  *
  * @param $sid
  *   A section ID.
- * @param $include_none
- *   A Boolean value indicating whether the selection list should include the "none" option.
  *
  * @return
  *   An associative array of topic IDs and their reference names, for use as the $options parameter in form_select function calls
  */
-function epublish_topic_selection_list($sid, $include_none=true) {
+function epublish_topic_selection_list($sid) {
   $result = db_query("SELECT et.tid, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid);
   $topics = array();
   while ($topic = db_fetch_object($result)) {
@@ -929,7 +927,7 @@ function epublish_sections_table() {
   $result = db_query("SELECT * FROM {epublish_section}");
   $header = array(t('sections/topics'), array("data" => t("operations"), "colspan" => 2));
   while ($section = db_fetch_object($result)) {
-    $topics = epublish_topic_selection_list($section->sid, false);
+    $topics = epublish_topic_selection_list($section->sid);
   	$rows[] = array(l('<b>' . t($section->title) . '</b>', "headlines/$section->sid", array(), NULL, NULL, FALSE, TRUE), 
               l(t("edit"), "admin/epublish/edit/section/$section->sid"), 
               l(t("add topic"), "admin/epublish/add/topic/$section->sid")
@@ -941,7 +939,6 @@ function epublish_sections_table() {
 	$rows[] = array(implode('<br />', $lines), array('data' => '', 'colspan' => 2));
   }
   $output = theme("table", $header, $rows);
-  $output .= form_hidden('sid', $section->sid);
   $output .= form_submit(t("Add Section"));
   return form($output); 
 }
@@ -957,6 +954,7 @@ function epublish_sections_table() {
  */
 function epublish_form_section($edit = array()) {
   $form = form_textfield(t('Section title'), 'title', $edit['title'], 50, 128, t('The title for this section.'), NULL, TRUE);
+  $vocs = array();
   foreach (module_invoke('taxonomy', 'get_vocabularies') as $vid => $voc) {
     $vocs[$vid] = $voc->name;
   }
@@ -967,15 +965,18 @@ function epublish_form_section($edit = array()) {
   if ($edit["sid"]) {
     $header = array(t('topics'), 
               t('weight'),
-              ($edit['vid'] ? l(t("add topic"), "admin/epublish/add/topic/" . $edit["sid"]) : '')
+			  l(t("add topic"), "admin/epublish/add/topic/" . $edit["sid"])
        );
     $rows = array();
     $result2 = db_query("SELECT et.*, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $edit["sid"]);
     while ($topic = db_fetch_object($result2)) {
       if ($topic->tid == -1) {
         $topic->name = variable_get('epublish_top_stories', t('top stories'));
-      }
-      if ($topic->tid == 0) {
+		$rows[] = array("$topic->name",
+                form_hidden('weight]['. $topic->tid, -99),
+                l(t('options'), "admin/epublish/edit/topic/" . $edit["sid"] . "/$topic->tid")
+         );
+      } elseif ($topic->tid == 0) {
         $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
         $rows[] = array("$topic->name",
                 form_hidden('weight]['. $topic->tid, 99),
@@ -1169,6 +1170,9 @@ function epublish_form_topic($edit = array()) {
   $range = drupal_map_assoc(range(-10, 10));
   if ($topic && $edit['tid'] == 0) {
     $form .= form_hidden('weight', 99);
+  } elseif ($topic && $edit['tid'] == -1) {
+    $form .= form_hidden('weight', -99);
+	$form .= form_submit(t("Delete"));
   } else {
     $form .= form_select(t("Topic weight"), "weight", $edit["weight"], $range, t("The weight sorts headline topics. Lighter (smaller weight value) topics \"float up\" towards the top of the page."));
     $form .= form_submit(t("Delete"));
@@ -1592,7 +1596,7 @@ function epublish_form_edition($edit = array()) {
     $group .= form_submit(t("Add more headlines"));
     $group .= '</div>';
     $header = array(NULL, t('Stories'), t('Topic'), t('Type'), t('Status'), t('Weight'));
-    $topics = epublish_topic_selection_list($sid, true);
+    $topics = epublish_topic_selection_list($sid);
     while ($node = db_fetch_object($result)) {
       $rows[] = array(
           form_checkbox(NULL, 'status]['. $node->nid, 1, 0), 
@@ -1920,7 +1924,7 @@ function epublish_admin_node($edit=array()) {
 	  $node->tid = 0;
 	}
     $node->weight = 0;
-    $topics = epublish_topic_selection_list($sid, true);
+    $topics = epublish_topic_selection_list($sid);
     $rows[] = array(
         form_checkbox(NULL, 'status]['. $node->nid, 1, 0), 
         l($node->title, 'node/'. $node->nid) .' '. theme('mark', node_mark($node->nid, $node->changed)), 
