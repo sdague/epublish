@@ -139,7 +139,8 @@ function epublish_settings() {
 
   // sections
   $sids = epublish_sections();
-  $output .= form_select(t("Headlines section"), "epublish_global_sid", variable_get('epublish_global_sid', array_shift(array_keys($sids))), $sids, t("Select a section to control which topics are headlined in each publication."));
+  $array_keys = array_keys($sids);
+  $output .= form_select(t("Headlines section"), "epublish_global_sid", variable_get('epublish_global_sid', array_shift($array_keys)), $sids, t("Select a section to control which topics are headlined in each publication."));
   $output .= form_checkbox(t('Custom sections?'), 'epublish_custom_sections', 1, variable_get('epublish_custom_sections', '0'), t('If checked, each publication and edition can have its own section that overrides the global section selected above.'));
   return $output;
 }
@@ -446,7 +447,8 @@ function epublish_sections($include_none = false) {
     foreach (node_list() as $type) {
       $nodetypes[] = node_invoke($type, 'node_name');
     }
-    $vid = array_pop(array_keys(module_invoke('taxonomy', 'get_vocabularies')));
+    $array_keys = array_keys(module_invoke('taxonomy', 'get_vocabularies'));
+    $vid = array_pop($array_keys);
     epublish_save_section(array('title' => t('default'), 'vid' => $vid, 'node_types' => $nodetypes, 'timeframe' => '', 'layout_list' => '', 'layout_page' => ''));
     $result = db_query("SELECT * FROM {epublish_section}");
   }
@@ -687,7 +689,8 @@ function epublish_headlines_page() {
   $sid = arg(1);
   $sids = epublish_sections();
   if (!$sid) {
-    $sid = variable_get('epublish_global_sid', array_shift(array_keys($sids)));
+    $array_keys = array_keys($sids);
+    $sid = variable_get('epublish_global_sid', array_shift($array_keys));
   }
   $section = epublish_get_section($sid);
   if ($section->timeframe) {
@@ -720,7 +723,8 @@ function epublish_headlines_page() {
   }
   $breadcrumb[] = array('path' => "epublish/headlines/$section->sid", 'title' => $section->title);
   menu_set_location($breadcrumb);
-  print theme('page', theme('epublish_topics', $topics, $sid, NULL, 'page'));
+  $edition = NULL;
+  print theme('page', theme('epublish_topics', $topics, $sid, $edition, 'page'));
 }
 
 /** 
@@ -858,7 +862,14 @@ function epublish_assign_section(&$edition) {
       return $publication->sid;
     }
   }
-  return variable_get('epublish_global_sid', array_shift(array_keys($sids)));
+  $array_keys = array_keys($sids);
+  $auto_sid = array_shift($array_keys);
+  $sid = variable_get('epublish_global_sid', $auto_sid);
+  if ($sids[$sid]) {
+    return $sid;
+  } else {
+    return $auto_sid;
+  }
 }
 
 /** 
@@ -959,7 +970,8 @@ function epublish_form_section($edit = array()) {
     $vocs[$vid] = $voc->name;
   }
   if (!$edit) {
-    $edit['vid'] = array_pop(array_keys($vocs));
+    $array_keys = array_keys($vocs);
+    $edit['vid'] = array_pop($array_keys);
   }
   $form .= form_select(t("Vocabulary"), "vid", $edit["vid"], $vocs, t("The vocabulary containing the topics covered in this section."));
   if ($edit["sid"]) {
@@ -1076,7 +1088,18 @@ function epublish_del_section($sid) {
   $section = epublish_get_section($sid);
   db_query("DELETE FROM {epublish_section} WHERE sid = '%d'", $sid);
   db_query("DELETE FROM {epublish_topic} WHERE sid = '%d'", $sid);
-  db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE sid = '%d'", $sid);
+  
+  $result = db_query("SELECT * FROM {epublish_edition}");
+  while ($edition = db_fetch_object($result)) {
+    if (epublish_assign_section($edition) == $sid) {
+      db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE eid = '%d'", $edition->eid);
+    }
+  }
+  db_query("UPDATE {epublish_edition} SET sid=0 WHERE sid = '%d'", $sid);
+  db_query("UPDATE {epublish_publication} SET sid=0 WHERE sid = '%d'", $sid);
+  if ($sid == variable_get('epublish_global_sid', 0)) {
+    variable_del('epublish_global_sid');
+  }
   return t('deleted section "%title".', array('%title' => $section->title));
 }
 
@@ -1223,7 +1246,7 @@ function epublish_del_topic($sid, $tid) {
   $section = epublish_get_section($sid);
   db_query("DELETE FROM {epublish_topic} WHERE sid = '%d' AND tid = '%d'", $sid, $tid);
   $result = db_query("SELECT eid FROM {epublish_edition} WHERE sid = '%d'", $sid);
-  WHILE ($edition = db_fetch_object($result)) {
+  while ($edition = db_fetch_object($result)) {
     db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE tid='%d' AND eid = '%d'", $tid, $edition->eid);
   }
   return t('deleted topic "%term" from section "%section."', array('%term' => $term->name, '%section' => $section->title));
