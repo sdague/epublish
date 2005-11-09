@@ -1,4 +1,6 @@
 <?php
+// $Id$
+
 $description = 'one- and two-column';
 $context = 'page';
 

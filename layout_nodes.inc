@@ -1,4 +1,6 @@
 <?php
+// $Id$
+
 $description = 'node views';
 $context = 'page';
 

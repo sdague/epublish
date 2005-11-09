@@ -1,4 +1,6 @@
 <?php
+// $Id$
+
 $description = 'simple list of headlines only';
 $context = 'list';
 

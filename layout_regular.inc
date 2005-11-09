@@ -1,4 +1,6 @@
 <?php
+// $Id$
+
 $description = 'regular';
 $context = 'page';
 
