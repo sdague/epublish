@@ -1,4 +1,5 @@
 <?php
+// $Id$
 
 /*
     epublish.module - Part of the epublish module for Drupal
@@ -236,7 +237,7 @@ function epublish_block($op = 'list', $delta = 0) {
  * @return a &lt;style&gt; tag that indicates what file browsers should import
  */
 function epublish_html_head() {
-  return '<style type="text/css">@import url(modules/epublish/epublish.css);</style>';
+  return '<style type="text/css">@import url(' . drupal_get_path('module', 'epublish') . '/epublish.css);</style>';
 }
 
 /** 
@@ -395,7 +396,7 @@ function epublish_admin() {
         $edit = epublish_save_pub($edit);
         drupal_goto('admin/epublish');
       } else if (arg(3) == 'edition') {
-        $edit = epublish_save_edition($edit);
+        $edit = epublish_save_edition($edit, $edit['make_current']);
         drupal_goto('admin/epublish/');
       } else if (arg(3) == 'volume') {
         $edit = epublish_save_volume($edit);
@@ -409,7 +410,7 @@ function epublish_admin() {
       }
 	  break;
     case t('Add more headlines'):
-      $edit = epublish_save_edition($edit);
+      $edit = epublish_save_edition($edit, $edit['make_current']);
       drupal_goto('admin/epublish/headlines/' . $edit['eid']);
 	  break;
     case 'sections':
@@ -432,14 +433,14 @@ function epublish_admin() {
 /**
  * epublish_sections: lists all publication sections.
  *
- * @param $include_none
- *   A Boolean value indicating whehter a "none" option should be included
+ * @param $include_default
+ *   A Boolean value indicating whehter a "default" option should be included
  *
  * @return
  *   An array of sections and their titles, suitable for use as the $options in a form_select call, e.g.,
  *      form_select($title, $name, $value, epublish_sections(), $description)
  */
-function epublish_sections($include_none = false) {
+function epublish_sections($include_default = false) {
   $result = db_query("SELECT * FROM {epublish_section}");
   $sections = array();
   // if no sections exist, create a default section
@@ -452,8 +453,8 @@ function epublish_sections($include_none = false) {
     epublish_save_section(array('title' => t('default'), 'vid' => $vid, 'node_types' => $nodetypes, 'timeframe' => '', 'layout_list' => '', 'layout_page' => ''));
     $result = db_query("SELECT * FROM {epublish_section}");
   }
-  if ($include_none) {
-    $sections[0] = t('<none>');
+  if ($include_default) {
+    $sections[0] = t('<default>');
   }
   while ($section = db_fetch_object($result)) {
     $sections[$section->sid] = $section->title;
@@ -481,11 +482,11 @@ function epublish_sections($include_none = false) {
  *   An array of layouts and their descriptions, suitable for use as the $options in a form_select call, e.g.,
  *      form_select($title, $name, $value, epublish_layouts(), $description)
  */
-function epublish_layouts($context_selection=NULL) {
+function epublish_layouts($context_selection=NULL, $include_default=FALSE) {
   static $layouts, $contexts;
   if (!isset($layouts)) {
     $layouts = array();
-    $files = file_scan_directory('modules/epublish/', '^layout_.*\.inc$');
+	$files = file_scan_directory(drupal_get_path('module', 'epublish'), '^layout_.*\.inc$');
     foreach ($files as $filename => $file) {
       include_once($filename);
       $layouts[substr($file->name, 7)] = $description;
@@ -495,9 +496,17 @@ function epublish_layouts($context_selection=NULL) {
     }
   }
   if ($context_selection) {
-    return $contexts[$context_selection];
+    if ($include_default) {
+      return array_merge(array(0 => t('<default>')), $contexts[$context_selection]);
+    } else {
+      return $contexts[$context_selection];
+    }
   } else {
-    return $layouts;
+    if ($include_default) {
+      return array_merge(array(0 => t('<default>')), $layouts);
+    } else {
+      return $layouts;
+    }
   }
 }
 
@@ -1005,9 +1014,9 @@ function epublish_form_section($edit = array()) {
   }
 
   if (variable_get('epublish_custom_layouts', '0')) {
-    $layouts = array_merge(array(0 => '<none>'), epublish_layouts('page'));
+    $layouts = epublish_layouts('page', TRUE);
     $form .= form_select(t("Page layout"), "layout_page", $edit['layout_page'], $layouts, t("Select a page layout for this section. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout settings'), 'admin/settings/epublish'))));
-    $layouts = array_merge(array(0 => '<none>'), epublish_layouts('list'));
+    $layouts = epublish_layouts('list', TRUE);
     $form .= form_select(t("Listing layout"), "layout_list", $edit['layout_list'], $layouts, t("Select a layout to control the display of headline listings for this section. If none is selected, the default settings will be used."));
   } else {
     // Even if custom layouts are turned off, pass through the layout values as hidden inputs.
@@ -1086,15 +1095,14 @@ function epublish_save_section($edit) {
  */
 function epublish_del_section($sid) {
   $section = epublish_get_section($sid);
-  db_query("DELETE FROM {epublish_section} WHERE sid = '%d'", $sid);
-  db_query("DELETE FROM {epublish_topic} WHERE sid = '%d'", $sid);
-  
   $result = db_query("SELECT * FROM {epublish_edition}");
   while ($edition = db_fetch_object($result)) {
     if (epublish_assign_section($edition) == $sid) {
       db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE eid = '%d'", $edition->eid);
     }
   }
+  db_query("DELETE FROM {epublish_section} WHERE sid = '%d'", $sid);
+  db_query("DELETE FROM {epublish_topic} WHERE sid = '%d'", $sid);
   db_query("UPDATE {epublish_edition} SET sid=0 WHERE sid = '%d'", $sid);
   db_query("UPDATE {epublish_publication} SET sid=0 WHERE sid = '%d'", $sid);
   if ($sid == variable_get('epublish_global_sid', 0)) {
@@ -1415,9 +1423,9 @@ function epublish_form_pub($edit = array()) {
 
   // Select a layout
   if (variable_get('epublish_custom_layouts', '0')) {
-    $layouts = array_merge(array(0 => '<none>'), epublish_layouts('page'));
+    $layouts = epublish_layouts('page', TRUE);
     $form .= form_select(t("Page layout"), "layout_page", $edit['layout_page'], $layouts, t("Select a page layout for this publication. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout settings'), 'admin/settings/epublish'))));
-    $layouts = array_merge(array(0 => '<none>'), epublish_layouts('list'));
+    $layouts = epublish_layouts('list', TRUE);
     $form .= form_select(t("Listing layout"), "layout_list", $edit['layout_list'], $layouts, t("Select a layout to control the display of headline listings for this publication. If none is selected, the default settings will be used."));
   } else {
     // Even if custom layouts are turned off, pass through the value as a hidden input. That way the settings are still there if custom layouts gets turned on again later.
@@ -1585,9 +1593,9 @@ function epublish_form_edition($edit = array()) {
 
   // Select a layout
   if (variable_get('epublish_custom_layouts', '0')) {
-    $layouts = array_merge(array(0 => '<none>'), epublish_layouts('page'));
+    $layouts = epublish_layouts('page', TRUE);
     $form .= form_select(t("Page layout"), "layout_page", $edit['layout_page'], $layouts, t("Select a page layout for this edition. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout for this publication'), 'admin/epublish/edit/' . $edit["pid"]))));
-    $layouts = array_merge(array(0 => '<none>'), epublish_layouts('list'));
+    $layouts = epublish_layouts('list', TRUE);
     $form .= form_select(t("Listing layout"), "layout_list", $edit['layout_list'], $layouts, t("Select a layout to control the display of headline listings for this edition. If none is selected, the default for this publication will be used."));
   } else {
     // Even if custom layouts are turned off, pass through the value as a hidden input. That way the settings are still there if custom layouts gets turned on again later.
@@ -1600,12 +1608,15 @@ function epublish_form_edition($edit = array()) {
     $sids =  epublish_sections(true);
     $form .= form_select(t("Section"), "sid", $edit['sid'], $sids, t("Select a section to control which topics are headlined in this edition. If none is selected, the default section for this publication will be used."));
   } else {
-    // Even if custom layouts are turned off, pass through the value as a hidden input. That way the settings are still there if custom layouts gets turned on again later.
+    // Even if custom sections are turned off, pass through the value as a hidden input. That way the settings are still there if custom sections gets turned on again later.
     $form .= form_hidden('sid', $edit['sid']);
   }
 
   if ($edit["eid"]) {
     $form .= form_checkbox(t('Published?'), 'published', 1, $edit['published']);
+    $form .= form_checkbox(t('Make current?'), 'make_current', 1, ($edit['eid'] == $publication->current_eid), 
+	       t('Check this box if you want this to be the %current of this publication', 
+		     array('%current' => l(t('current edition'), "epublish/" . $publication->pid . "/current"))));
     $form .= form_submit(t("Submit"));
     $form .= form_hidden("eid", $edit["eid"]);
     $form .= form_submit(t("Delete"));
@@ -1635,12 +1646,12 @@ function epublish_form_edition($edit = array()) {
     $form .= '<hr />';
     $form .= form_group(t('Manage headlines'), $group);
     drupal_set_title(t('edit ') . "$publication->name, " . theme('epublish_edition_reference', $edition));
-    print theme('page', form($form));
   } else {
     $form .= form_checkbox(t('Published?'), 'published', 1, 1);
+    $form .= form_checkbox(t('Make current?'), 'make_current', 1, 0);
     $form .= form_submit(t("Submit"));
-    print theme('page', form($form));
   }
+  print theme('page', form($form));
 }
 
 /** 
@@ -1654,7 +1665,7 @@ function epublish_form_edition($edit = array()) {
  * @return
  *   the same array, with modifications if a new record is created 
  */
-function epublish_save_edition($edit, $make_current=true) {
+function epublish_save_edition($edit, $make_current=false) {
   if ($edit['eid'] && $edit['action'] != 'delete') {
     db_query("UPDATE {epublish_edition} SET pid='%d', dateline='%s', description='%s', volume='%d', number='%d', pubdate='%d', layout_list='%s', layout_page='%s', sid='%d', published='%d' WHERE eid = '%d'", $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'].$edit['month'].$edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published'], $edit['eid']);
     // Handle operations:
@@ -1892,8 +1903,8 @@ function epublish_admin_node($edit=array()) {
   $filters[] = array(t('View posts that are unpublished'), "WHERE ($exclusions) AND (n.status = 0 AND n.moderate = 0) ORDER BY n.changed DESC");
 
   if ($op == t('Add checked items to this edition') && isset($edit['status'])) {
-    foreach ($edit['status'] as $nid => $value) {
-      if ($value) {
+    foreach ($edit['status'] as $nid => $checked) {
+      if ($checked) {
         epublish_add_node($edit['eid'], $nid, $edit['weight'][$nid], $edit['tid'][$nid]);
       }
     }
