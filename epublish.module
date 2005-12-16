@@ -202,11 +202,34 @@ function epublish_block($op = 'list', $delta = 0) {
     $blocks = array();
     $blocks[0]['info'] = t('E-Publish');
     foreach (epublish_sections() as $sid => $title) {
-	  $blocks[$sid]['info'] = t($title);
+	  $blocks[$sid]['info'] = t('E-publish section: ') . t($title);
 	}
+    $publications = db_query("SELECT * FROM {epublish_publication}");
+    while ($publication = db_fetch_object($publications)) {
+      $blocks['pub_' . $publication->pid]['info'] = t($publication->name);
+    }
 	return $blocks;
   } else if ($op == 'view') {
-    if ($delta) {
+
+    // publication blocks
+    if (substr($delta, 0, 4) == 'pub_') {
+      $pid = substr($delta, 4);
+	  $publication = epublish_get_pub($pid);
+      $data['subject'] = t($publication->name);
+      $items = array();
+      $order = variable_get('epublish_edition_order', 'DESC');
+      $result = db_query("SELECT * FROM {epublish_edition} WHERE pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order LIMIT 10", $publication->pid);
+      while (($edition = db_fetch_object($result)) && $i++ < 10) {
+        $items[] = l(theme('epublish_edition_reference', $edition), "epublish/$publication->pid/$edition->eid");
+      }
+      $data['content'] = theme('item_list', $items);
+      if ($i == 10) {
+        $data['content'] .= '<div class="more-link">'. l(t('more'), "epublish/$publication->pid", array('title' => t('More editions.'))) .'</div>';
+      }
+      return $data;
+
+    // section blocks
+    } else if ($delta) {
       $section = epublish_get_section($delta);
       $topics = epublish_topic_selection_list($delta);
       $data['subject'] = l(t($section->title), "headlines/$delta");
