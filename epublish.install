@@ -1,0 +1,6 @@
+<?php
+function epublish_update_1() {
+  return _system_update_utf8(array('epublish_abstract', 'epublish_edition', 'epublish_edition_node', 'epublish_publication', 
+  	'epublish_section', 'epublish_topic', 'epublish_volume'));
+}
+?>
