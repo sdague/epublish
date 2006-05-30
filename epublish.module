@@ -451,7 +451,7 @@ function epublish_menu($may_cache) {
  * epublish_sections: lists all publication sections.
  *
  * @param $include_default
- *	 A Boolean value indicating whehter a "default" option should be included
+ *	 A Boolean value indicating whether a "default" option should be included
  *
  * @return
  *	 An array of sections and their titles, suitable for use as the $options in a form_select call, e.g.,
@@ -462,6 +462,7 @@ function epublish_sections($include_default = false) {
 	$sections = array();
 	// if no sections exist, create a default section
 	if (!db_num_rows($result)) {
+		$nodetype = array();
 		foreach (node_get_types() as $type => $name) {
 			$nodetypes[$type] = $name;
 		}
@@ -1125,9 +1126,8 @@ function epublish_form_section($edit = NULL) {
 		'#title' => t('Content types'),
 		'#default_value' => explode(',', $edit->node_types),
 		'#options' => node_get_types(),
-		'#description' => t('A list of node types you want to include in headlines listings.'),
+		'#description' => t('A list of node types you want to include in headlines listings. If none are selected, all node types will be included.'),
 		'#attributes' => NULL,
-		'#required' => TRUE,
 	);
 	$form['rules']['timeframe'] = array(
 		'#type' => 'textfield',
@@ -1208,7 +1208,7 @@ function epublish_form_section_submit($form_id, $form_values) {
 		db_query("INSERT INTO {epublish_section} (sid, title, vid, node_types, timeframe, layout_list, layout_page) VALUES ('%d', '%s', '%d', '%s', '%s', '%s', '%s')", $form_values['sid'], $form_values['title'], $form_values['vid'], implode(',', $form_values['node_types']), $form_values['timeframe'], $form_values['layout_list'], $form_values['layout_page']);
 		// Every section has a "miscellaneous" topic that can't be deleted, with a weight of 99 (so it always appears at the bottom of the section)
 		$misc_topic = array('sid' => $form_values['sid'], 'tid' => 0, 'count' => 0, 'weight' => 99, 'node_types' => array());
-		epublish_save_topic($misc_topic);
+		epublish_form_topic_submit(NULL, $misc_topic);
 		if ($form_id) {
 			drupal_set_message(t('The "%title" section has been added.', array('%title' => theme('placeholder', $form_values['title']))));
 		}
@@ -1295,7 +1295,7 @@ function epublish_get_topic($sid, $tid) {
 function epublish_admin_topic_edit($sid=NULL, $tid=NULL) {
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
 		return epublish_del_topic($sid, $tid);
-	} elseif ($sid && $tid) {
+	} elseif ($sid) {
 		$topic = epublish_get_topic($sid, $tid);
 	}
 	return epublish_form_topic($topic);
@@ -1356,10 +1356,12 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 	}
 
 	// Each topic can be associated with node types in addition to the node types selected for the entire section
+	$node_already_included = array();
 	foreach (explode(',', $section->node_types) as $node_type) {
 		$node_already_included[$node_type] = TRUE;
 	}
 	
+	$nodetypes = array();
 	foreach (node_get_types() as $type => $name) {
 		if (!$node_already_included[$type]) {
 			$nodetypes[$type] = $name;
@@ -1377,7 +1379,7 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 	$form['node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Additional Types'),
-    '#default_value' => $edit->node_types, // $types_array,
+    '#default_value' => $types_array, // $types_array,
     '#options' => $nodetypes,
     '#description' => t('A list of node types you want to associate with this topic. Node types checked here will be included <i>in addition</i> to node types selected for this section.'),
   );
@@ -1450,10 +1452,12 @@ function epublish_form_topic_submit($form_id, $edit) {
 		db_query("DELETE FROM {epublish_topic} WHERE sid = '%d' AND tid = '%d'", $edit['sid'], $edit['tid']);
 		db_query("INSERT INTO {epublish_topic} (sid, tid, count, weight, node_types) VALUES (%d, %d, %d, %d, '%s')", $edit['sid'], $edit['tid'], $edit['count'], $edit['weight'], implode(',', $edit['node_types']));
 		$term = epublish_get_term($edit['tid'], $edit['sid']);
-		if (db_num_rows($result)) {
-			drupal_set_message(t('The topic "%title" has been updated.', array('%title' => theme('placeholder', $term->name))));
-		} else {
-			drupal_set_message(t('The topic "%title" has been added.', array('%title' => theme('placeholder', $term->name))));
+		if ($form_id) {
+			if (db_num_rows($result)) {
+				drupal_set_message(t('The topic "%title" has been updated.', array('%title' => theme('placeholder', $term->name))));
+			} else {
+				drupal_set_message(t('The topic "%title" has been added.', array('%title' => theme('placeholder', $term->name))));
+			}
 		}
 	} else if ($edit['action'] == 'delete') {
 		return epublish_del_topic($edit['sid'], $edit['tid']);
@@ -2570,7 +2574,11 @@ function epublish_get_term($tid, $sid) {
  *	 The SQL conditions that should appear in the WHERE clause of a SELECT statement.
  */
 function _epublish_build_node_inclusions($node_types = array()) {
-	return " n.type='" . implode("' OR n.type='", $node_types) . "'";
+	if (count($node_types)) {
+		return " n.type='" . implode("' OR n.type='", $node_types) . "'";
+	} else {
+		return " n.type=n.type";
+	}
 }
 
 /** 
