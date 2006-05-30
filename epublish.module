@@ -822,7 +822,7 @@ function theme_epublish_format_pub() {
 	}
 	$output .= "</dl>\n";
 	drupal_set_title(t('publications'));
-	return theme('page', "<div class=\"epublish\">$output</div>");
+	return "<div class=\"epublish\">$output</div>";
 }
 
 /*******************************************
