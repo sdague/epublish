@@ -283,6 +283,15 @@ function epublish_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 				return array('epublish_abstract' => $object->epublish_abstract);
 			}
 			break;
+    case 'view':
+			// append epublish navigation to all nodes that belong to an edition
+      if (!$a3) {
+        $eid = db_result(db_query('SELECT eid FROM {epublish_edition_node} een WHERE nid = %d', $node->nid));
+        if ($eid) {
+          $node = theme('epublish_navigation', $node, $eid);
+        }
+      }
+      break;
 	}
 }
 
@@ -299,12 +308,30 @@ function epublish_block($op = 'list', $delta = 0) {
 		$publications = db_query("SELECT * FROM {epublish_publication}");
 		while ($publication = db_fetch_object($publications)) {
 			$blocks['pub_' . $publication->pid]['info'] = t($publication->name);
+      $blocks['cur_edition_' . $publication->pid]['info'] = t("Current edition of %pub", array('%pub' => $publication->name));
 		}
 	return $blocks;
 	} else if ($op == 'view') {
 
 		// publication blocks
-		if (substr($delta, 0, 4) == 'pub_') {
+    if (substr($delta, 0, 12) == 'cur_edition_') {
+      $pid = substr($delta, 12);
+			$publication = epublish_get_pub($pid);
+      $data['subject'] = t($publication->name);
+		  $eid = epublish_current_edition($pid);
+			$edition = epublish_get_edition($eid);
+			$sid = epublish_assign_section($edition);
+			$topics = epublish_section_topics($sid, $edition->eid);
+			$items = array();
+			foreach ($topics as $topic) {
+				foreach ($topic->nodes as $nid) {
+					$node = node_load($nid);
+					$items[] = l($node->title, "node/$nid");
+				}
+			}
+			$data['content'] = theme('item_list', $items);
+      return $data;
+    } else if (substr($delta, 0, 4) == 'pub_') {
 			$pid = substr($delta, 4);
 		$publication = epublish_get_pub($pid);
 			$data['subject'] = t($publication->name);
@@ -796,7 +823,7 @@ function theme_epublish_format_volume($volume, $pid, $edition_blocks = array()) 
 function theme_epublish_format_edition(&$edition) {
 	$sid = epublish_assign_section($edition);
 	$topics = epublish_section_topics($sid, $edition->eid);
-	if (is_numeric($edition->volume) && is_numeric($edition->number)) {
+  if (is_numeric($edition->volume) && is_numeric($edition->number) && $edition->volume > 0 && $edition->number > 0) {
 		$output = "<li><div class=\"reference\">" . l(theme('epublish_edition_reference', $edition), "epublish/$edition->pid/v$edition->volume" . "n$edition->number") . "</div></li>\n";
 	} else {
 		$output = "<li><div class=\"reference\">" . l(theme('epublish_edition_reference', $edition), "epublish/$edition->pid/$edition->eid") . "</div></li>\n";
@@ -2623,6 +2650,81 @@ function _epublish_topic_term_inclusions($tid, $sid) {
 	}
 	}
 	return 'tn.tid=' . implode(' OR tn.tid =', $terms);
+}
+
+function _epublish_topics_node_count(&$topics) {
+	$count = 0;
+	foreach ($topics as $topic) {
+		$count += count($topic->nodes);
+	}
+	return $count;
+}
+
+
+/**
+ * Prepares both the custom breadcrumb trail and the forward/backward
+ * navigation for a node presented as part of an epublish edition.
+ *
+ * @ingroup themeable
+ */
+
+function theme_epublish_navigation($node, $eid) {
+  if ($node->nid) {
+    $output .= '<div class="epublish_navigation">';
+
+		$edition = epublish_get_edition($eid);
+		$publication = epublish_get_pub($edition->pid);
+		$sid = epublish_assign_section($edition);
+		$topics = epublish_section_topics($sid, $edition->eid);
+	  // Construct the breadcrumb:
+		$node->breadcrumb = array();
+		$node->breadcrumb[] = array('path' => "epublish/$publication->pid", 'title' => $publication->name);
+		$node->breadcrumb[] = array('path' => "epublish/$edition->pid/$edition->eid", 'title' => theme('epublish_edition_reference', $edition));
+		$node->breadcrumb[] = array('path' => "node/$node->nid", 'title' => $node->title);
+		menu_set_location($node->breadcrumb);
+
+    if ($prev = epublish_prev($node, $topics)) {
+			$links[] = "Previous story: " . l($prev->title, 'node/'. $prev->nid);
+    }
+    if ($next = epublish_next($node, $topics)) {
+			$links[] = "Next story: " . l($next->title, 'node/'. $next->nid);
+    }
+		$output .= "<h3>Published in " . l("$publication->name", "epublish/$publication->pid") . ", " .l(theme('epublish_edition_reference', $edition), "epublish/$publication->pid/$edition->eid") . "</h3>\n";
+		$output .= theme('item_list', $links);
+
+    $output .= '</div>';
+  }
+
+  $node->body = $node->body.$output;
+
+  return $node;
+}
+
+function epublish_prev($node, $topics) {
+	$prev_nid = NULL;
+	foreach ($topics as $topic) {
+		foreach ($topic->nodes as $nid) {
+			if ($nid == $node->nid) {
+				return $prev_nid ? node_load($prev_nid) : $prev_nid;
+			}
+			$prev_nid = $nid;
+		}
+	}
+}
+
+function epublish_next($node, $topics) {
+	$prev_nid = false;
+	foreach ($topics as $topic) {
+		foreach ($topic->nodes as $nid) {
+			if ($prev_nid) {
+				 return node_load($nid);
+			}
+			if ($nid == $node->nid) {
+				$prev_nid = true;
+			}
+		}
+	}
+	return NULL;
 }
 
 ?>
