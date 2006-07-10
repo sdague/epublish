@@ -55,7 +55,6 @@ function epublish_help($section = 'admin/help#epublish') {
 			$output = t("<p>This module helps organize a publication or group of publications, each with multiple editions.</p>".
 									"<h3>Configuration</h3><p>To use this module, you have to take a few steps:</p>".
 					"<ul><li>Install and enable the module.</li>".
-					"<li>Create the necessary tables, using file epublish.sql.</li>".
 					"<li>Enable the taxonomy module in %modules.<br />If the taxonomy module is not enabled, you can not use this module.</li>".
 					"<li>Create a taxonomy vocabulary in %taxonomy.</li>".
 					"<li>Create in %taxcreate at least one term in your new taxonomy. Each posting can be associated with a taxonomy term and grouped by topic within a headlines \"section\" (see below).</li>".
@@ -63,7 +62,7 @@ function epublish_help($section = 'admin/help#epublish') {
 						array('%modules' => l(t("administer &raquo; modules"), "admin/modules", array(), NULL, NULL, FALSE, TRUE), 
 						'%taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/taxonomy/add/vocabulary", array(), NULL, NULL, FALSE, TRUE), 
 					'%taxcreate' => l(t("administer &raquo; topics"), "admin/taxonomy", array(), NULL, NULL, FALSE, TRUE), 
-					'%access' => l(t("administer &raquo; users &raquo; configure &raquo; permissions"), "admin/user/configure/permission", array(), NULL, NULL, FALSE, TRUE))) .
+					'%access' => l(t("administer &raquo; access"), "admin/access", array(), NULL, NULL, FALSE, TRUE))) .
 
 					t("<h3>Creating and administering publications</h3>".
 					"<p>The epublish module deals with three objects, which can be created or edited using %admin:</p>".
@@ -2163,7 +2162,7 @@ function theme_epublish_form_edition($form) {
   } else  {
     $rows[] = array(array('data' => t('No posts available.'), 'colspan' => '6'));
   }
-  $header = array(NULL, t('Title'), t('Topic'), t('Type'), t('Status'), t('Weight'));
+  $header = array(NULL, t('Title'), t('Type'), t('Topic'), t('Status'), t('Weight'));
   $table_content = theme('table', $header, $rows);
 	
 	// put the table content inside the headlines fieldset
