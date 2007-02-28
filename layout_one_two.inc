@@ -28,7 +28,7 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
   if ($topics) {
     $topic = array_shift($topics);
     foreach ($topic->nodes as $nid) {
-			if (module_exist('translation')) {
+			if (module_exists('translation')) {
  				$lang = i18n_get_lang();
 			 	$transnid .= translation_node_nid($nid, $lang);
 				if ($transnid) { $nid = $transnid; $transnid = '';}
@@ -57,7 +57,7 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
       $position++;
       $output .= '    		  <div class="topic">' . $topic->name . "</div>\n";
       foreach ($topic->nodes as $nid) {
-			if (module_exist('translation')) {
+			if (module_exists('translation')) {
 				$lang = i18n_get_lang();
 				$transnid = translation_node_nid($nid, $lang);
 				if ($transnid) { $nid = $transnid; $transnid = ''; }

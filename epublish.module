@@ -2,19 +2,18 @@
 // $Id$
 
 /*
-		epublish.module - Part of the epublish module for Drupal
-		Copyright (c) 2005	Sheldon Rampton <sheldon@prwatch.org>
-																																								
+		epublish.module - Part of the epublish module for Drupal		
+
 		This program is free software; you can redistribute it and/or modify
 		it under the terms of the GNU General Public License as published by
 		the Free Software Foundation; either version 2 of the License, or
 		(at your option) any later version.
-																																								
+
 		This program is distributed in the hope that it will be useful,
 		but WITHOUT ANY WARRANTY; without even the implied warranty of
 		MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 		GNU General Public License for more details.
-																																								
+
 		You should have received a copy of the GNU General Public License
 		along with this program; if not, write to the Free Software
 		Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
@@ -25,13 +24,13 @@
    for his contributions to the upgrade.
 */
 
-/** 
+/**
  * @file epublish.module
  * This module helps organize a group of nodes into a publication, such as
  * a newspaper, magazine or newsletter. Each publication can have multiple
  * editions. Within each edition, the epublish module also makes it
- * possible to organize content by topic, similar to the way news websites 
- * such as the New York Times categorize their content using topics such 
+ * possible to organize content by topic, similar to the way news websites
+ * such as the New York Times categorize their content using topics such
  * as "international," "national," "sports," etc.
  *
  * @note See the module help for usage and administration information.
@@ -50,38 +49,38 @@ function epublish_help($section = 'admin/help#epublish') {
 		break;
 		case 'admin/node/configure/defaults':
 			$output = t('<p>If you want users to be able to enter brief abstracts of postings for displays on headlines and publication pages, check the <em>has abstract</em> box.</p>');
-			break; 
+			break;
 	case 'admin/help#epublish':
 			$output = t("<p>This module helps organize a publication or group of publications, each with multiple editions.</p>".
 									"<h3>Configuration</h3><p>To use this module, you have to take a few steps:</p>".
 					"<ul><li>Install and enable the module.</li>".
-					"<li>Enable the taxonomy module in %modules.<br />If the taxonomy module is not enabled, you can not use this module.</li>".
-					"<li>Create a taxonomy vocabulary in %taxonomy.</li>".
-					"<li>Create in %taxcreate at least one term in your new taxonomy. Each posting can be associated with a taxonomy term and grouped by topic within a headlines \"section\" (see below).</li>".
-					"<li>Set the appropriate access right in %access<br />The access right is <b>administer publications</b>.</li></ul>",
-						array('%modules' => l(t("administer &raquo; modules"), "admin/modules", array(), NULL, NULL, FALSE, TRUE), 
-						'%taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/taxonomy/add/vocabulary", array(), NULL, NULL, FALSE, TRUE), 
-					'%taxcreate' => l(t("administer &raquo; topics"), "admin/taxonomy", array(), NULL, NULL, FALSE, TRUE), 
-					'%access' => l(t("administer &raquo; access"), "admin/access", array(), NULL, NULL, FALSE, TRUE))) .
+					"<li>Enable the taxonomy module in !modules.<br />If the taxonomy module is not enabled, you can not use this module.</li>".
+					"<li>Create a taxonomy vocabulary in !taxonomy.</li>".
+					"<li>Create in !taxcreate at least one term in your new taxonomy. Each posting can be associated with a taxonomy term and grouped by topic within a headlines \"section\" (see below).</li>".
+					"<li>Set the appropriate access right in !access<br />The access right is <b>administer publications</b>.</li></ul>",
+						array('!modules' => l(t("administer &raquo; modules"), "admin/modules", array(), NULL, NULL, FALSE, TRUE),
+						'!taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/taxonomy/add/vocabulary", array(), NULL, NULL, FALSE, TRUE),
+					'!taxcreate' => l(t("administer &raquo; topics"), "admin/taxonomy", array(), NULL, NULL, FALSE, TRUE),
+					'!access' => l(t("administer &raquo; access"), "admin/access", array(), NULL, NULL, FALSE, TRUE))) .
 
 					t("<h3>Creating and administering publications</h3>".
-					"<p>The epublish module deals with three objects, which can be created or edited using %admin:</p>".
+					"<p>The epublish module deals with three objects, which can be created or edited using !admin:</p>".
 					"<ul><li>A \"<b>publication</b>\" could be a newsletter or magazine -- something that appears in multiple editions, either on a regular or sporadic basis, according to a publication schedule that you specify.</li>".
 					"<li>Each publication can have multiple \"<b>editions</b>,\" typically labeled with a dateline, volume and number. A monthly magazine, for example, might be labeled \"November 2004, volume 3, no. 11.\"".
 					"(The volume and number fields are optional.) Each publication can have a designated \"current\" edition. The current edition will display in all places where a publication is specified but no specific edition number has otherwise been indicated.</li>".
 					"<li>Within each edition, content can be organized using a headlines \"<b>section</b>.\" Headlines sections organize postings by topic using taxonomy terms, similar to the way that news websites such as the New York Times categorize their content using ".
-					"topics such as \"international,\" \"national,\" \"sports,\" etc. In addition to topics based on taxonomy terms, two special, non-taxonomy-based topic groupings exist: \"top stories\" and \"miscellaneous.\"</li></ul>\n".
-					"<p>You can add or organize headlines to a specific edition of a publication by using %admin to specify the edition that you want to edit. You can also use weighting to control the order in which headlines appear.</p>\n".
+					"topics such as \"international,\" \"national,\" \"sports,\" etc. In addition to topics based on taxonomy terms, two special, non-taxonomy-based topic groupings exist: \"top stories\" , \"advertisement\" and \"miscellaneous.\"</li></ul>\n".
+					"<p>You can add or organize headlines to a specific edition of a publication by using !admin to specify the edition that you want to edit. You can also use weighting to control the order in which headlines appear.</p>\n".
 
 					"<h3>Viewing publications</h3>".
-					"<p>A list of publications can be viewed at path %epublish. Each publication has a numeric publication ID (pid). An individual publication can be viewed using the path \"epublish/{pid}\" where ".
+					"<p>A list of publications can be viewed at path !epublish. Each publication has a numeric publication ID (pid). An individual publication can be viewed using the path \"epublish/{pid}\" where ".
 					"{pid} is the publication's ID number, or \"epublish\{name}\" where {name} is the publication name. An individual edition can be viewed using the path \"epublish/{pid}/{eid}\" or \"epublish/{name}/{eid}\" ".
 					"where {eid} is the edition ID number. As an alternative to {eid}, the path can also specify editions by their volume and number using the syntax \"v{volume}n{number}\". For example, the path ".
 					"\"epublish/Monthly%20News/v3n14\" would show volume 3, number 14 of the publication named \"Monthly News.\" Or, the path \"epublish/4/v3\" would show all editions of volume 3 of the publication ".
 					"with {pid} 4. The path \"epublish/{pid}/current\" specifies a publication's current edition.</p>\n",
-					array('%admin' => l(t("administer &raquo; epublish"), "admin/epublish", array(), NULL, NULL, FALSE, TRUE), 
-						'%epublish' => l(t('epublish'), "epublish"), 
-					'%nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array(), NULL, NULL, FALSE, TRUE))) .
+					array('!admin' => l(t("administer &raquo; epublish"), "admin/epublish", array(), NULL, NULL, FALSE, TRUE),
+						'!epublish' => l(t('epublish'), "epublish"),
+					'!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array(), NULL, NULL, FALSE, TRUE))) .
 
 					t("<h3>Viewing latest headlines</h3>".
 					"<p>In addition to displaying postings that have been collected into specific editions of a publication, you can also view a list of the most recent postings in each topic section ".
@@ -89,17 +88,17 @@ function epublish_help($section = 'admin/help#epublish') {
 					"<li>When editing the topics in each section, you can set an \"automatically-included headlines limit\" specifying the maximum number of headlines that should be included for that topic and also set a time frame that limits the search. For example, a time ".
 					"frame of \"30 days\" means that postings older than that will be ignored. You can also specify which node types are eligible for inclusion.</li>\n".
 					"<li>Most topics refer to a taxonomy term and all of its descendants. For example, a taxonomy might include the term \"music,\" with child terms \"rock,\" \"classical,\" \"jazz.\" Only nodes that have been tagged with one or more of these terms would be included in the topic \"music.\"</li>\n".
-					"<li>In addition, there are two special topics, named \"top stories\" and \"miscellaneous,\" which do not filter for taxonomy terms at all. \"Top stories\" are taken from stories that have been marked as \"sticky at top of lists\. ".
+					"<li>In addition, there are three special topics, named \"top stories\" \"advertisement\" and \"miscellaneous,\" which do not filter for taxonomy terms at all. \"Top stories\" are taken from stories that have been marked as \"sticky at top of lists\. ".
 					"The \"miscellaneous\" topic appears at the bottom of each section. (If, however, you set its \"automatically-included headlines limit\" to zero, no miscellanous headlines will be displayed.)</li>\n").
 
 					t("<h3>Publications and headlines blocks</h3>".
-					"<p>The epublish module creates a sidebar block for each section, as well as an \"epublish\" block that lists all publications. To make blocks visible on your pages, use %blocks.</p>",
-					array('%blocks' => l(t("administer &raquo; blocks"), "admin/block", array(), NULL, NULL, FALSE, TRUE))) .
+					"<p>The epublish module creates a sidebar block for each section, as well as an \"epublish\" block that lists all publications. To make blocks visible on your pages, use !blocks.</p>",
+					array('!blocks' => l(t("administer &raquo; blocks"), "admin/block", array(), NULL, NULL, FALSE, TRUE))) .
 
 					t("<h3>Customizing layouts</h3>\n".
 					"<p>The epublish module comes with several standard \"layouts\" that make it possible to customize the layout of publication pages. The \"node views,\" \"one- and two-column\" and \"regular\" layouts are different ".
 					"page layouts for displaying nodes from a single edition. The \"simple list of headlines only\" layout is used on pages that list multiple editions of a publication.</p>\n".
-					"<p>You can use %settings to select a headlines <b>layout</b> and <b>section</b> that apply to all publications and their editions. If you check the \"custom layouts\" or \"custom sections\" boxes, ".
+					"<p>You can use !settings to select a headlines <b>layout</b> and <b>section</b> that apply to all publications and their editions. If you check the \"custom layouts\" or \"custom sections\" boxes, ".
 					"individual publications and editions can also be assigned their own separate layouts and sections that override the global settings, according to the following order of precedence:</p>\n".
 					"<h4>Section selection</h4>".
 					"<ul><li>If the <i>edition</i> specifies a custom section, it takes precedence.</li>\n".
@@ -113,7 +112,7 @@ function epublish_help($section = 'admin/help#epublish') {
 					"<p>The ability to customize layouts and sections provides considerable flexibility for design purposes, but it can can also make administration of publications more complicated. Most users will probably ".
 					"want to leave the \"custom layouts\" option turned off.</p>\n" .
 					"<p>Layouts are also themeable, and additional layouts can be can be added as needed. For an explanation of how to do this, see the README.txt file that comes included with this module.</p>",
-					array('%settings' => l(t("epublish settings"), "admin/settings/epublish")));
+					array('!settings' => l(t("epublish settings"), "admin/settings/epublish")));
 			break;
 	}
 	return $output;
@@ -127,9 +126,115 @@ function epublish_perm() {
 }
 
 /**
+ * Implementation of hook_menu: Define menu links.
+ *
+ *	 - epublish -> publications page
+ * @note See hook_menu for a description of parameters and return values.
+ */
+function epublish_menu($may_cache) {
+	$items = array();
+	if ($may_cache) {
+		// publications
+		$items[] = array('path' => 'epublish',
+			'title' => t('Publications'),
+			'access' => user_access('access content'),
+			'callback' => 'epublish_pub_page',
+			'type' => MENU_SUGGESTED_ITEM);
+		// headlines
+		$items[] = array('path' => 'headlines',
+			'title' => t('Headlines'),
+			'access' => user_access('access content'),
+			'callback' => 'epublish_headlines_page',
+			'type' => MENU_CALLBACK);
+		// admin/epublish
+		$items[] = array('path' => 'admin/epublish',
+			'title' => t('Epublish'),
+			'callback' => 'epublish_pub_list',
+			'access' => user_access('administer publications')
+			);
+		$items[] = array('path' => 'admin/epublish/list',
+			'title' => t('List publications'),
+			'type' => MENU_DEFAULT_LOCAL_TASK,
+			'weight' => -10);
+		$items[] = array('path' => 'admin/epublish/add/publication',
+			'title' => t('Add publication'),
+			'callback' => 'epublish_admin_publication_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_LOCAL_TASK);
+		$items[] = array('path' => 'admin/epublish/edit/publication',
+			'title' => t('Edit publication'),
+			'callback' => 'epublish_admin_publication_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/add/edition',
+			'title' => t('Add edition'),
+			'callback' => 'epublish_admin_edition_add',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/edit/edition',
+			'title' => t('Edit edition'),
+			'callback' => 'epublish_admin_edition_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/sections',
+			'title' => t('Sections and Topics'),
+			'callback' => 'epublish_sections_table',
+			'access' => user_access('administer publications'),
+			'type' => MENU_LOCAL_TASK);
+		$items[] = array('path' => 'admin/epublish/add/section',
+			'title' => t('Add section'),
+			'callback' => 'epublish_admin_section_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/edit/section',
+			'title' => t('Edit section'),
+			'callback' => 'epublish_admin_section_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/add/topic',
+			'title' => t('Add topic'),
+			'callback' => 'epublish_admin_topic_add',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/edit/topic',
+			'title' => t('Edit topic'),
+			'callback' => 'epublish_admin_topic_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/headlines',
+			'title' => t('Add headlines'),
+			'callback' => 'epublish_admin_node_head',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/epublish/edit/volume',
+			'title' => t('Edit volume name'),
+			'callback' => 'epublish_admin_volume_edit',
+			'access' => user_access('administer publications'),
+			'type' => MENU_CALLBACK);
+		$items[] = array('path' => 'admin/settings/epublish',
+		        'title' => t('Epublish'),
+		        'description' => t('Describes what the settings generally do.'),
+			'callback' => 'drupal_get_form',
+			'callback arguments' => array('epublish_admin_settings'),
+			'access' => user_access('administer site configuration'),
+			'type' => MENU_NORMAL_ITEM, // optional
+   );
+
+	} else {
+
+		$path = drupal_get_path('module', 'epublish');
+		if (variable_get('epublish_css', 1)) {
+			drupal_add_css($path . '/epublish.css');
+		}
+		drupal_add_js($path . '/epublish.js');
+	}
+	return $items;
+}
+
+/**
  * Implementation of hook_settings().
  */
-function epublish_settings() {
+function epublish_admin_settings() {
 	$form['display'] = array(
     '#type' => 'fieldset',
     '#title' => t('Display'),
@@ -159,6 +264,14 @@ function epublish_settings() {
 		'#size' => 50,
 		'#maxlength' => 128,
 		'#description' => t('The subtitle used for miscellaneous stories in a headlines section.'),
+	);
+	$form['display']['epublish_advertisement'] = array(
+		'#type' => 'textfield',
+		'#title' => t('Advertisement stories'),
+		'#default_value' => variable_get('epublish_advertisement', t('advertisement')),
+		'#size' => 50,
+		'#maxlength' => 128,
+		'#description' => t('The subtitle used for advertisement stories in a headlines section.'),
 	);
 	$form['display']['epublish_css'] = array(
 		'#type' => 'select',
@@ -222,23 +335,28 @@ function epublish_settings() {
 		'#default_value' => variable_get('epublish_custom_sections', '0'),
 		'#description' => t('If checked, each publication and edition can have its own section that overrides the global section selected above.'),
 	);
-	return $form;
+	return system_settings_form($form);
 }
 
 /**
  * Implementation of hook_form_alter().
  */
 function epublish_form_alter($form_id, &$form) {
-	if (isset($form['type']) && $form['type']['#value'] .'_node_settings' == $form_id) {
-		$form['submission']['epublish_abstract_'. $form['type']['#value']] = array(
+	if (isset($form['type']) && $form['type']['#value'] .'_node_settings' == $form_id)
+	 {
+	   $form['submission']['epublish_abstract_'. $form['type']['#value']] = array(
 			'#type' => 'checkbox',
 			'#title' => t('Has abstract'),
 			'#return_value' => 1,
-			'#default_value' => variable_get('epublish_abstract_'. $form['type']['#value'], TRUE),
-			'#description' => t('Users can enter a brief abstract summarizing the content of each node.'),
+			'#default_value' => variable_get('epublish_abstract_'. $form['type']
+					    ['#value'], TRUE),
+			'#description' => t('Users can enter a brief abstract summarizing the 						   content of each node.'),
 		);
-	} else if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
-		if (variable_get('epublish_abstract_'. $form['type']['#value'], TRUE)) {
+	 }
+	 else if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id)
+	 {
+	      if (variable_get('epublish_abstract_'. $form['type']['#value'], TRUE))
+	 {
 			$node = $form['#node'];
 			$form['epublish_abstract'] = array(
 				'#type' => 'textarea',
@@ -248,8 +366,8 @@ function epublish_form_alter($form_id, &$form) {
 				'#rows' => 4,
 				'#description' => t('A brief summary of this item.'),
 			);
-		}
-	}
+	 }
+	 }
 }
 
 /**
@@ -282,16 +400,16 @@ function epublish_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 				return array('epublish_abstract' => $object->epublish_abstract);
 			}
 			break;
-    case 'view':
+    		case 'view':
 			// append epublish navigation to all nodes that belong to an edition
-      if (!$a3) {
-        $eid = db_result(db_query('SELECT eid FROM {epublish_edition_node} een WHERE nid = %d', $node->nid));
-        if ($eid) {
-          $node = theme('epublish_navigation', $node, $eid);
-        }
-      }
-      break;
-	}
+      			if (!$a3) {
+        			$eid = db_result(db_query('SELECT eid FROM {epublish_edition_node} een WHERE nid = %d', $node->nid));
+        		if ($eid) {
+          			$node = theme('epublish_navigation', $node, $eid);
+        		}
+      			}
+      			break;
+		}
 }
 
 /**
@@ -307,7 +425,7 @@ function epublish_block($op = 'list', $delta = 0) {
 		$publications = db_query("SELECT * FROM {epublish_publication}");
 		while ($publication = db_fetch_object($publications)) {
 			$blocks['pub_' . $publication->pid]['info'] = t($publication->name);
-      $blocks['cur_edition_' . $publication->pid]['info'] = t("Current edition of %pub", array('%pub' => $publication->name));
+      $blocks['cur_edition_' . $publication->pid]['info'] = t("Current edition of !pub", array('!pub' => $publication->name));
 		}
 	return $blocks;
 	} else if ($op == 'view') {
@@ -372,103 +490,6 @@ function epublish_block($op = 'list', $delta = 0) {
 	}
 }
 
-/** 
- * Implementation of hook_menu: Define menu links.
- * 
- *	 - epublish -> publications page
- * @note See hook_menu for a description of parameters and return values.
- */
-function epublish_menu($may_cache) {
-	$items = array();
-	if ($may_cache) {
-		// publications
-		$items[] = array('path' => 'epublish',
-			'title' => t('Publications'),
-			'access' => user_access('access content'),
-			'callback' => 'epublish_pub_page',
-			'type' => MENU_SUGGESTED_ITEM);
-		// headlines
-		$items[] = array('path' => 'headlines',
-			'title' => t('Headlines'),
-			'access' => user_access('access content'),
-			'callback' => 'epublish_headlines_page',
-			'type' => MENU_CALLBACK);
-		// admin/epublish
-		$items[] = array('path' => 'admin/epublish',
-			'title' => t('epublish'),
-			'callback' => 'epublish_pub_list',
-			'access' => user_access('administer publications')
-			);
-		$items[] = array('path' => 'admin/epublish/list',
-			'title' => t('list publications'),
-			'type' => MENU_DEFAULT_LOCAL_TASK,
-			'weight' => -10);
-		$items[] = array('path' => 'admin/epublish/add/publication',
-			'title' => t('add publication'),
-			'callback' => 'epublish_admin_publication_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_LOCAL_TASK);
-		$items[] = array('path' => 'admin/epublish/edit/publication',
-			'title' => t('edit publication'),
-			'callback' => 'epublish_admin_publication_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/add/edition',
-			'title' => t('add edition'),
-			'callback' => 'epublish_admin_edition_add',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/edit/edition',
-			'title' => t('edit edition'),
-			'callback' => 'epublish_admin_edition_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/sections',
-			'title' => t('sections and topics'),
-			'callback' => 'epublish_sections_table',
-			'access' => user_access('administer publications'),
-			'type' => MENU_LOCAL_TASK);
-		$items[] = array('path' => 'admin/epublish/add/section',
-			'title' => t('add section'),
-			'callback' => 'epublish_admin_section_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/edit/section',
-			'title' => t('edit section'),
-			'callback' => 'epublish_admin_section_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/add/topic',
-			'title' => t('add topic'),
-			'callback' => 'epublish_admin_topic_add',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/edit/topic',
-			'title' => t('edit topic'),
-			'callback' => 'epublish_admin_topic_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/headlines',
-			'title' => t('add headlines'),
-			'callback' => 'epublish_admin_node',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-		$items[] = array('path' => 'admin/epublish/edit/volume',
-			'title' => t('edit volume name'),
-			'callback' => 'epublish_admin_volume_edit',
-			'access' => user_access('administer publications'),
-			'type' => MENU_CALLBACK);
-	} else {
-		$path = drupal_get_path('module', 'epublish');
-		if (variable_get('epublish_css', 1)) {
-			theme_add_style($path . '/epublish.css');
-		}
-		drupal_add_js($path . '/epublish.js');
-	} 
-	return $items;
-}
-
-
 /*******************************************
  *	 LISTINGS
  ******************************************/
@@ -495,11 +516,11 @@ function epublish_sections($include_default = false) {
 		$array_keys = array_keys(module_invoke('taxonomy', 'get_vocabularies'));
 		$vid = array_pop($array_keys);
 		epublish_form_section_submit(NULL, array(
-			'title' => t('default'), 
-			'vid' => $vid, 
-			'node_types' => $nodetypes, 
-			'timeframe' => '', 
-			'layout_list' => '', 
+			'title' => t('default'),
+			'vid' => $vid,
+			'node_types' => $nodetypes,
+			'timeframe' => '',
+			'layout_list' => '',
 			'layout_page' => ''));
 
 		$result = db_query("SELECT * FROM {epublish_section}");
@@ -577,7 +598,7 @@ function theme_epublish_abstract($abstract) {
 	return '<div class="epublish_abstract">' . $abstract . '</div>';
 }
 
-/** 
+/**
  * theme_epublish_topics: A themeable function to display the headlines from an array of topics.
  *
  * @param $topics
@@ -606,7 +627,7 @@ function theme_epublish_topics(&$topics, $sid, &$edition, $context='page') {
 	}
 }
 
-/** 
+/**
  * theme_epublish_volume_reference: Themeable function that returns the reference string for an edition of a publication.
  *
  * @param $pid
@@ -628,7 +649,7 @@ function theme_epublish_volume_reference($pid, $volume) {
 	return t('<none>');
 }
 
-/** 
+/**
  * theme_epublish_edition_reference: Themeable function that returns the reference string for an edition of a publication.
  *
  * @param $edition
@@ -651,7 +672,7 @@ function theme_epublish_edition_reference(&$edition) {
 	return implode(', ', $reference);
 }
 
-/** 
+/**
  * epublish_pub_page: Display the publication(s).
  */
 function epublish_pub_page() {
@@ -707,7 +728,7 @@ function epublish_pub_page() {
 	return theme('epublish_pub_page', $output, $publication, $edition, $match[2]);
 }
 
-/** 
+/**
  * theme_epublish_pub_page: Display the page.
  *
  * @param $output
@@ -743,7 +764,7 @@ function theme_epublish_pub_page(&$output, &$publication, &$edition, $volume=NUL
 }
 
 
-/** 
+/**
  * epublish_headlines_page: Display the headlines.
  */
 function epublish_headlines_page() {
@@ -763,7 +784,12 @@ function epublish_headlines_page() {
 	while ($topic = db_fetch_object($result)) {
 		$included_node_types = _epublish_build_node_inclusions(array_unique(array_merge(explode(',', $section->node_types), explode(',', $topic->node_types))));
 	$exclusions = _epublish_build_node_exclusions($all_nodes);
-		if ($topic->tid == -1) {
+	// Condition to handle another default section
+			if ($topic->tid == -2) {
+			$topic->name = variable_get('epublish_advertisement', t('advertisement'));
+			$result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
+		} else if ($topic->tid == -1) {
+
 			$topic->name = variable_get('epublish_top_stories', t('top stories'));
 			$result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
 		} else if ($topic->tid == 0) {
@@ -788,8 +814,8 @@ function epublish_headlines_page() {
 	return theme('epublish_topics', $topics, $sid, $edition, 'page');
 }
 
-/** 
- * theme_epublish_format_volume: A themeable function that lists the issues 
+/**
+ * theme_epublish_format_volume: A themeable function that lists the issues
  * of a single volume of a publication.
  *
  * @param $volume
@@ -810,7 +836,7 @@ function theme_epublish_format_volume($volume, $pid, $edition_blocks = array()) 
 	return '<div class="volume">' . "$output</div>\n";
 }
 
-/** 
+/**
  * theme_epublish_format_edition: A themeable layout that lists the nodes in a single edition of a publication.
  *
  * @param $edition
@@ -831,7 +857,7 @@ function theme_epublish_format_edition(&$edition) {
 	return '<div class="edition">' . "$output</div>\n";
 }
 
-/** 
+/**
  * theme_epublish_format_pub: A themeable function that lists all of the publications on the site.
  *
  * @return
@@ -855,7 +881,7 @@ function theme_epublish_format_pub() {
  *	 SELECTORS
  ******************************************/
 
-/** 
+/**
  * epublish_assign_layout: chooses the right layout to use in displaying an array of topics.
  *	 If the "custom layouts" option is turned on, this function looks for a layout in the following
  *	 order and chooses the first one it finds:
@@ -898,9 +924,9 @@ function epublish_assign_layout($sid, &$edition, $context) {
 	}
 }
 
-/** 
- * epublish_assign_section: chooses the right headlines section to use for organizing 
- *	 topics and their headlines. If the "custom sections" option is turned on, this 
+/**
+ * epublish_assign_section: chooses the right headlines section to use for organizing
+ *	 topics and their headlines. If the "custom sections" option is turned on, this
  *	 function looks for a layout in the following order and chooses the first one it finds:
  *		 --> edition
  *		 --> publication
@@ -933,7 +959,7 @@ function epublish_assign_section(&$edition) {
 	}
 }
 
-/** 
+/**
  * epublish_topic_selection_list: returns the topics associated with a specific section ID
  *
  * @param $sid
@@ -946,7 +972,10 @@ function epublish_topic_selection_list($sid) {
 	$result = db_query("SELECT et.tid, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid);
 	$topics = array();
 	while ($topic = db_fetch_object($result)) {
-		if ($topic->tid == -1) {
+ // condition added to handle additional default topic
+		if ($topic->tid == -2) {
+		$topic->name = variable_get('epublish_advertisement', t('advertisement'));
+	} else if ($topic->tid == -1) {
 		$topic->name = variable_get('epublish_top_stories', t('top stories'));
 	} else if ($topic->tid == 0) {
 		$topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
@@ -960,28 +989,28 @@ function epublish_topic_selection_list($sid) {
  *	 SECTIONS
  ******************************************/
 
-/** 
+/**
  * epublish_get_section: get an epublish_section record from the database
  *
  * @param $sid
  *	 A publication section ID
  *
  * @return
- *	 An object containing all of the values for a single record in the 
+ *	 An object containing all of the values for a single record in the
  *	 {epublish_section} table.
  */
 function epublish_get_section($sid) {
 	return db_fetch_object(db_query("SELECT * FROM {epublish_section} WHERE sid='%d'", $sid));
 }
 
-/** 
+/**
  * epublish_get_section_by_title: get an epublish_section record from the database, based on its title
  *
  * @param $title
  *	 The title of a publication section
  *
  * @return
- *	 An object containing all of the values for a single epublish_section record in the 
+ *	 An object containing all of the values for a single epublish_section record in the
  *	 {epublish_section} table.
  */
 function epublish_get_section_by_title($title) {
@@ -989,12 +1018,14 @@ function epublish_get_section_by_title($title) {
 }
 
 
-/** 
+/**
  * epublish_sections_table: list the sections and topics for admin/epublish/sections
  *
  * @return
  *	 An HTML-formatted table listing each section and its topics
  */
+
+
 function epublish_sections_table() {
 	$sections = epublish_sections();
 	$result = db_query("SELECT * FROM {epublish_section}");
@@ -1002,10 +1033,10 @@ function epublish_sections_table() {
 
 	while ($section = db_fetch_object($result)) {
 		$topics = epublish_topic_selection_list($section->sid);
-		$rows[] = array(l('<b>' . t($section->title) . '</b>', "headlines/$section->sid", array(), NULL, NULL, FALSE, TRUE), 
-								l(t("edit"), "admin/epublish/edit/section/$section->sid"), 
-								l(t("add topic"), "admin/epublish/add/topic/$section->sid")
-							);
+		$rows[] = array(l('<b>' . t($section->title) . '</b>', "headlines/$section->sid", array(), NULL, NULL, FALSE, TRUE),
+								l(t("edit"), "admin/epublish/edit/section/$section->sid"),
+								l(t("add topic"), "admin/epublish/add/topic/$section->sid"),
+					  	);
 		$lines = array();
 		foreach ($topics as $tid => $name) {
 			$lines[] = "-$name (" . l(t('edit topic'), "admin/epublish/edit/topic/$section->sid/$tid") . ')';
@@ -1013,16 +1044,45 @@ function epublish_sections_table() {
 		$rows[] = array(implode('<br />', $lines), array('data' => '', 'colspan' => 2));
 	}
 	$output = theme("table", $header, $rows);
+	$output .= epublish_sections_button(); // Appends Add Section button /
+	return $output;
+}
+
+/**
+* epublish_sections_button_form(), to define a Add Section button to be appended to admin/epublish/sections page
+*
+* @return
+* An array
+*/
+function epublish_sections_button_form() {
+
 	$form[] = array(
 		'#type' => 'submit',
 		'#value' => t("Add Section"),
 	);
-	$output .= drupal_get_form('epublish_sections_table', $form);
-	return $output; 
+
+	return $form;
 }
 
-function epublish_sections_table_submit($form_id, $form_values) {
+/**
+* Renders a form returned by epublish_sections_button_form()
+*/
+function epublish_sections_button() {
+$output = drupal_get_form('epublish_sections_button_form');
+	return $output;
+}
+
+/**
+* Implementation of hook_submit()
+*/
+function epublish_sections_button_form_submit($form_id, $form_values) {
 	drupal_goto('admin/epublish/add/section');
+}
+
+function section_form() {
+
+$output = drupal_get_form('epublish_form_section');
+	return $output;
 }
 
 /**
@@ -1034,20 +1094,22 @@ function epublish_admin_section_edit($sid = NULL) {
 	} elseif ($sid) {
 		$section = epublish_get_section($sid);
 	}
-	return epublish_form_section($section);
+	$output = drupal_get_form('epublish_form_section', $section);
+	return $output;
 }
 
-/** 
+/**
  * epublish_form_section: return a form for editing a headlines section
  *
  * @param $edit
  *	 an array of values handled by the form
  *
  * @return
- *	 An HTML-formatted form 
+ *	 An HTML-formatted form
  */
 function epublish_form_section($edit = NULL) {
-	$edit = (object) $edit;
+
+//	$edit = (object) $edit;
 	$form['title'] = array(
 		'#type' => 'textfield',
 		'#title' => t('Section title'),
@@ -1063,6 +1125,7 @@ function epublish_form_section($edit = NULL) {
 		$vocs[$vid] = $voc->name;
 	}
 	if (!$edit) {
+
 		$array_keys = array_keys($vocs);
 		$edit->vid = array_pop($array_keys);
 	}
@@ -1083,7 +1146,14 @@ function epublish_form_section($edit = NULL) {
 		);
 		$result2 = db_query("SELECT et.*, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $edit->sid);
 		while ($topic = db_fetch_object($result2)) {
-			if ($topic->tid == -1) {
+	// condition added to handle additional default field
+           			if ($topic->tid == -2) {
+				$form['weight'][$topic->tid] = array(
+					'#title' => variable_get('epublish_advertisement', t('advertisement')),
+					'#type' => 'hidden',
+					'#value' => -98,
+				);
+	 		} elseif ($topic->tid == -1) {
 				$form['weight'][$topic->tid] = array(
 					'#title' => variable_get('epublish_top_stories', t('top stories')),
 					'#type' => 'hidden',
@@ -1105,7 +1175,6 @@ function epublish_form_section($edit = NULL) {
 			}
 		}
 	}
-
 	if (variable_get('epublish_custom_layouts', '0')) {
 		$layouts = epublish_layouts('page', TRUE);
 		$form["layout_page"] = array(
@@ -1113,7 +1182,7 @@ function epublish_form_section($edit = NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this section. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout settings'), 'admin/settings/epublish'))),
+			'#description' => t("Select a page layout for this section. If none is selected, the default !settings will be used.", array('!settings' => l(t('layout settings'), 'admin/settings/epublish'))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
@@ -1140,18 +1209,27 @@ function epublish_form_section($edit = NULL) {
 			'#value' => $edit->layout_list,
 		);
 	}
-	
+
 	$form[] = array('#value' => "<hr />");
 	$form['rules'] = array(
 		'#type' => 'fieldset',
 		'#title' => t('Automatic selection rules'),
 	);
-	$form['rules'][] = array('#value' => t('The automatic selection rules determine which postings will be selected to display in the %heads (where no publication or edition is specified).', array('%heads' => l(t('headlines listing'), 'headlines/' . $edit->sid))));
+	$form['rules'][] = array('#value' => t('The automatic selection rules determine which postings will be selected to display in the !heads (where no publication or edition is specified).', array('!heads' => l(t('headlines listing'), 'headlines/' . $edit->sid))));
+	$nodetypes = array();
+	foreach (node_get_types() as $type => $name_obj) {
+
+		if (!$node_already_included[$name_obj->name]) {
+			$nodetypes[$name_obj->name] = $name_obj->name;
+		}
+	}
  	$form['rules']['node_types'] = array(
 		'#type' => 'checkboxes',
 		'#title' => t('Content types'),
+
 		'#default_value' => explode(',', $edit->node_types),
-		'#options' => node_get_types(),
+
+		'#options' => $nodetypes,
 		'#description' => t('A list of node types you want to include in headlines listings. If none are selected, all node types will be included.'),
 		'#attributes' => NULL,
 	);
@@ -1177,43 +1255,48 @@ function epublish_form_section($edit = NULL) {
 			'#value' => t('Delete'),
 		);
 	}
-	$output = drupal_get_form('epublish_form_section', $form);
+	return $form;
+}
+
+function epublish_sec() {
+$output = drupal_get_form('epublish_form_section');
 	return $output;
 }
 
 function theme_epublish_form_section($form) {
 	$output = '';
-	$output .= form_render($form['title']);
-	$output .= form_render($form['vid']);
+	$output .= drupal_render($form['title']);
+	$output .= drupal_render($form['vid']);
 	if ($form['weight']) {
 		$sid = $form['weight']['#value'];
 		$header = array(t('topics'), t('weight'), l(t("add topic"), "admin/epublish/add/topic/" . $sid));
 		$rows = array();
 
 		foreach ($form['weight'] as $tid => $item) {
+
 			if (is_array($item) && $item['#title']) {
 				$form['weight'][$tid]['#title'] = NULL;
-				$rows[] = array($item['#title'], form_render($form['weight'][$tid]), l(t('options'), "admin/epublish/edit/topic/$sid/$tid"));
+				$rows[] = array($item['#title'], drupal_render($form['weight'][$tid]), l(t('options'), "admin/epublish/edit/topic/$sid/$tid"));
 			}
 		}
 
-        form_render($form['weight']);
+        drupal_render($form['weight']);
 		$output .= theme("table", $header, $rows);
 	}
-	$output .= form_render($form);
+	$output .= drupal_render($form);
 	return $output;
 }
 
-/** 
+/**
  * epublish_form_section_submit: save changes to a headlines section
  *
  * @param $edit
  *	 an array of values to be saved
  *
  * @return
- *	 the same array, with modifications if a new record is created 
+ *	 the same array, with modifications if a new record is created
  */
- 
+
 function epublish_form_section_submit($form_id, $form_values) {
 	if (!$form_values['node_types']) {
 		$form_values['node_types'] = array();
@@ -1225,7 +1308,7 @@ function epublish_form_section_submit($form_id, $form_values) {
 			foreach ($form_values['weight'] as $tid => $value) {
 				db_query("UPDATE {epublish_topic} SET weight = '%d' WHERE sid = '%d' AND tid = '%d'", $value, $form_values['sid'], $tid);
 			}
-			drupal_set_message(t('The "%title" section has been updated.', array('%title' => theme('placeholder', $form_values['title']))));
+			drupal_set_message(t('The "!title" section has been updated.', array('!title' => $form_values['title'])));
 		}
 	} else if ($form_values['action'] == 'delete') {
 		epublish_del_section($form_values['sid']);
@@ -1236,24 +1319,24 @@ function epublish_form_section_submit($form_id, $form_values) {
 		$misc_topic = array('sid' => $form_values['sid'], 'tid' => 0, 'count' => 0, 'weight' => 99, 'node_types' => array());
 		epublish_form_topic_submit(NULL, $misc_topic);
 		if ($form_id) {
-			drupal_set_message(t('The "%title" section has been added.', array('%title' => theme('placeholder', $form_values['title']))));
+			drupal_set_message(t('The "!title" section has been added.', array('!title' => $form_values['title'])));
 		}
 	}
 	return 'admin/epublish/sections';
 }
 
-/** 
+/**
  * epublish_del_section: delete a headlines section
  *
  * @param $sid
  *	 the topic section ID to be deleted
  *
  * @return
- *	 A message stating that the section has been deleted 
+ *	 A message stating that the section has been deleted
  */
 function epublish_del_section($sid) {
 	$section = epublish_get_section($sid);
-	if ($section->sid && $_POST['edit']['confirm']) {
+	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
 		$result = db_query("SELECT * FROM {epublish_edition}");
 		while ($edition = db_fetch_object($result)) {
 			if (epublish_assign_section($edition) == $sid) {
@@ -1272,25 +1355,24 @@ function epublish_del_section($sid) {
 	// if no sections exist, create a default section
 		if (!db_num_rows($result)) {
 			epublish_sections();
-			drupal_set_message(t('deleted section "%title" and created new default section.', array('%title' => $section->title)));
+			drupal_set_message(t('deleted section "!title" and created new default section.', array('!title' => $section->title)));
 		} else {
-			drupal_set_message(t('deleted section "%title".', array('%title' => $section->title)));
+			drupal_set_message(t('deleted section "!title".', array('!title' => $section->title)));
 		}
-		drupal_goto("admin/epublish/sections"); 
+		drupal_goto("admin/epublish/sections");
 	} else if ($section->sid) {
-		return confirm_form('epublish_section_confirm_delete', 
-			array('sid' => array(
+		return drupal_get_form('confirm_form', array('sid' => array(
 				'#type' => hidden,
 				'#value' => $section->sid
-				)
-			),
-			t('Are you sure you want to delete the section "%title"?', array('%title' => theme('placeholder', $section->title))), 		
+				)),
+				t('Are you sure you want to delete the section "!title"?', array('!title' => $section->title)),
 			'admin/epublish/sections',
-			t('This action cannot be undone.'), 
+			t('This action cannot be undone.'),
 			t('Delete'),
-			t('Cancel'));
+			t('Cancel'),'','');
 	} else {
-		drupal_set_message(t('The section no longer exists.')); 
+		drupal_set_message(t('The section no longer exists.'));
+		return 'admin/epublish/sections';
 	}
 }
 
@@ -1299,16 +1381,16 @@ function epublish_del_section($sid) {
  *	 TOPICS
  ******************************************/
 
-/** 
+/**
  * epublish_get_topic: get an epublish_topic record from the database
  *
  * @param $sid
  *	 A section ID
  * @param $tid
- *	 A term ID (a taxonomy term, or else 0 for "top stories" or -1 for "miscellaneous")
+ *	 A term ID (a taxonomy term, or else 0 for "top stories" or -1 for "miscellaneous" or -2 for "advertisement")
  *
  * @return
- *	 An object containing all of the values for a single record in the 
+ *	 An object containing all of the values for a single record in the
  *	 {epublish_topic} table.
  */
 function epublish_get_topic($sid, $tid) {
@@ -1324,24 +1406,25 @@ function epublish_admin_topic_edit($sid=NULL, $tid=NULL) {
 	} elseif ($sid) {
 		$topic = epublish_get_topic($sid, $tid);
 	}
-	return epublish_form_topic($topic);
+$output = drupal_get_form('epublish_form_topic', $topic);
+	return $output;
 }
 
 function epublish_admin_topic_add($sid = NULL) {
-	return epublish_form_topic(NULL, $sid);
+$output = drupal_get_form('epublish_form_topic', NULL,$sid);
+	return $output;
 }
 
-/** 
+/**
  * epublish_form_topic: return a form for editing a section topic
  *
  * @param $edit
  *	 an array of values handled by the form
  *
  * @return
- *	 An HTML-formatted form 
+ *	 An HTML-formatted form
  */
 function epublish_form_topic($edit = NULL, $sid = NULL) {
-	$edit = (object) $edit;
 	if ($edit->sid) {
 		$sid = $edit->sid;
 	}
@@ -1363,12 +1446,14 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 		// If creating a new topic, display a pulldown menu to select it
 		$form[] = array('#value' => "<h3>Add topic to section \"$section->title\"</h3>\n");
 		$terms = array();
+		$terms[-2] = variable_get('epublish_advertisement', t('advertisement'));
 		$terms[-1] = variable_get('epublish_top_stories', t('top stories'));
 		$tree = module_invoke('taxonomy', 'get_tree', $section->vid);
 		$edit->tid = 0;
 		if ($tree) {
 			foreach ($tree as $term) {
-				$terms[$term->tid] = _taxonomy_depth($term->depth, '-') .' '. $term->name; // the number of hyphens shows depth within the tree structure
+				//$terms[$term->tid] = _taxonomy_depth($term->depth, '-') .' '. $term->name; // the number of hyphens shows depth within the tree structure
+				$terms[$term->tid] = str_repeat('-', $term->depth) .' '. $term->name; // the number of hyphens shows depth within the tree structure
 			}
 		}
 		$form["tid"] = array(
@@ -1386,14 +1471,15 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 	foreach (explode(',', $section->node_types) as $node_type) {
 		$node_already_included[$node_type] = TRUE;
 	}
-	
+
 	$nodetypes = array();
-	foreach (node_get_types() as $type => $name) {
-		if (!$node_already_included[$type]) {
-			$nodetypes[$type] = $name;
+	foreach (node_get_types() as $type => $name_obj) {
+
+		if (!$node_already_included[$name_obj->name]) {
+			$nodetypes[$name_obj->name] = $name_obj->name;
 		}
 	}
-	
+
 	// HACK because I can't figure out how to make Drupal 4.7 checkboxes work with default values.
 	// (there's an error if submitting with NO boxes checked)
 	if ($_POST['op']) {
@@ -1401,7 +1487,6 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 	} else {
 		$types_array = explode(',', $edit->node_types);
 	}
-	
 	$form['node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Additional Types'),
@@ -1419,14 +1504,27 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 		'#options' => $range,
 		'#description' => t("The maximum number of headlines to select for this topic."),
 	);
-	
+
 	$range = drupal_map_assoc(range(-10, 10));
 	if ($topic_exists && $edit->tid == 0) {
 		$form['weight'] = array(
 			'#type' => 'hidden',
 			'#value' => 99,
 		);
-	} elseif ($topic_exists && $edit->tid == -1) {
+		$form[] = array(
+			'#type' => 'submit',
+			'#value' => t("Delete"),
+		);
+	} elseif ($topic_exists && $edit->tid == -2) {
+		$form['weight'] = array(
+			'#type' => 'hidden',
+			'#value' => -98.
+		);
+		$form[] = array(
+			'#type' => 'submit',
+			'#value' => t("Delete"),
+		);
+        } elseif ($topic_exists && $edit->tid == -1) {
 		$form['weight'] = array(
 			'#type' => 'hidden',
 			'#value' => -99,
@@ -1443,27 +1541,34 @@ function epublish_form_topic($edit = NULL, $sid = NULL) {
 			'#options' => $range,
 			'#description' => t("The weight sorts headline topics. Lighter (smaller weight value) topics \"float up\" towards the top of the page."),
 		);
+		if(arg(2)!='add') {
 		$form[] = array(
 			'#type' => 'submit',
 			'#value' => t("Delete"),
 		);
+		}
 	}
 	$form[] = array(
 		'#type' => 'submit',
 		'#value' => t("Submit"),
 	);
-	$output = drupal_get_form('epublish_form_topic', $form);
+
+	return $form;
+}
+
+function epublish_topic() {
+$output = drupal_get_form('epublish_form_topic');
 	return $output;
 }
 
-/** 
+/**
  * epublish_save_topic: save changes to a section topic
  *
  * @param $edit
  *	 an array of values to be saved
  *
  * @return
- *	 the same array, with modifications if a new record is created 
+ *	 the same array, with modifications if a new record is created
  */
 
 function epublish_form_topic_submit($form_id, $edit) {
@@ -1480,9 +1585,9 @@ function epublish_form_topic_submit($form_id, $edit) {
 		$term = epublish_get_term($edit['tid'], $edit['sid']);
 		if ($form_id) {
 			if (db_num_rows($result)) {
-				drupal_set_message(t('The topic "%title" has been updated.', array('%title' => theme('placeholder', $term->name))));
+				drupal_set_message(t('The topic "!title" has been updated.', array('!title' => $term->name)));
 			} else {
-				drupal_set_message(t('The topic "%title" has been added.', array('%title' => theme('placeholder', $term->name))));
+				drupal_set_message(t('The topic "!title" has been added.', array('!title' => $term->name)));
 			}
 		}
 	} else if ($edit['action'] == 'delete') {
@@ -1491,7 +1596,7 @@ function epublish_form_topic_submit($form_id, $edit) {
 	return 'admin/epublish/sections';
 }
 
-/** 
+/**
  * epublish_del_topic: delete a section topic
  *
  * @param $sid
@@ -1500,41 +1605,37 @@ function epublish_form_topic_submit($form_id, $edit) {
  *	 the topic's term ID (usually a taxonomy term; 0 and -1 signify "top stories" and "miscellaneous")
  *
  * @return
- *	 A message stating that the section has been deleted 
+ *	 A message stating that the section has been deleted
  */
 
 function epublish_del_topic($sid, $tid) {
 	$term = epublish_get_term($tid, $sid);
 	$section = epublish_get_section($sid);
-	if ($term->tid && $_POST['edit']['confirm']) {
+	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
 		db_query("DELETE FROM {epublish_topic} WHERE sid = '%d' AND tid = '%d'", $sid, $tid);
 		$result = db_query("SELECT eid FROM {epublish_edition} WHERE sid = '%d'", $sid);
 		while ($edition = db_fetch_object($result)) {
 			db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE tid='%d' AND eid = '%d'", $tid, $edition->eid);
 		}
-		drupal_set_message(t('deleted topic "%term" from section "%section."', array('%term' => $term->name, '%section' => $section->title)));
+		drupal_set_message(t('deleted topic "!term" from section "!section."', array('!term' => $term->name, '!section' => $section->title)));
 		drupal_goto('admin/epublish/sections');
 	} else if ($term->tid) {
-		return confirm_form('term_confirm_delete', 
-			array(
+		return drupal_get_form('confirm_form', array(
 				'sid' => array( '#type' => hidden, '#value' => $section->sid),
 				'tid' => array( '#type' => hidden, '#value' => $term->tid),
 				),
-			t('Are you sure you want to delete the term "%term" from section "%section"?', 
-				array(
-					'%term' => theme('placeholder', $term->name),
-					'%section' => theme('placeholder', $section->title),
-				)), 		
+			t('Are you sure you want to delete the term "!term" from section "!section"?', array('!term' => $term->name,'!section' => $section->title)),
 			'admin/epublish/sections',
-			t('This action cannot be undone.'), 
+			t('This action cannot be undone.'),
 			t('Delete'),
-			t('Cancel'));
+			t('Cancel'),'','');
 	} else {
-		drupal_set_message(t('The term no longer exists.')); 
+		drupal_set_message(t('The term no longer exists.'));
+		return 'admin/epublish';
 	}
 }
 
-/** 
+/**
  * epublish_section_topics: build an array of topics for a single section of a single edition of a publication.
  *
  * @param $sid
@@ -1551,7 +1652,8 @@ function epublish_del_topic($sid, $tid) {
 
 function epublish_section_topics($sid, $eid) {
 	$section = epublish_get_section($sid);
-	$result = db_query("SELECT DISTINCT(n.nid), een.tid FROM {node} n LEFT JOIN {epublish_edition_node} een USING (nid) LEFT JOIN {epublish_topic} et ON et.tid=een.tid WHERE eid='$eid' AND et.sid='$sid' ORDER BY et.weight, een.weight, n.changed DESC");
+	$result = db_query("SELECT DISTINCT(n.nid), een.tid, et.weight FROM {node} n LEFT JOIN {epublish_edition_node} een USING (nid) LEFT JOIN {epublish_topic} et ON et.tid=een.tid WHERE eid='$eid' AND et.sid='$sid' ORDER BY et.weight, een.weight, n.changed DESC");
+
 	$last_tid = NULL;
 	$topics = array();
 	$topic = NULL;
@@ -1560,8 +1662,10 @@ function epublish_section_topics($sid, $eid) {
 		if ($topic) {
 			$topics[] = $topic;
 		}
-			$topic = db_fetch_object(db_query("SELECT et.tid, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' AND et.tid='%d'", $sid, $node->tid));
-			if ($topic->tid == -1) {
+			$topic = db_fetch_object(db_query("SELECT et.tid, td.name, et.weight FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' AND et.tid='%d'", $sid, $node->tid));
+				if ($topic->tid == -2) {
+				$topic->name = variable_get('epublish_advertisement', t('advertisement'));
+			} else if ($topic->tid == -1) {
 				$topic->name = variable_get('epublish_top_stories', t('top stories'));
 			} else if ($topic->tid == 0) {
 				$topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
@@ -1580,28 +1684,28 @@ function epublish_section_topics($sid, $eid) {
  *	 PUBLICATIONS
  ******************************************/
 
-/** 
+/**
  * epublish_get_pub: get a publication record from the database
  *
  * @param $pid
  *	 A publication ID number
  *
  * @return
- *	 An object containing all of the values for a single record in the 
+ *	 An object containing all of the values for a single record in the
  *	 {epublish_publication} table.
  */
 function epublish_get_pub($pid) {
 	return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE pid='%d'", $pid));
 }
 
-/** 
+/**
  * epublish_get_pub_by_name: get a publication record from the database, based on its name
  *
  * @param $name
  *	 A publication name
  *
  * @return
- *	 An object containing all of the values for a single record in the 
+ *	 An object containing all of the values for a single record in the
  *	 {epublish_publication} table.
  */
 function epublish_get_pub_by_name($name) {
@@ -1609,7 +1713,7 @@ function epublish_get_pub_by_name($name) {
 	return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE LOWER('%s') LIKE LOWER(name)", trim($name)));
 }
 
-/** 
+/**
  * epublish_pub_list: list the publications for admin/epublish
  *
  * @return
@@ -1620,8 +1724,8 @@ function epublish_pub_list() {
 	$publications = db_query("SELECT * FROM {epublish_publication}");
 	$header = array(t('publication/editions'), array("data" => t("operations"), "colspan" => 2));
 	while ($publication = db_fetch_object($publications)) {
-		$rows[] = array(l('<b>' . t($publication->name) . '</b>', "epublish/$publication->pid", array(), NULL, NULL, FALSE, TRUE), 
-							l(t("edit publication"), "admin/epublish/edit/publication/$publication->pid"), 
+		$rows[] = array(l('<b>' . t($publication->name) . '</b>', "epublish/$publication->pid", array(), NULL, NULL, FALSE, TRUE),
+							l(t("edit publication"), "admin/epublish/edit/publication/$publication->pid"),
 							l(t("add edition"), "admin/epublish/add/edition/$publication->pid")
 			 );
 		$result = db_query("SELECT * FROM {epublish_edition} WHERE pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
@@ -1642,34 +1746,39 @@ function epublish_pub_list() {
 		}
 	}
 	$output = theme("table", $header, $rows);
-	return $output; 
+	return $output;
 }
 
 
 /**
  * Page to add or edit a publication
  */
+
 function epublish_admin_publication_edit($pid = NULL) {
+
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
 		return epublish_del_pub($pid);
 	} elseif ($pid) {
 		$publication = epublish_get_pub($pid);
 	}
-	return epublish_form_pub($publication);
+	$output = drupal_get_form('epublish_form_pub', $publication);
+	return $output;
+
 }
 
-/** 
+
+/**
  * epublish_form_pub: return a form for editing a publication
  *
  * @param $edit
  *	 an array of values handled by the form
  *
  * @return
- *	 An HTML-formatted form 
+ *	 An HTML-formatted form
  */
 
 function epublish_form_pub($edit = NULL) {
-	$edit = (object) $edit;
+    	$edit = (object) $edit;
 	if (!$edit) {
 		$edit->pid = 0;
 	}
@@ -1722,7 +1831,7 @@ function epublish_form_pub($edit = NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this publication. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout settings'), 'admin/settings/epublish'))),
+			'#description' => t("Select a page layout for this publication. If none is selected, the default !settings will be used.", array('!settings' => l(t('layout settings'), 'admin/settings/epublish'))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
@@ -1752,7 +1861,7 @@ function epublish_form_pub($edit = NULL) {
 			'#title' => t("Section"),
 			'#default_value' => $edit->sid,
 			'#options' => $sids,
-			'#description' => t("Select a section to control which topics are headlined for each edition of this publication. If none is selected, the default section from %settings will be used.", array('%settings' => l(t('publication settings'), 'admin/settings/epublish'))),
+			'#description' => t("Select a section to control which topics are headlined for each edition of this publication. If none is selected, the default section from !settings will be used.", array('!settings' => l(t('publication settings'), 'admin/settings/epublish'))),
 		);
 	} else {
 		$form['sid'] = array(
@@ -1775,52 +1884,54 @@ function epublish_form_pub($edit = NULL) {
 			'#value' => t("Delete"),
 		);
 	}
-	$output = drupal_get_form('epublish_form_pub', $form);
-	return $output;
+	return $form;
 }
 
-
-/** 
+function epublish_pub() {
+$output = drupal_get_form('epublish_form_pub');
+	return $output;
+}
+/**
  * epublish_form_pub_submit: save changes to a publication
  *
  * @param $edit
  *	 an array of values to be saved
  *
  * @return
- *	 the same array, with modifications if a new record is created 
+ *	 the same array, with modifications if a new record is created
  */
 
 function epublish_form_pub_submit($form_id, $edit) {
 	if ($edit['pid'] && $edit['action'] != 'delete') {
-		db_query("UPDATE {epublish_publication} SET name = '%s', description = '%s', schedule = '%s', current_eid = '%d', 
-		  layout_list = '%s', layout_page = '%s', sid = '%s' WHERE pid = '%d'", $edit['name'], $edit['description'], 
+		db_query("UPDATE {epublish_publication} SET name = '%s', description = '%s', schedule = '%s', current_eid = '%d',
+		  layout_list = '%s', layout_page = '%s', sid = '%s' WHERE pid = '%d'", $edit['name'], $edit['description'],
 			$edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['pid']);
-		drupal_set_message(t('The publication "%title" has been updated.', array('%title' => theme('placeholder', $edit['name']))));
+		drupal_set_message(t('The publication "!title" has been updated.', array('!title' => $edit['name'])));
 	} else if ($edit['action'] == 'delete') {
 		epublish_del_pub($edit['pid']);
 	} else {
 		$edit['pid'] = db_next_id('{epublish_publication}_pid');
-		db_query("INSERT INTO {epublish_publication} (pid, name, description, schedule, current_eid, layout_list, layout_page, sid) 
-		  VALUES ('%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s')", $edit['pid'], $edit['name'], $edit['description'], 
+		db_query("INSERT INTO {epublish_publication} (pid, name, description, schedule, current_eid, layout_list, layout_page, sid)
+		  VALUES ('%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s')", $edit['pid'], $edit['name'], $edit['description'],
 			$edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid']);
-		drupal_set_message(t('The publication "%title" has been added.', array('%title' => theme('placeholder', $edit['name']))));
+		drupal_set_message(t('The publication "!title" has been added.', array('!title' => $edit['name'])));
 	}
 	return 'admin/epublish';
 }
 
 
-/** 
+/**
  * epublish_del_pub: delete a publication
  *
  * @param $pid
  *	 the publication ID to be deleted
  *
  * @return
- *	 A message stating that the publication has been deleted 
+ *	 A message stating that the publication has been deleted
  */
 function epublish_del_pub($pid) {
 	$publication = epublish_get_pub($pid);
-	if ($publication->pid && $_POST['edit']['confirm']) {
+	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
 		db_query("DELETE FROM {epublish_publication} WHERE pid = '%d'", $pid);
 		$result = db_query("SELECT eid from {epublish_edition} WHERE pid = '%d'", $pid);
 		while ($edition = db_fetch_object($result)) {
@@ -1828,49 +1939,42 @@ function epublish_del_pub($pid) {
 		}
 		db_query("DELETE FROM {epublish_edition} WHERE pid = '%d'", $pid);
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d'", $pid);
-		drupal_set_message(t('deleted publication "%name".', array('%name' => $publication->name)));
-		drupal_goto("admin/epublish"); 
+		drupal_set_message(t('deleted publication "!name".', array('!name' => $publication->name)));
+		drupal_goto("admin/epublish");
 	} else if ($publication->pid) {
-		return confirm_form('epublish_pub_confirm_delete', 
-			array('pid' => array(
-				'#type' => hidden,
-				'#value' => $publication->pid
-				)
-			),
-			t('Are you sure you want to delete the publication "%title"?', array('%title' => theme('placeholder', $publication->name))), 		
-			'admin/epublish',
-			t('This action cannot be undone.'), 
-			t('Delete'),
-			t('Cancel'));
-	} else {
+
+		return drupal_get_form('confirm_form',array('pid' => array(
+				'#type' => hidden,'#value' => $publication->pid)),
+			        t('Are you sure you want to delete the publication "!title"?', array('!title' => $publication->name)),
+				'admin/epublish',
+				t('This action cannot be undone.'),
+				t('Delete'),
+			t('Cancel'),'confirm');
+	 } else {
 		drupal_set_message(t('The section no longer exists.'));
 		return 'admin/epublish';
 	}
 }
 
-
-
-
-
 /*******************************************
  *	 EDITIONS
  ******************************************/
 
-/** 
+/**
  * epublish_get_edition: get an epublish_edition record from the database
  *
  * @param $eid
  *	 An edition ID number
  *
  * @return
- *	 An object containing all of the values for a single record in the 
+ *	 An object containing all of the values for a single record in the
  *	 {epublish_edition} table.
  */
 function epublish_get_edition($eid) {
 	return db_fetch_object(db_query("SELECT * FROM {epublish_edition} WHERE eid='%d'", $eid));
 }
 
-/** 
+/**
  * epublish_current_edition: return the current edition ID number for a publication. If no edition is specified, returns the edition with the latest publication date.
  *
  * @param $pid
@@ -1903,29 +2007,31 @@ function epublish_admin_edition_edit($eid = NULL) {
 	} elseif ($eid) {
 		$edition = epublish_get_edition($eid);
 	}
-	return epublish_form_edition($edition);
+	$output = drupal_get_form('epublish_form_edition',$edition);
+	return $output;
 }
 
 function epublish_admin_edition_add($pid = NULL) {
-	return epublish_form_edition(NULL, $pid);
+$output = drupal_get_form('epublish_form_edition',NULL,$pid);
+	return $output;
 }
 
 
-/** 
+/**
  * epublish_form_edition: return a form for editing a publication edition
  *
  * @param $edit
  *	 an array of values handled by the form
  *
  * @return
- *	 An HTML-formatted form 
+ *	 An HTML-formatted form
  */
 function epublish_form_edition($edit = NULL, $pid=NULL) {
 	$edit = (object) $edit;
 	if ($pid) {
 		$edit->pid = $pid;
 	}
-	
+
 	$publication = epublish_get_pub($edit->pid);
 	$form[] = array('#value' => '<h3>' . t('Edition of publication ') . l($publication->name, "admin/epublish/edit/publication/$publication->pid") . "</h3>\n");
 	$form['pid'] = array(
@@ -1940,7 +2046,7 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		'#maxlength' => 128,
 		'#description' => t('A textual representation of the publication date, e.g., "March 2003" or "April 11-17, 2004."'),
 	);
-	
+
 	$form[] = array('#value' => '<div class="container-inline">');
 		$form['volume'] = array(
 		'#type' => 'textfield',
@@ -1967,7 +2073,7 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		'#cols' => 70,
 		'#rows' => 8,
 	);
-	
+
 	// publication date
 	if (!$edit->year && !$edit->pubdate) {
 		$edit->year = date('Y', time());
@@ -1984,7 +2090,7 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'11' => '11', '12' => '12', '13' => '13', '14' => '14', '15' => '15', '16' => '16', '17' => '17', '18' => '18', '19' => '19', '20' => '20',
 			'21' => '21', '22' => '22', '23' => '23', '24' => '24', '25' => '25', '26' => '26', '27' => '27', '28' => '28', '29' => '29', '30' => '30',
 			'31' => '31');
-	
+
 	$form[] = array('#value' => '<div class="container-inline">');
 	$form["month"] = array(
 		'#type' => 'select',
@@ -2014,7 +2120,7 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this edition. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout for this publication'), 'admin/epublish/edit/' . $edit["pid"]))),
+			'#description' => t("Select a page layout for this edition. If none is selected, the default !settings will be used.", array('!settings' => l(t('layout for this publication'), 'admin/epublish/edit/publication/' . $edit->pid))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
@@ -2046,7 +2152,6 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'#options' => $sids,
 			'#description' => t("Select a section to control which topics are headlined in this edition. If none is selected, the default section for this publication will be used."),
 		);
-		//$form .= form_select(t("Section"), "sid", $edit->sid, $sids, t("Select a section to control which topics are headlined in this edition. If none is selected, the default section for this publication will be used."));
 	} else {
 		// Even if custom sections are turned off, pass through the value as a hidden input. That way the settings are still there if custom sections gets turned on again later.
 		$form['sid'] = array(
@@ -2067,8 +2172,8 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'#title' => t('Make current?'),
 			'#return_value' => 1,
 			'#default_value' => ($edit->eid == $publication->current_eid),
-			'#description' => t('Check this box if you want this to be the %current of this publication', 
-				array('%current' => l(t('current edition'), "epublish/" . $publication->pid . "/current"))),
+			'#description' => t('Check this box if you want this to be the !current of this publication',
+				array('!current' => l(t('current edition'), "epublish/" . $publication->pid . "/current"))),
 		);
 		$form["eid"] = array(
 			'#type' => 'hidden',
@@ -2082,7 +2187,7 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'#type' => 'submit',
 			'#value' => t("Delete"),
 		);
-		
+
 		// headlines
 		$form[] = array('#value'=>'<hr /><a name="manageheadlines"></a>')	;
 		$form['headlines'] = array(
@@ -2091,36 +2196,36 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		$edition = epublish_get_edition($edit->eid);
 		$sid = epublish_assign_section($edition);
 		$operations = array('add' => t('Update the selected posts'), 'del' => t('Remove the selected posts'));
-		
+
 		$form['headlines'][] = array('#value'=>'<div class="container-inline">');
 		$form['headlines']['operation'] = array(
 			'#type' => 'select',
 			'#default_value' => 'add',
 			'#options' => $operations,
 		);
-		$form['headlines']['submit'] = array('#type' => 'submit', '#value' => t('Update'));	
+		$form['headlines']['submit'] = array('#type' => 'submit', '#value' => t('Update'));
 		$form['headlines'][] = array('#type' => 'submit', '#value' => t("Add more headlines"));
 		$form['headlines'][] = array('#value'=>'</div>');
-		
+
 		$header = array(NULL, t('Stories'), t('Topic'), t('Type'), t('Status'), t('Weight'));
 		$topics = epublish_topic_selection_list($sid);
-		
-		$result = db_query(db_rewrite_sql("SELECT n.nid, n.title, n.changed, n.status, n.type, een.weight, een.tid 
-			FROM {node} n LEFT JOIN {epublish_edition_node} een ON n.nid = een.nid 
-			LEFT JOIN {epublish_topic} et ON et.tid=een.tid 
+
+		$result = db_query(db_rewrite_sql("SELECT n.nid, n.title, n.changed, n.status, n.type, een.weight, een.tid
+			FROM {node} n LEFT JOIN {epublish_edition_node} een ON n.nid = een.nid
+			LEFT JOIN {epublish_topic} et ON et.tid=een.tid
 			WHERE eid='" . $edit->eid . "' AND et.sid='" . $sid . "' ORDER BY et.weight, een.weight, n.changed DESC"));
 		while ($node = db_fetch_object($result)) {
 			$nodes[$node->nid] = '';
 			$form['title'][$node->nid] = array('#value' => l($node->title, 'node/'. $node->nid) .' '. theme('mark', node_mark($node->nid, $node->changed)));
-			$form['name'][$node->nid] =  array('#value' => node_get_name($node));
-			$form['tid']['tid_' . $node->nid] =  array('#type' => 'select', '#default_value' => $node->tid, 
+			$form['name'][$node->nid] =  array('#value' => node_get_types('name', $node));
+			$form['tid']['tid_' . $node->nid] =  array('#type' => 'select', '#default_value' => $node->tid,
 			  '#options' => $topics, '#attributes' => array('onchange'=>'onChangeTID(' . $node->nid . ')'));
 			$form['status'][$node->nid] =  array('#value' =>  ($node->status ? t('published') : t('not published')));
-			$form['weight']['weight_' . $node->nid] =  array('#type' => 'weight', '#default_value' => $node->weight, 
-			  '#delta' => 10, '#attributes' => array('onchange'=>'onChangeWeight(' . $node->nid . ')'));
+			$form['weight']['weight_' . $node->nid] =  array('#type' => 'weight', '#default_value' => $node->weight,
+			  '#delta' => 30, '#attributes' => array('onchange'=>'onChangeWeight(' . $node->nid . ')'));
 		}
 		$form['nodes'] = array('#type' => 'checkboxes', '#options' => $nodes);
-		
+
 		drupal_set_title(t('edit ') . "$publication->name, " . theme('epublish_edition_reference', $edition));
 	} else {
 		$form['published'] = array(
@@ -2140,23 +2245,26 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'#value' => t("Submit"),
 		);
 	}
-	$output = drupal_get_form('epublish_form_edition', $form);
+	return $form;
+}
+
+function epublish_edition() {
+$output = drupal_get_form('epublish_form_edition');
 	return $output;
 }
 
 function theme_epublish_form_edition($form) {
 	// create the headlines table
   if (isset($form['title']) && is_array($form['title'])) {
-	//if (count($form['nodes']) > 3) {
 	$rows = array();
     foreach (element_children($form['title']) as $key) {
       $row = array();
-      $row[] = form_render($form['nodes'][$key]);
-      $row[] = form_render($form['title'][$key]);
-      $row[] = form_render($form['name'][$key]);
-      $row[] = form_render($form['tid']['tid_' . $key]);
-      $row[] = form_render($form['status'][$key]);
-      $row[] = form_render($form['weight']['weight_' . $key]);
+      $row[] = drupal_render($form['nodes'][$key]);
+      $row[] = drupal_render($form['title'][$key]);
+      $row[] = drupal_render($form['name'][$key]);
+      $row[] = drupal_render($form['tid']['tid_' . $key]);
+      $row[] = drupal_render($form['status'][$key]);
+      $row[] = drupal_render($form['weight']['weight_' . $key]);
       $rows[] = $row;
     }
   } else  {
@@ -2164,17 +2272,17 @@ function theme_epublish_form_edition($form) {
   }
   $header = array(NULL, t('Title'), t('Type'), t('Topic'), t('Status'), t('Weight'));
   $table_content = theme('table', $header, $rows);
-	
+
 	// put the table content inside the headlines fieldset
-	$output = form_render($form['headlines']);
+	$output = drupal_render($form['headlines']);
 	$output = str_replace('</div></fieldset>', $table_content . "\n</div></fieldset>\n", $output);
-	
+
 	// put the headlines fieldset and table below the rest of the form content
-  $output = form_render($form) . $output;
+  $output = drupal_render($form) . $output;
   return $output;
 }
 
-/** 
+/**
  * epublish_save_edition: save changes to a publication edition
  *
  * @param $edit
@@ -2183,7 +2291,7 @@ function theme_epublish_form_edition($form) {
  *	 a Boolean value that indicates whether or not this edition should become the current edition of the publication
  *
  * @return
- *	 the same array, with modifications if a new record is created 
+ *	 the same array, with modifications if a new record is created
  */
  // ($edit, $make_current = false)
 
@@ -2204,14 +2312,14 @@ function epublish_form_edition_submit($form_id, $edit) {
 					}
 				}
 			}
-			drupal_set_message(t('The "%title" edition has been updated.', array('%title' => theme('placeholder', $edit['dateline']))));
+			drupal_set_message(t('The "!title" edition has been updated.', array('!title' => $edit['dateline'])));
 		}
 	} else if ($edit['action'] == 'delete') {
 		epublish_del_edition($edit);
 	}	else {
 		$edit['eid'] = db_next_id('{epublish_edition}_eid');
 		db_query("INSERT INTO {epublish_edition} (eid, pid, dateline, description, volume, number, pubdate, layout_list, layout_page, sid, published) VALUES ('%d', '%d', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%d', '%d')", $edit['eid'], $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'].$edit['month'].$edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published']);
-		drupal_set_message(t('The "%title" edition has been added.', array('%title' => theme('placeholder', $edit['dateline']))));
+		drupal_set_message(t('The "!title" edition has been added.', array('!title' => $edit['dateline'])));
 	}
 	if ($edit['make_current']) {
 		db_query("UPDATE {epublish_publication} SET current_eid = '%d' WHERE pid = '%d'", $edit['eid'], $edit['pid']);
@@ -2219,37 +2327,37 @@ function epublish_form_edition_submit($form_id, $edit) {
 	return 'admin/epublish';
 }
 
-/** 
+/**
  * epublish_del_edition: delete a publication edition
  *
  * @param $edit
  *	 an array for the edition to be deleted
  *
  * @return
- *	 A message stating that the edition has been deleted 
+ *	 A message stating that the edition has been deleted
  */
 function epublish_del_edition($eid) {
 	$edition = epublish_get_edition($eid);
-	if ($edition->eid && $_POST['edit']['confirm']) {
+	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
+
 		$publication = epublish_get_pub($edition->pid);
 		db_query("DELETE FROM {epublish_edition} WHERE eid = '%d'", $edition->eid);
 		db_query("DELETE FROM {epublish_edition_node} WHERE eid = '%d'", $edition->eid);
-		drupal_set_message(t('Deleted "%edition" edition from publication "%publication."', array('%edition' => $edition->dateline, '%publication' => $publication->name)));
-		drupal_goto("admin/epublish"); 
+		drupal_set_message(t('Deleted "!edition" edition from publication "!publication."', array('!edition' => $edition->dateline, '!publication' => $publication->name)));
+		drupal_goto("admin/epublish");
 	} else if ($edition->eid) {
+
 		$publication = epublish_get_pub($edition->pid);
-		return confirm_form('epublish_edition_confirm_delete', 
-			array('eid' => array(
-				'#type' => hidden,
-				'#value' => $edition->eid
-				)
-			),
-			t('Are you sure you want to delete the "%edition" edition from publication "%publication"?', array('%edition' => $edition->dateline, '%publication' => $publication->name)),
-			'admin/epublish',
-			t('This action cannot be undone.'), 
-			t('Delete'),
-			t('Cancel'));
+
+		return drupal_get_form('confirm_form', array('eid' => array('#type' => hidden,
+				'#value' => $edition->eid)),
+				t('Are you sure you want to delete the "!edition" edition from publication "!publication"?',array('!edition' => $edition->dateline, '!publication' => $publication->name)),
+				'admin/epublish',
+				t('This action cannot be undone.'),
+				t('Delete'),
+				t('Cancel'),'','');
 	} else {
+
 		drupal_set_message(t('The edition no longer exists.'));
 		return 'admin/epublish';
 	}
@@ -2260,7 +2368,7 @@ function epublish_del_edition($eid) {
  *	 VOLUMES
  ******************************************/
 
-/** 
+/**
  * epublish_get_volume: get an epublish_volume record from the database
  *
  * @param $pid
@@ -2269,7 +2377,7 @@ function epublish_del_edition($eid) {
  *	 A volume number
  *
  * @return
- *	 An object containing all of the values for a single record in the 
+ *	 An object containing all of the values for a single record in the
  *	 {epublish_volume} table.
  */
 function epublish_get_volume($pid, $volume) {
@@ -2291,22 +2399,24 @@ function epublish_admin_volume_edit($pid = NULL, $volume = NULL) {
 	} elseif ($pid) {
 		$volume = epublish_get_volume($pid, $volume);
 	}
-	return epublish_form_volume($volume);
+	//return epublish_form_volume($volume);
+	$output = drupal_get_form('epublish_form_volume',$volume);
+	return $output;
 }
 
-/** 
+/**
  * epublish_form_volume: return a form for editing a publication volume
  *
  * @param $edit
  *	 an array of values handled by the form
  *
  * @return
- *	 An HTML-formatted form 
+ *	 An HTML-formatted form
  */
 function epublish_form_volume($edit = NULL) {
 	$edit = (object) $edit;
 	$publication = epublish_get_pub($edit->pid);
-	$form[] = array('#value' => '<h3>' . t('Volume %vol of publication "%pub"', array('%vol' => $edit->volume, '%pub' => l($publication->name, "admin/epublish/edit/publication/$publication->pid"))) . "</h3>\n");
+	$form[] = array('#value' => '<h3>' . t('Volume !vol of publication "!pub"', array('!vol' => $edit->volume, '!pub' => l($publication->name, "admin/epublish/edit/publication/$publication->pid"))) . "</h3>\n");
 	$form["pid"] = array(
 		'#type' => 'hidden',
 		'#value' => $edit->pid,
@@ -2331,59 +2441,63 @@ function epublish_form_volume($edit = NULL) {
 		'#type' => 'submit',
 		'#value' => t("Delete"),
 	);
-	$output = drupal_get_form('epublish_form_volume', $form);
+	return $form;
+}
+
+function epublish_volume() {
+$output = drupal_get_form('epublish_form_volume');
 	return $output;
 }
 
-/** 
+/**
  * epublish_save_volume: save changes to a publication volume
  *
  * @param $edit
  *	 an array of values to be saved
  *
  * @return
- *	 the same array 
+ *	 the same array
  */
 function epublish_form_volume_submit($form_id, $edit) {
 	if ($edit['action'] == 'delete') {
 		epublish_del_volume($edit['pid'], $edit['volume']);
 	} else {
-		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", 
+		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'",
 			$edit['pid'], $edit['volume']);
-		db_query("INSERT INTO {epublish_volume} (pid, volume, dateline) VALUES ('%d', '%d', '%s')", 
+		db_query("INSERT INTO {epublish_volume} (pid, volume, dateline) VALUES ('%d', '%d', '%s')",
 			$edit['pid'], $edit['volume'], $edit['dateline']);
-		drupal_set_message(t('The volume name "%title" has been updated.', array('%title' => theme('placeholder', $edit['dateline']))));
+		drupal_set_message(t('The volume name "!title" has been updated.', array('!title' => $edit['dateline'])));
 	}
 	return 'admin/epublish';
 }
 
-/** 
+/**
  * epublish_del_volume: delete a publication volume name
  *
  * @param $edit
  *	 an array with the values specifying the volume to be deleted
  *
  * @return
- *	 A message stating that the volume has been deleted 
+ *	 A message stating that the volume has been deleted
  */
 function epublish_del_volume($pid, $volume) {
 	$publication = epublish_get_pub($pid);
 	$vol = epublish_get_volume($pid, $volume);
-	if ($_POST['edit']['confirm']) {
+	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )) {
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", $pid, $volume);
-		drupal_set_message(t('Removed volume name "%volume" from publication "%publication."', array('%volume' => $vol->dateline, '%publication' => $publication->name)));
-		drupal_goto("admin/epublish"); 
+		drupal_set_message(t('Removed volume name "!volume" from publication "!publication."', array('!volume' => $vol->dateline, '!publication' => $publication->name)));
+		drupal_goto("admin/epublish");
 	} else {
-		return confirm_form('epublish_volume_confirm_delete', 
-			array(
-				'pid' => array( '#type' => hidden, '#value' => $pid),
-				'volume' => array( '#type' => hidden, '#value' => $volume),
-				),
-			t('Are you sure you want to remove volume name "%volume" from publication "%publication"?', array('%volume' => $vol->dateline, '%publication' => $publication->name)),
-			'admin/epublish',
-			t('This action cannot be undone.'), 
-			t('Delete'),
-			t('Cancel'));
+
+		return drupal_get_form('confirm_form',
+				 array('pid' => array( '#type' => hidden,'#value' => $pid),
+				 'volume' => array( '#type' => hidden, '#value' => $volume)),
+	  	        	 t('Are you sure you want to remove volume name !volume from publication !publication?',	 array('!volume' => $vol->dateline, '!publication' => $publication->name)),
+				 'admin/epublish',
+				 t('This action cannot be undone.'),
+				 t('Delete'),
+				 t('Cancel'),'','');
+
 	}
 }
 
@@ -2392,7 +2506,7 @@ function epublish_del_volume($pid, $volume) {
  *	 NODES
  ******************************************/
 
-/** 
+/**
  * epublish_get_edition_nodes: get a list of nodes from an edition
  *
  * @param $eid
@@ -2409,7 +2523,7 @@ function epublish_get_edition_nodes($eid) {
 	return $nodes;
 }
 
-/** 
+/**
  * epublish_add_node: add a node to an edition
  *
  * @param $eid
@@ -2422,7 +2536,7 @@ function epublish_add_node($eid, $nid, $weight=0, $tid=0) {
 	db_query("INSERT INTO {epublish_edition_node} (eid, nid, weight, tid) VALUES ('%d', '%d', '%d', '%d')", $eid, $nid, $weight, $tid);
 }
 
-/** 
+/**
  * epublish_del_node: delete a node from an edition
  *
  * @param $eid
@@ -2440,7 +2554,14 @@ function epublish_del_node($eid, $nid) {
  * @param $edit
  *	 an array of values to be saved
  */
+
+function epublish_admin_node_head() {
+$output = drupal_get_form('epublish_admin_node');
+	return $output;
+}
+
 function epublish_admin_node() {
+
 	$eid = arg(3);
 	$filter = arg(4) ? arg(4) : 0;
 	$edition = epublish_get_edition($eid);
@@ -2476,7 +2597,7 @@ function epublish_admin_node() {
 		'#value' => t('Filter'),
 	);
 	$form[] = array('#value' => '</div>');
-	
+
 	$result = pager_query("SELECT DISTINCT (n.nid), n.title, n.changed, n.type, n.status FROM {node} n ". $filters[$filter][1], 50);
 
 	// Make sure the update controls are disabled if we don't have any rows to select from.
@@ -2493,20 +2614,25 @@ function epublish_admin_node() {
 		$node->weight = 0;
 		$topics = epublish_topic_selection_list($sid);
 		$form['title'][$node->nid] = array('#value' => l($node->title, 'node/'. $node->nid) .' '. theme('mark', node_mark($node->nid, $node->changed)));
-		$form['name'][$node->nid] =  array('#value' => node_get_name($node));
-		$form['tid']['tid_' . $node->nid] =  array('#type' => 'select', '#default_value' => $node->tid, 
+		$form['name'][$node->nid] =  array('#value' => node_get_types('name', $node));
+		$form['tid']['tid_' . $node->nid] =  array('#type' => 'select', '#default_value' => $node->tid,
 			'#options' => $topics, '#attributes' => array('onchange'=>'onChangeTID(' . $node->nid . ')'));
 		$form['status'][$node->nid] =  array('#value' =>  ($node->status ? t('published') : t('not published')));
-		$form['weight']['weight_' . $node->nid] =  array('#type' => 'weight', '#default_value' => $node->weight, 
-			'#delta' => 10, '#attributes' => array('onchange'=>'onChangeWeight(' . $node->nid . ')'));
+		$form['weight']['weight_' . $node->nid] =  array('#type' => 'weight', '#default_value' => $node->weight,
+			'#delta' => 30, '#attributes' => array('onchange'=>'onChangeWeight(' . $node->nid . ')'));
 	}
 	$form['nodes'] = array('#type' => 'checkboxes', '#options' => $nodes);
 	$form['pager'] = array('#value' => theme('pager', NULL, 50, 0));
 	$form[] = array('#value' => '<h3>' . $filters[$filter][0] . '</h3>');
-	
-	drupal_set_title(t('Add Posts to %pub', array('%pub' => "$publication->name, " . theme('epublish_edition_reference', $edition))));
-	$output .= drupal_get_form('epublish_admin_node', $form);
-	return $output;
+
+	drupal_set_title(t('Add Posts to !pub', array('!pub' => "$publication->name, " . theme('epublish_edition_reference', $edition))));
+	return $form;
+
+}
+
+function epublish_headlines() {
+$output = drupal_get_form('epublish_admin_node');
+return $output;
 }
 
 function theme_epublish_admin_node($form) {
@@ -2515,12 +2641,12 @@ function theme_epublish_admin_node($form) {
     $rows = array();
     foreach (element_children($form['title']) as $key) {
       $row = array();
-      $row[] = form_render($form['nodes'][$key]);
-      $row[] = form_render($form['title'][$key]);
-      $row[] = form_render($form['name'][$key]);
-      $row[] = form_render($form['tid']['tid_' . $key]);
-      $row[] = form_render($form['status'][$key]);
-      $row[] = form_render($form['weight']['weight_' . $key]);
+      $row[] = drupal_render($form['nodes'][$key]);
+      $row[] = drupal_render($form['title'][$key]);
+      $row[] = drupal_render($form['name'][$key]);
+      $row[] = drupal_render($form['tid']['tid_' . $key]);
+      $row[] = drupal_render($form['status'][$key]);
+      $row[] = drupal_render($form['weight']['weight_' . $key]);
       $rows[] = $row;
     }
   } else  {
@@ -2530,17 +2656,17 @@ function theme_epublish_admin_node($form) {
 	$header = array(NULL, t('Title'), t('Topic'), t('Type'), t('Status'), t('Weight'));
 	$output = theme('table', $header, $rows);
 	if ($form['pager']['#value']) {
-    $output .= form_render($form['pager']);
+    $output .= drupal_render($form['pager']);
   }
-	
+
   // put the headlines table below the rest of the form content
-  $output = form_render($form) . $output;
+  $output = drupal_render($form) . $output;
   return $output;
 }
 
 function epublish_admin_node_submit($form_id, $edit) {
 	$op = $_POST['op'];
-	
+
 	if ($op == t('Add checked items to this edition') && isset($edit['nodes'])) {
 		$nodes_added = 0;
 		foreach ($edit['nodes'] as $nid => $checked) {
@@ -2550,18 +2676,16 @@ function epublish_admin_node_submit($form_id, $edit) {
 			}
 		}
 		if ($nodes_added) {
-			drupal_set_message(format_plural($nodes_added, "One headline was added to this edition.", "%count headlines were added to this edition."));
+			drupal_set_message(format_plural($nodes_added, 'One headline was added to this edition.', '@count headlines were added to this edition.'));
 		} else {
 			drupal_set_message(t('The update has been performed.'));
 		}
 		return 'admin/epublish/edit/edition/' . $edit['eid'];
 	}
-//	drupal_goto('admin/epublish/headlines/' . $edit['eid'] . '/' . $edit['filter']);
 	return 'admin/epublish/headlines/' . $edit['eid'] . '/' . $edit['filter'];
 }
 
-
-/** 
+/**
  * epublish_get_term: get a taxonomy term or a pseudo-term for "miscellaneous" or "top stories"
  *
  * @param $tid
@@ -2578,7 +2702,10 @@ function epublish_get_term($tid, $sid) {
 	}
 	$section = epublish_get_section($sid);
 	$vid = $section->vid;
-	if ($tid == -1) {
+	if ($tid == -2) {
+		$term = db_fetch_object(db_query("SELECT vid FROM {vocabulary} WHERE vid = '%d'", $vid));
+	$term->name = variable_get('epublish_advertisement', t('advertisement'));
+	} else if ($tid == -1) {
 		$term = db_fetch_object(db_query("SELECT vid FROM {vocabulary} WHERE vid = '%d'", $vid));
 	$term->name = variable_get('epublish_top_stories', t('top stories'));
 	} else {
@@ -2589,7 +2716,7 @@ function epublish_get_term($tid, $sid) {
 	return $term;
 }
 
-/** 
+/**
  * _epublish_build_node_inclusions: internal function that builds a set of SQL conditions for
  * specifying which node types should be included in a query.
  *
@@ -2607,7 +2734,7 @@ function _epublish_build_node_inclusions($node_types = array()) {
 	}
 }
 
-/** 
+/**
  * _epublish_build_node_exclusions: internal function that builds a set of SQL conditions for
  * specifying which nodes should be excluded in a query.
  *
@@ -2625,7 +2752,7 @@ function _epublish_build_node_exclusions($nodes = array()) {
 	}
 }
 
-/** 
+/**
  * epublish_topic_terms: get a list of taxonomy terms encompassed by a topic
  *
  * @param $tid
@@ -2688,14 +2815,11 @@ function theme_epublish_navigation($node, $eid) {
     if ($next = epublish_next($node, $topics)) {
 			$links[] = "Next story: " . l($next->title, 'node/'. $next->nid);
     }
-		$output .= "<h3>Published in " . l("$publication->name", "epublish/$publication->pid") . ", " .l(theme('epublish_edition_reference', $edition), "epublish/$publication->pid/$edition->eid") . "</h3>\n";
+		$output .= "<h3>Published in " . l("$publication->name", "epublish/$publication->pid") . ", " .l(theme('epublish_edition_reference', $edition), "epublish/$publication->pid/$edition->eid") . "</h3><br/>\n";
 		$output .= theme('item_list', $links);
-
     $output .= '</div>';
   }
-
   $node->body = $node->body.$output;
-
   return $node;
 }
 

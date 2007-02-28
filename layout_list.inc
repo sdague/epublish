@@ -28,7 +28,7 @@ function theme_epublish_layout_list($topics, $params=NULL) {
   $output = '<div class="pub_list">' . $description . '<ul>';
   foreach ($topics as $topic) {
     foreach ($topic->nodes as $nid) {
-			if (module_exist('translation')) {
+			if (module_exists('translation')) {
  				$lang = i18n_get_lang();
 	 			$transnid .= translation_node_nid($nid, $lang);
 				if ($transnid) { $nid = $transnid; $transnid = '';}
