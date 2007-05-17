@@ -1336,7 +1336,7 @@ function epublish_form_section_submit($form_id, $form_values) {
  */
 function epublish_del_section($sid) {
 	$section = epublish_get_section($sid);
-	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
+	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
 		$result = db_query("SELECT * FROM {epublish_edition}");
 		while ($edition = db_fetch_object($result)) {
 			if (epublish_assign_section($edition) == $sid) {
@@ -1611,7 +1611,7 @@ function epublish_form_topic_submit($form_id, $edit) {
 function epublish_del_topic($sid, $tid) {
 	$term = epublish_get_term($tid, $sid);
 	$section = epublish_get_section($sid);
-	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
+	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
 		db_query("DELETE FROM {epublish_topic} WHERE sid = '%d' AND tid = '%d'", $sid, $tid);
 		$result = db_query("SELECT eid FROM {epublish_edition} WHERE sid = '%d'", $sid);
 		while ($edition = db_fetch_object($result)) {
@@ -1931,7 +1931,7 @@ function epublish_form_pub_submit($form_id, $edit) {
  */
 function epublish_del_pub($pid) {
 	$publication = epublish_get_pub($pid);
-	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
+	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
 		db_query("DELETE FROM {epublish_publication} WHERE pid = '%d'", $pid);
 		$result = db_query("SELECT eid from {epublish_edition} WHERE pid = '%d'", $pid);
 		while ($edition = db_fetch_object($result)) {
@@ -2338,7 +2338,7 @@ function epublish_form_edition_submit($form_id, $edit) {
  */
 function epublish_del_edition($eid) {
 	$edition = epublish_get_edition($eid);
-	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )){
+	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
 
 		$publication = epublish_get_pub($edition->pid);
 		db_query("DELETE FROM {epublish_edition} WHERE eid = '%d'", $edition->eid);
@@ -2483,7 +2483,7 @@ function epublish_form_volume_submit($form_id, $edit) {
 function epublish_del_volume($pid, $volume) {
 	$publication = epublish_get_pub($pid);
 	$vol = epublish_get_volume($pid, $volume);
-	if (($_POST['op'] == 'Delete') && ($_POST ['form_id'] == 'confirm_form' )) {
+	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )) {
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", $pid, $volume);
 		drupal_set_message(t('Removed volume name "!volume" from publication "!publication."', array('!volume' => $vol->dateline, '!publication' => $publication->name)));
 		drupal_goto("admin/epublish");
