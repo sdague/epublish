@@ -82,6 +82,10 @@ function epublish_help($section = 'admin/help#epublish') {
 						'!epublish' => l(t('epublish'), "epublish"),
 					'!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array(), NULL, NULL, FALSE, TRUE))) .
 
+					t("<h3>URL Aliases for publication edition</h3>".
+					"<p>The Publication edition can have custom URL aliases. To enable the URL aliases, one must enable the 'path' module from the !modules.</p>",
+					array('!modules' => l(t("module list"), "admin/build/modules", array(), NULL, NULL, FALSE, TRUE))) .
+
 					t("<h3>Viewing latest headlines</h3>".
 					"<p>In addition to displaying postings that have been collected into specific editions of a publication, you can also view a list of the most recent postings in each topic section ".
 					"at \"epublish/headlines/{sid}\" where {sid} is a numeric section ID. \"Topics\" use taxonomy terms to organize content according to the following rules:</p>\n".
@@ -2027,6 +2031,9 @@ $output = drupal_get_form('epublish_form_edition',NULL,$pid);
  *	 An HTML-formatted form
  */
 function epublish_form_edition($edit = NULL, $pid=NULL) {
+	$urlquery = 'epublish/'.$edit->pid.'/'.$edit->eid;
+	$urlres= db_result(db_query("SELECT dst FROM {url_alias} WHERE src = '".$urlquery."'"));
+
 	$edit = (object) $edit;
 	if ($pid) {
 		$edit->pid = $pid;
@@ -2073,6 +2080,29 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		'#cols' => 70,
 		'#rows' => 8,
 	);
+
+	if (module_exists('path')) {
+		$path = $form['#node']->path;
+		$form['path'] = array(
+			'#type' => 'fieldset',
+			'#title' => t('URL path settings'),
+			'#collapsible' => TRUE,
+			'#collapsed' => empty($path),
+			'#weight' => 1,
+		);
+		$form['path']['path'] = array(
+			'#type' => 'textfield',
+			'#default_value' => $urlres,
+			'#maxlength' => 250,
+			'#collapsible' => TRUE,
+			'#collapsed' => TRUE,
+			'#description' => t('Optionally specify an alternative URL by which this node can be accessed.  For example, type "about" when writing an about page.  Use a relative path and don\'t add a trailing slash or the URL alias won\'t work.'),
+		);
+		$form['path']['pthid'] = array(
+			'#type' => 'hidden',
+			'#value' => db_result(db_query("SELECT pid FROM {url_alias} WHERE dst ='".$urlres."'"))
+		);
+	}
 
 	// publication date
 	if (!$edit->year && !$edit->pubdate) {
@@ -2181,15 +2211,17 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		);
 		$form[] = array(
 			'#type' => 'submit',
+			'#weight' => 2,
 			'#value' => t("Submit"),
 		);
 		$form[] = array(
 			'#type' => 'submit',
+			'#weight' => 2,
 			'#value' => t("Delete"),
 		);
 
 		// headlines
-		$form[] = array('#value'=>'<hr /><a name="manageheadlines"></a>')	;
+		$form[] = array('#value'=>'<hr /><a name="manageheadlines"></a>', '#weight' => 2,)	;
 		$form['headlines'] = array(
 			'#type' => 'fieldset', '#title' => t('Manage headlines'),
 		);
@@ -2296,7 +2328,23 @@ function theme_epublish_form_edition($form) {
  // ($edit, $make_current = false)
 
 function epublish_form_edition_submit($form_id, $edit) {
+
 	if ($edit['eid'] && $edit['action'] != 'delete') {
+		if(module_exists('path')) {
+			$ppid = $edit['pid'];
+			$peid = $edit['eid'];
+			$pnid = $edit['path'];
+			$pthid = $edit['pthid'];
+			if ($edit['path']) {
+				if($pthid) {
+					path_set_alias("epublish/$ppid/$peid",$pnid,$pthid);	
+				}
+				else {
+					path_set_alias("epublish/$ppid/$peid",$pnid);
+				}
+	        	}
+		}
+
 		db_query("UPDATE {epublish_edition} SET pid='%d', dateline='%s', description='%s', volume='%d', number='%d', pubdate='%d', layout_list='%s', layout_page='%s', sid='%d', published='%d' WHERE eid = '%d'", $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'].$edit['month'].$edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published'], $edit['eid']);
 		// Handle operations:
 		if (isset($edit['operation']) && isset($edit['nodes'])) {
