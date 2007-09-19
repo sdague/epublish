@@ -2819,7 +2819,7 @@ function theme_epublish_navigation($node, $eid) {
 		$output .= theme('item_list', $links);
     $output .= '</div>';
   }
-  $node->body = $node->body.$output;
+  $node->content['body']['#value'] = $node->body.$output;
   return $node;
 }
 
