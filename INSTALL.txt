@@ -1,0 +1,19 @@
+== Configuration ==
+To use this module, you have to take a few steps:
+
+* Make sure the taxonomy module is installed and enabled. Create a taxonomy
+  vocabulary in "admin/taxonomy/add/vocabulary", and in "admin/taxonomy"
+  create at least one term in your term in your taxonomy. (Taxonomy termss
+  define the section topics for your publication.)
+
+* Install and enable the epublish module in "admin/modules".
+
+* Set the appropriate access right in "admin/access". 
+  The access right is "administer publications."
+
+* To add or edit new filters, use "admin/epublish". To view lists of 
+  publications or specific editions of a publication, use "epublish".
+
+For additional information, see "admin/help#epublish" or the README.txt 
+file that comes included with this module.
+

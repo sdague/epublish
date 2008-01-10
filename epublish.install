@@ -1,0 +1,130 @@
+<?php
+
+/*
+Implementation of hook_install()
+*/
+
+function epublish_install() {
+  // Create tables.
+     drupal_install_schema('epublish');
+}
+//function epublish_publication_schema(){
+function epublish_schema(){  
+  
+$schema['epublish_publication'] = array(
+     'fields' =>array(
+       'pid' =>array('type'=>'serial','unsigned'=>TRUE ,'not null'=>TRUE,'length'=>10),
+       'name'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),
+       'description'=>array('type'=>'text','not null' => TRUE,'size'=>'big'),
+       'schedule'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),
+       'current_eid'=>array('type'=>'int','unsigned'=>TRUE,'not null' => TRUE,'default'=>0,'length'=>10),
+       'layout_list'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),
+       'layout_page'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),
+       'sid'=>array('type'=>'int','unsigned'=>TRUE,'not null' => TRUE,'default'=>0,'length'=>10)
+      ),
+      'primary key' => array('pid'),
+    );
+
+
+  $schema['epublish_abstract'] = array(
+    'fields' =>array(
+      'nid' =>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>10),
+      'epublish_abstract'=>array('type'=>'text','not null' => TRUE,'size'=>'big'),
+      'use_as_teaser'=>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>2)
+      ),
+        'unique keys' => array(
+        'nid' => array('nid')
+        ),
+	//'unique key' => array('nid'),
+   );
+	
+  $schema['epublish_edition'] = array(
+    'fields' =>array(
+      'eid' =>array('type'=>'serial','unsigned'=>TRUE ,'not null'=>TRUE,'length'=>10),
+      'pid' =>array('type'=>'int','unsigned'=>TRUE ,'not null'=>TRUE,'default'=>0,'length'=>10),
+      'dateline'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),	
+      'description'=>array('type'=>'text','not null' => TRUE,'size'=>'big'),
+      'volume'=>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>10),
+      'number'=>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>10),
+      'pubdate'=>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>8),
+      'layout_list'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),
+      'layout_page'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),
+      'sid'=>array('type'=>'int','unsigned'=>TRUE,'not null' => TRUE,'default'=>0,'length'=>10),
+      'published'=>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>4)
+     ),
+	'indexes' => array(
+	      'pid'=> array('pid')
+        ),
+      'primary key' => array('eid'),
+  
+  );
+
+ 
+  $schema['epublish_edition_node'] = array(
+    'fields' =>array(
+      'eid' =>array('type'=>'int','unsigned'=>TRUE ,'not null' => TRUE,'default'=>0,'length'=>10),
+      'nid' =>array('type'=>'int','unsigned'=>TRUE ,'not null' => TRUE,'default'=>0,'length'=>10),
+      'weight'=>array('type'=>'int','not null' => TRUE,'default'=>0,'size'=>'tiny','length'=>4),	
+      'tid'=>array('type'=>'int','not null' => TRUE,'default'=>0,'length'=>10)
+           ),
+	'indexes' => array(
+            'eid'    => array('eid','nid'),
+	    'tid'    => array('tid'),
+	    'nid'    => array('nid')
+         ),
+  );
+
+
+  $schema['epublish_section'] = array(
+    'fields' =>array(
+      'sid' =>array('type'=>'serial','unsigned'=>TRUE ,'not null' => TRUE,'length'=>10),
+      'title'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),	
+      'vid' =>array('type'=>'int','unsigned'=>TRUE ,'not null' => TRUE,'default'=>0,'length'=>10),
+      'node_types'=>array('type'=>'text','size'=>'big'),
+      'timeframe'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>16),		
+      'layout_list'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),	
+      'layout_page'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128),	
+      'weight'=>array('type'=>'int','not null' => TRUE,'default'=>0,'size'=>'tiny','length'=>4)
+    ),
+	'primary key' => array('sid'),
+  );
+
+  $schema['epublish_topic'] = array(
+    'fields' =>array(
+       'sid' =>array('type'=>'int','unsigned'=>TRUE ,'not null' => TRUE,'default'=>0,'length'=>10),
+       'tid' =>array('type'=> 'int','not null' => TRUE,'default'=>0,'length'=>10),
+       'count' =>array('type'=>'int','unsigned'=>TRUE,'not null' => TRUE,'default'=>1,'length'=>2),
+       'weight'=>array('type'=>'int','not null' => TRUE,'default'=>0,'size'=>'tiny','length'=>4),
+       'node_types'=>array('type'=>'text','size'=>'big')
+     ),	
+	'indexes' => array(
+	'tid'    => array('tid'),
+	'htid'    => array('sid')
+	),
+	
+	);
+
+
+  $schema['epublish_volume'] = array(
+    'fields' =>array(
+      'pid' =>array('type'=>'int','unsigned'=>TRUE ,'not null' => TRUE,'default'=>0,'length'=>10),
+      'volume' =>array('type'=>'int','unsigned'=>TRUE ,'not null' => TRUE,'default'=>0,'length'=>10),
+      'dateline'=>array('type'=>'varchar','not null' => TRUE,'default'=>'','length'=>128)
+	),		
+	'indexes' => array(
+	'volume'    => array('volume'),
+	'pid'    => array('pid')
+	),
+	
+  );
+
+	return $schema;
+
+}
+ 
+
+function epublish_update_1() {
+	return _system_update_utf8(array('epublish_abstract', 'epublish_edition', 'epublish_edition_node', 'epublish_publication','epublish_section', 'epublish_topic', 'epublish_volume'));
+}
+
+?>

@@ -1,0 +1,16 @@
+; $Id$
+name = Epublish
+description = "Enables users to organize the contents of their site into publications with multiple editions, like a magazine or newspaper."
+package = Epublish
+core = 6.x
+php = 5.1
+
+; Information added by drupal.org packaging script on 2007-02-05
+project = "drupal"
+
+
+; Information added by drupal.org packaging script on 2007-09-20
+version = "6.x-1.x-dev"
+project = "epublish"
+datestamp = "1190246637"
+

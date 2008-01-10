@@ -1,0 +1,149 @@
+.epublish {
+  padding: 0px 0 10px 10px;
+}
+.epublish .one_two .other_heads {
+  margin-top: 10px;
+  border-top: 1px solid #666;
+}
+.epublish .one_two .title {
+  font-family: Times New Roman, Times, serif;
+  font-size: 1.4em;
+  font-weight: bold;
+  margin-top: 10px;
+}
+.epublish .one_two .user {
+  font-family: Times New Roman, Times, serif;
+  font-size: 1em;
+}
+.epublish .one_two .abstract {
+  font-family: Times New Roman, Times, serif;
+  font-size: 1.2em;
+}
+.all_caps {
+  text-transform: uppercase;
+}
+.epublish .one_two .topic {
+  font-family: Times New Roman, Times, serif;
+  font-size: .9em;
+  font-weight: bold;
+  color: #900;
+  text-transform: uppercase;
+  margin-top: 20px;
+  margin-bottom: -10px;
+}
+
+.epublish .regular .topic {
+  font-family: Times New Roman, Times, serif;
+  font-size: .9em;
+  font-weight: bold;
+  color: #900;
+  text-transform: uppercase;
+  margin-top: 10px;
+  background-color: #BBBBBB;
+}
+
+.epublish .one_two .description, .epublish .regular .description, .epublish .nodes .description  {
+  font-family: Arial, Helvetica, Sans-serif;;
+  font-size: 1.2em;
+  font-weight: bold;
+  margin: 10px;
+  text-align: center;
+  padding: 10px;
+  background-color: #dfdfdf;
+}
+
+.pub_list .description  {
+  font-style: italic;
+}
+
+.epublish .one_two .topic_title, .epublish .regular .title {
+  font-family: Times New Roman, Times, serif;
+  font-weight: bold;
+  margin-top: 7px;
+  margin-bottom: 3px;
+  font-size: 1.2em;
+}
+
+.edition .reference {
+  font-weight: bold;
+}
+
+.epublish_navigation {
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+}
+.epublish .advertisement{
+	float:right;
+	width:auto;
+	margin-top: 20px;
+	border-left:1px solid #000;
+	border-bottom:1px solid #000;
+	border-top:1px solid #000;
+	border-right:1px solid #000;
+	height:350;
+	display:block;
+	background-color:#fff;
+	padding: 2px;
+}
+.epublish .regular{
+	border-left:1px solid #000;
+	border-bottom:1px solid #000;
+	border-top:1px solid #000;
+	border-right:1px solid #000;
+	padding: 2px ;
+}
+
+.abstract {
+  font-family: Verdana;
+  font-size: 9 pt;
+}
+.epub-title a {
+  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
+  font-size: 11 pt;
+  font-weight: bold;
+  color: #069;
+}
+.epub-title a:link { color: #006699; }
+.epub-title a:hover { color: #006699; }
+.link-title a {
+  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
+  font-size: 9 pt;
+  font-weight: bold;
+  color: #069;
+  text-decoration: underline;
+}
+.ad-link-title a {
+  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
+  font-size: 9 pt;
+  color: #900;
+  text-decoration: underline;
+}
+.ad-title a {
+  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
+  font-size: 9 pt;
+  font-weight: bold;
+  color: #900;
+}
+.ad-title a:link { color: #990000; }
+.ad-title a:hover { color: #990000; }
+.topic{
+  color: #000;
+}
+.abstract a {
+  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
+  font-size: 9 pt;
+  color: #069;
+}
+.ad-abstract {
+  font-family: Verdana;
+  font-size: 9 pt;
+}
+.ad-abstract a {
+  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
+  font-size: 9 pt;
+  color: #990000;
+}
+.bullet {
+	color: #990000;
+	font-weight: bold;
+}
