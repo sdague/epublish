@@ -82,10 +82,6 @@ function epublish_help($section = 'admin/help#epublish') {
 						'!epublish' => l(t('epublish'), "epublish"),
 					'!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array(), NULL, NULL, FALSE, TRUE))) .
 
-					t("<h3>URL Aliases for publication edition</h3>".
-					"<p>The Publication edition can have custom URL aliases. To enable the URL aliases, one must enable the 'path' module from the !modules.</p>",
-					array('!modules' => l(t("module list"), "admin/build/modules", array(), NULL, NULL, FALSE, TRUE))) .
-
 					t("<h3>Viewing latest headlines</h3>".
 					"<p>In addition to displaying postings that have been collected into specific editions of a publication, you can also view a list of the most recent postings in each topic section ".
 					"at \"epublish/headlines/{sid}\" where {sid} is a numeric section ID. \"Topics\" use taxonomy terms to organize content according to the following rules:</p>\n".
@@ -1094,7 +1090,7 @@ $output = drupal_get_form('epublish_form_section');
  */
 function epublish_admin_section_edit($sid = NULL) {
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
-		return epublish_del_section($sid);
+		return drupal_get_form('epublish_section_confirm_delete',$sid);
 	} elseif ($sid) {
 		$section = epublish_get_section($sid);
 	}
@@ -1338,9 +1334,16 @@ function epublish_form_section_submit($form_id, $form_values) {
  * @return
  *	 A message stating that the section has been deleted
  */
-function epublish_del_section($sid) {
+function epublish_section_confirm_delete($sid) {
+      $section = epublish_get_section($sid);
+
+      $form['sid'] = array('#type' => 'value', '#value' => $section->sid);
+      return confirm_form($form, t('Are you sure you want to delete the forum !title?', array('!title' => $section->title)), 'admin/epublish/sections', 'This action cannot be undone.', t('Delete'), t('Cancel'));
+}
+
+function epublish_section_confirm_delete_submit($form_id, $form_values) {
+        $sid = $form_values['sid'];
 	$section = epublish_get_section($sid);
-	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
 		$result = db_query("SELECT * FROM {epublish_edition}");
 		while ($edition = db_fetch_object($result)) {
 			if (epublish_assign_section($edition) == $sid) {
@@ -1363,21 +1366,8 @@ function epublish_del_section($sid) {
 		} else {
 			drupal_set_message(t('deleted section "!title".', array('!title' => $section->title)));
 		}
-		drupal_goto("admin/epublish/sections");
-	} else if ($section->sid) {
-		return drupal_get_form('confirm_form', array('sid' => array(
-				'#type' => hidden,
-				'#value' => $section->sid
-				)),
-				t('Are you sure you want to delete the section "!title"?', array('!title' => $section->title)),
-			'admin/epublish/sections',
-			t('This action cannot be undone.'),
-			t('Delete'),
-			t('Cancel'),'','');
-	} else {
 		drupal_set_message(t('The section no longer exists.'));
-		return 'admin/epublish/sections';
-	}
+		return 'admin/epublish/sections';	
 }
 
 
@@ -1406,7 +1396,7 @@ function epublish_get_topic($sid, $tid) {
  */
 function epublish_admin_topic_edit($sid=NULL, $tid=NULL) {
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
-		return epublish_del_topic($sid, $tid);
+		return drupal_get_form('epublish_topic_confirm_delete',$sid,$tid);
 	} elseif ($sid) {
 		$topic = epublish_get_topic($sid, $tid);
 	}
@@ -1612,31 +1602,31 @@ function epublish_form_topic_submit($form_id, $edit) {
  *	 A message stating that the section has been deleted
  */
 
-function epublish_del_topic($sid, $tid) {
+function epublish_topic_confirm_delete($sid,$tid) {
+      $section = epublish_get_section($sid);
+      $term = epublish_get_term($tid, $sid);
+      $section = epublish_get_section($sid);
+
+      $form['sid'] = array('#type' => 'value', '#value' => $section->sid);
+      $form['tid'] = array('#type' => 'value', '#value' => $term->tid);
+      return confirm_form($form, t('Are you sure you want to delete the term "!term" from section "!section"?', array('!term' => $term->name,'!section' => $section->title)),
+			'admin/epublish/sections', 'This action cannot be undone.', t('Delete'), t('Cancel'));
+}
+
+function epublish_topic_confirm_delete_submit($form_id,$form_values) {
+        $sid = $form_values['sid'];
+        $tid = $form_values['tid'];
 	$term = epublish_get_term($tid, $sid);
 	$section = epublish_get_section($sid);
-	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
+
 		db_query("DELETE FROM {epublish_topic} WHERE sid = '%d' AND tid = '%d'", $sid, $tid);
 		$result = db_query("SELECT eid FROM {epublish_edition} WHERE sid = '%d'", $sid);
 		while ($edition = db_fetch_object($result)) {
 			db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE tid='%d' AND eid = '%d'", $tid, $edition->eid);
 		}
 		drupal_set_message(t('deleted topic "!term" from section "!section."', array('!term' => $term->name, '!section' => $section->title)));
-		drupal_goto('admin/epublish/sections');
-	} else if ($term->tid) {
-		return drupal_get_form('confirm_form', array(
-				'sid' => array( '#type' => hidden, '#value' => $section->sid),
-				'tid' => array( '#type' => hidden, '#value' => $term->tid),
-				),
-			t('Are you sure you want to delete the term "!term" from section "!section"?', array('!term' => $term->name,'!section' => $section->title)),
-			'admin/epublish/sections',
-			t('This action cannot be undone.'),
-			t('Delete'),
-			t('Cancel'),'','');
-	} else {
-		drupal_set_message(t('The term no longer exists.'));
-		return 'admin/epublish';
-	}
+                drupal_set_message(t('The term no longer exists.'));
+		return 'admin/epublish/sections';
 }
 
 /**
@@ -1761,7 +1751,7 @@ function epublish_pub_list() {
 function epublish_admin_publication_edit($pid = NULL) {
 
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
-		return epublish_del_pub($pid);
+		return drupal_get_form('epublish_pub_confirm_delete',$pid);
 	} elseif ($pid) {
 		$publication = epublish_get_pub($pid);
 	}
@@ -1933,9 +1923,18 @@ function epublish_form_pub_submit($form_id, $edit) {
  * @return
  *	 A message stating that the publication has been deleted
  */
-function epublish_del_pub($pid) {
+
+function epublish_pub_confirm_delete($pid) {
+          $publication = epublish_get_pub($pid);
+
+          $form['pid'] = array('#type' => 'value', '#value' => $publication->pid);
+          return confirm_form($form, t('Are you sure you want to delete the publication "!title"?', array('!title' => $publication->name)), 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'));
+}
+
+function epublish_pub_confirm_delete_submit($form_id,$form_values) {
+        $pid = $form_values['pid'];
 	$publication = epublish_get_pub($pid);
-	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
+
 		db_query("DELETE FROM {epublish_publication} WHERE pid = '%d'", $pid);
 		$result = db_query("SELECT eid from {epublish_edition} WHERE pid = '%d'", $pid);
 		while ($edition = db_fetch_object($result)) {
@@ -1944,20 +1943,7 @@ function epublish_del_pub($pid) {
 		db_query("DELETE FROM {epublish_edition} WHERE pid = '%d'", $pid);
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d'", $pid);
 		drupal_set_message(t('deleted publication "!name".', array('!name' => $publication->name)));
-		drupal_goto("admin/epublish");
-	} else if ($publication->pid) {
-
-		return drupal_get_form('confirm_form',array('pid' => array(
-				'#type' => hidden,'#value' => $publication->pid)),
-			        t('Are you sure you want to delete the publication "!title"?', array('!title' => $publication->name)),
-				'admin/epublish',
-				t('This action cannot be undone.'),
-				t('Delete'),
-			t('Cancel'),'confirm');
-	 } else {
-		drupal_set_message(t('The section no longer exists.'));
 		return 'admin/epublish';
-	}
 }
 
 /*******************************************
@@ -2005,7 +1991,7 @@ function epublish_current_edition($pid=0) {
  */
 function epublish_admin_edition_edit($eid = NULL) {
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
-		return epublish_del_edition($eid);
+		return drupal_get_form('epublish_edition_confirm_delete',$eid);
 	} elseif ($_POST['op'] == t('Add more headlines')) {
 		drupal_goto( "admin/epublish/headlines/$eid" );
 	} elseif ($eid) {
@@ -2031,9 +2017,6 @@ $output = drupal_get_form('epublish_form_edition',NULL,$pid);
  *	 An HTML-formatted form
  */
 function epublish_form_edition($edit = NULL, $pid=NULL) {
-	$urlquery = 'epublish/'.$edit->pid.'/'.$edit->eid;
-	$urlres= db_result(db_query("SELECT dst FROM {url_alias} WHERE src = '".$urlquery."'"));
-
 	$edit = (object) $edit;
 	if ($pid) {
 		$edit->pid = $pid;
@@ -2080,29 +2063,6 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		'#cols' => 70,
 		'#rows' => 8,
 	);
-
-	if (module_exists('path')) {
-		$path = $form['#node']->path;
-		$form['path'] = array(
-			'#type' => 'fieldset',
-			'#title' => t('URL path settings'),
-			'#collapsible' => TRUE,
-			'#collapsed' => empty($path),
-			'#weight' => 1,
-		);
-		$form['path']['path'] = array(
-			'#type' => 'textfield',
-			'#default_value' => $urlres,
-			'#maxlength' => 250,
-			'#collapsible' => TRUE,
-			'#collapsed' => TRUE,
-			'#description' => t('Optionally specify an alternative URL by which this node can be accessed.  For example, type "about" when writing an about page.  Use a relative path and don\'t add a trailing slash or the URL alias won\'t work.'),
-		);
-		$form['path']['pthid'] = array(
-			'#type' => 'hidden',
-			'#value' => db_result(db_query("SELECT pid FROM {url_alias} WHERE dst ='".$urlres."'"))
-		);
-	}
 
 	// publication date
 	if (!$edit->year && !$edit->pubdate) {
@@ -2211,17 +2171,15 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 		);
 		$form[] = array(
 			'#type' => 'submit',
-			'#weight' => 2,
 			'#value' => t("Submit"),
 		);
 		$form[] = array(
 			'#type' => 'submit',
-			'#weight' => 2,
 			'#value' => t("Delete"),
 		);
 
 		// headlines
-		$form[] = array('#value'=>'<hr /><a name="manageheadlines"></a>', '#weight' => 2,)	;
+		$form[] = array('#value'=>'<hr /><a name="manageheadlines"></a>')	;
 		$form['headlines'] = array(
 			'#type' => 'fieldset', '#title' => t('Manage headlines'),
 		);
@@ -2328,23 +2286,7 @@ function theme_epublish_form_edition($form) {
  // ($edit, $make_current = false)
 
 function epublish_form_edition_submit($form_id, $edit) {
-
 	if ($edit['eid'] && $edit['action'] != 'delete') {
-		if(module_exists('path')) {
-			$ppid = $edit['pid'];
-			$peid = $edit['eid'];
-			$pnid = $edit['path'];
-			$pthid = $edit['pthid'];
-			if ($edit['path']) {
-				if($pthid) {
-					path_set_alias("epublish/$ppid/$peid",$pnid,$pthid);	
-				}
-				else {
-					path_set_alias("epublish/$ppid/$peid",$pnid);
-				}
-	        	}
-		}
-
 		db_query("UPDATE {epublish_edition} SET pid='%d', dateline='%s', description='%s', volume='%d', number='%d', pubdate='%d', layout_list='%s', layout_page='%s', sid='%d', published='%d' WHERE eid = '%d'", $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'].$edit['month'].$edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published'], $edit['eid']);
 		// Handle operations:
 		if (isset($edit['operation']) && isset($edit['nodes'])) {
@@ -2384,31 +2326,25 @@ function epublish_form_edition_submit($form_id, $edit) {
  * @return
  *	 A message stating that the edition has been deleted
  */
-function epublish_del_edition($eid) {
-	$edition = epublish_get_edition($eid);
-	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )){
+function epublish_edition_confirm_delete($eid){
+                $edition = epublish_get_edition($eid);
+	        $publication = epublish_get_pub($edition->pid);
+                $edition = epublish_get_edition($eid);
 
+                $form['eid'] = array('#type' => 'value', '#value' => $edition->eid);
+                return confirm_form($form, t('Are you sure you want to delete the "!edition" edition from publication "!publication"?',array('!edition' => $edition->dateline, '!publication' => $publication->name)),'admin/epublish','This action cannot be undone.',t('Delete'), t('Cancel'));
+}
+
+function epublish_edition_confirm_delete_submit($form_id,$form_values){
+        $eid = $form_values['eid'];
+	$edition = epublish_get_edition($eid);
+	
 		$publication = epublish_get_pub($edition->pid);
 		db_query("DELETE FROM {epublish_edition} WHERE eid = '%d'", $edition->eid);
 		db_query("DELETE FROM {epublish_edition_node} WHERE eid = '%d'", $edition->eid);
 		drupal_set_message(t('Deleted "!edition" edition from publication "!publication."', array('!edition' => $edition->dateline, '!publication' => $publication->name)));
-		drupal_goto("admin/epublish");
-	} else if ($edition->eid) {
-
-		$publication = epublish_get_pub($edition->pid);
-
-		return drupal_get_form('confirm_form', array('eid' => array('#type' => hidden,
-				'#value' => $edition->eid)),
-				t('Are you sure you want to delete the "!edition" edition from publication "!publication"?',array('!edition' => $edition->dateline, '!publication' => $publication->name)),
-				'admin/epublish',
-				t('This action cannot be undone.'),
-				t('Delete'),
-				t('Cancel'),'','');
-	} else {
-
 		drupal_set_message(t('The edition no longer exists.'));
-		return 'admin/epublish';
-	}
+		return 'admin/epublish';	
 }
 
 
@@ -2443,7 +2379,7 @@ function epublish_get_volume($pid, $volume) {
  */
 function epublish_admin_volume_edit($pid = NULL, $volume = NULL) {
 	if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
-		return epublish_del_volume($pid, $volume);
+		return drupal_get_form('epublish_volume_confirm_delete',$pid,$volume);
 	} elseif ($pid) {
 		$volume = epublish_get_volume($pid, $volume);
 	}
@@ -2528,25 +2464,25 @@ function epublish_form_volume_submit($form_id, $edit) {
  * @return
  *	 A message stating that the volume has been deleted
  */
-function epublish_del_volume($pid, $volume) {
+function epublish_volume_confirm_delete($pid,$volume) {
+      $publication = epublish_get_pub($pid);
+      $vol = epublish_get_volume($pid,$volume);
+
+      $form['pid'] = array('#type' => 'value', '#value' => $pid);
+      $form['volume']=array('#type' => 'value', '#value' => $volume);
+      return confirm_form($form, t('Are you sure you want to remove volume name !volume from publication !publication?',	 array('!volume' => $vol->dateline, '!publication' => $publication->name)),
+				 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'));
+}
+
+function epublish_volume_confirm_delete_submit($form_id,$form_values){
+        $pid = $form_values['pid'];
+        $volume = $form_values['volume'];
 	$publication = epublish_get_pub($pid);
 	$vol = epublish_get_volume($pid, $volume);
-	if (($_POST['op'] == t('Delete')) && ($_POST ['form_id'] == 'confirm_form' )) {
+	
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", $pid, $volume);
 		drupal_set_message(t('Removed volume name "!volume" from publication "!publication."', array('!volume' => $vol->dateline, '!publication' => $publication->name)));
-		drupal_goto("admin/epublish");
-	} else {
-
-		return drupal_get_form('confirm_form',
-				 array('pid' => array( '#type' => hidden,'#value' => $pid),
-				 'volume' => array( '#type' => hidden, '#value' => $volume)),
-	  	        	 t('Are you sure you want to remove volume name !volume from publication !publication?',	 array('!volume' => $vol->dateline, '!publication' => $publication->name)),
-				 'admin/epublish',
-				 t('This action cannot be undone.'),
-				 t('Delete'),
-				 t('Cancel'),'','');
-
-	}
+		return 'admin/epublish';
 }
 
 
