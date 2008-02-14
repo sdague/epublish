@@ -1629,8 +1629,7 @@ function epublish_section_confirm_delete_submit($form, &$form_state) {
 		}
         drupal_set_message(t('The section no longer exists.'));
         $form_state['redirect'] = 'admin/epublish/sections';
-        return;
-		
+
 
 } 
 
