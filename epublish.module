@@ -1341,7 +1341,6 @@ function epublish_admin_topic_add($sid = NULL) {
  *	 An HTML-formatted form 
  */
 function epublish_form_topic($edit = NULL, $sid = NULL) {
-	$edit = (object) $edit;
 	if ($edit->sid) {
 		$sid = $edit->sid;
 	}
@@ -1879,6 +1878,7 @@ function epublish_get_edition($eid) {
  * @return
  *	 An edition ID number
  */
+
 function epublish_current_edition($pid=0) {
 	$publication = epublish_get_pub($pid);
 	if ($publication->current_eid) {
@@ -2014,7 +2014,7 @@ function epublish_form_edition($edit = NULL, $pid=NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this edition. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout for this publication'), 'admin/epublish/edit/' . $edit["pid"]))),
+			'#description' => t("Select a page layout for this edition. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout for this publication'), 'admin/epublish/edit/' . $edit->pid))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
