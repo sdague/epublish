@@ -552,7 +552,7 @@ function epublish_block($op = 'list', $delta = 0) {
 
 		while ($publication = db_fetch_object($publications)) {
 			$blocks['pub_' . $publication->pid]['info'] = t($publication->name);
-      $blocks['cur_edition_' . $publication->pid]['info'] = t("Current edition of !pub", array('!pub' => $publication->name));
+      $blocks['cur_edition_' . $publication->pid]['info'] = t("Current edition of @pub", array('@pub' => $publication->name));
 		}
 	return $blocks;
 	} else if ($op == 'view') {
@@ -955,7 +955,7 @@ function theme_epublish_pub_page(&$output, &$publication, &$edition, $volume=NUL
   if ($output) {
         drupal_set_breadcrumb($breadcrumb);
    }
-	drupal_set_title($title);
+	drupal_set_title(check_plain($title));
 	return $output;
 }
 
@@ -1021,7 +1021,7 @@ function epublish_headlines_page() {
 	}
 
        
-        drupal_set_title($section->title);
+        drupal_set_title(check_plain($section->title));
 	
         $edition = NULL;
 
@@ -1415,7 +1415,7 @@ function epublish_form_section($form_state, $edit = NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this section. If none is selected, the default !settings will be used.", array('!settings' => l(t('layout settings'), 'admin/settings/epublish'))),
+			'#description' => t("Select a page layout for this section. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout settings'), 'admin/settings/epublish'))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
@@ -1556,7 +1556,7 @@ else
 			foreach ($form_state['weight'] as $tid => $value) {
 				db_query("UPDATE {epublish_topic} SET weight = '%d' WHERE sid = '%d' AND tid = '%d'", $value, $form_state['sid'], $tid);
 			}
-			drupal_set_message(t('The "!title" section has been updated.', array('!title' => $form_state['title'])));
+			drupal_set_message(t('The "%title" section has been updated.', array('%title' => $form_state['title'])));
 		}
 	} else {
 
@@ -1569,7 +1569,7 @@ else
 
 		epublish_form_topic_submit(NULL, $misc_topic);
 		if ($form) {
-			drupal_set_message(t('The "!title" section has been added.', array('!title' => $form_state['title'])));
+			drupal_set_message(t('The "%title" section has been added.', array('%title' => $form_state['title'])));
 		}
 	}
 
@@ -1592,7 +1592,7 @@ function epublish_section_confirm_delete(&$form_state,$sid) {
 
       $form['sid'] = array('#type' => 'value', '#value' => $section->sid);
 
-      return confirm_form($form, t('Are you sure you want to delete the forum !title?', array('!title' => $section->title)), 'admin/epublish/sections', 'This action cannot be undone.', t('Delete'), t('Cancel'));
+      return confirm_form($form, t('Are you sure you want to delete the forum %title?', array('%title' => $section->title)), 'admin/epublish/sections', 'This action cannot be undone.', t('Delete'), t('Cancel'));
 }
 
 function epublish_section_confirm_delete_submit($form, &$form_state) {
@@ -1623,9 +1623,9 @@ function epublish_section_confirm_delete_submit($form, &$form_state) {
 	// if no sections exist, create a default section
 		if (!db_result($result)) {
 			epublish_sections();
-			drupal_set_message(t('deleted section "!title" and created new default section.', array('!title' => $section->title)));
+			drupal_set_message(t('deleted section "%title" and created new default section.', array('%title' => $section->title)));
 		} else {
-			drupal_set_message(t('deleted section "!title".', array('!title' => $section->title)));
+			drupal_set_message(t('deleted section "%title".', array('%title' => $section->title)));
 		}
         drupal_set_message(t('The section no longer exists.'));
         $form_state['redirect'] = 'admin/epublish/sections';
@@ -1866,9 +1866,9 @@ else
 
 		if ($form) {
 			if (db_result($result)) {
-				drupal_set_message(t('The topic "!title" has been updated.', array('!title' => $term->name)));
+				drupal_set_message(t('The topic "%title" has been updated.', array('%title' => $term->name)));
 			} else {
-				drupal_set_message(t('The topic "!title" has been added.', array('!title' => $term->name)));
+				drupal_set_message(t('The topic "%title" has been added.', array('%title' => $term->name)));
 			}
 		}
 	} else if ($edit['action'] == 'delete') {
@@ -1901,7 +1901,7 @@ function epublish_topic_confirm_delete(&$form_state,$sid,$tid) {
       $form['sid'] = array('#type' => 'value', '#value' => $section->sid);
       $form['tid'] = array('#type' => 'value', '#value' => $term->tid);
 
-      return confirm_form($form, t('Are you sure you want to delete the term "!term" from section "!section"?', array('!term' => $term->name,'!section' => $section->title)),
+      return confirm_form($form, t('Are you sure you want to delete the term "%term" from section "%section"?', array('%term' => $term->name,'%section' => $section->title)),
 			'admin/epublish/sections', 'This action cannot be undone.', t('Delete'), t('Cancel'));
 
 }
@@ -1919,7 +1919,7 @@ function epublish_topic_confirm_delete_submit($form,&$form_state) {
 		while ($edition = db_fetch_object($result)) {
 			db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE tid='%d' AND eid = '%d'", $tid, $edition->eid);
 		}
-		drupal_set_message(t('deleted topic "!term" from section "!section."', array('!term' => $term->name, '!section' => $section->title)));
+		drupal_set_message(t('deleted topic "%term" from section "%section."', array('%term' => $term->name, '%section' => $section->title)));
 		drupal_goto('admin/epublish/sections');
 		 
 		drupal_set_message(t('The term no longer exists.'));
@@ -2154,7 +2154,7 @@ function epublish_form_pub($form_state, $edit = NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this publication. If none is selected, the default !settings will be used.", array('!settings' => l(t('layout settings'), 'admin/settings/epublish'))),
+			'#description' => t("Select a page layout for this publication. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout settings'), 'admin/settings/epublish'))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
@@ -2184,7 +2184,7 @@ function epublish_form_pub($form_state, $edit = NULL) {
 			'#title' => t("Section"),
 			'#default_value' => $edit->sid,
 			'#options' => $sids,
-			'#description' => t("Select a section to control which topics are headlined for each edition of this publication. If none is selected, the default section from !settings will be used.", array('!settings' => l(t('publication settings'), 'admin/settings/epublish'))),
+			'#description' => t("Select a section to control which topics are headlined for each edition of this publication. If none is selected, the default section from %settings will be used.", array('%settings' => l(t('publication settings'), 'admin/settings/epublish'))),
 		);
 	} else {
 		$form['sid'] = array(
@@ -2233,7 +2233,7 @@ $edit = $form_state['values'];
 
 	if ($edit['pid'] && $edit['action'] != 'delete') {
 		db_query("UPDATE {epublish_publication} SET name = '%s', description = '%s', schedule = '%s', current_eid = '%d',layout_list = '%s', layout_page = '%s', sid = '%s' WHERE pid = '%d'", $edit['name'], $edit['description'],$edit['schedule'], $edit['current_eid'],$edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['pid']);
-		drupal_set_message(t('The publication "!title" has been updated.', array('!title' => $edit['name'])));
+		drupal_set_message(t('The publication "%title" has been updated.', array('%title' => $edit['name'])));
 
 	} else {
 		
@@ -2241,7 +2241,7 @@ $edit = $form_state['values'];
 
 		db_query("INSERT INTO {epublish_publication} (pid, name, description, schedule, current_eid, layout_list, layout_page, sid)
 		  VALUES ('%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s')", $edit['pid'], $edit['name'], $edit['description'],$edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid']);
-		drupal_set_message(t('The publication "!title" has been added.', array('!title' => $edit['name'])));
+		drupal_set_message(t('The publication "%title" has been added.', array('%title' => $edit['name'])));
 	}
 	$form_state['redirect'] = 'admin/epublish';
 
@@ -2265,7 +2265,7 @@ function epublish_pub_confirm_delete(&$form_state,$pid) {
       
           $form['pid'] = array('#type' => 'value', '#value' => $publication->pid);
 
-          return confirm_form($form, t('Are you sure you want to delete the publication "!title"?', array('!title' => $publication->name)), 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'),'confirm');
+          return confirm_form($form, t('Are you sure you want to delete the publication "%title"?', array('%title' => $publication->name)), 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'),'confirm');
 }
 
 function epublish_pub_confirm_delete_submit($form,&$form_state) {
@@ -2282,7 +2282,7 @@ function epublish_pub_confirm_delete_submit($form,&$form_state) {
 		}
 		db_query("DELETE FROM {epublish_edition} WHERE pid = '%d'", $pid);
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d'", $pid);
-		drupal_set_message(t('deleted publication "!name".', array('!name' => $publication->name)));
+		drupal_set_message(t('deleted publication "%name".', array('%name' => $publication->name)));
 		drupal_goto("admin/epublish");
 	
  		drupal_set_message(t('The section no longer exists.'));
@@ -2481,7 +2481,7 @@ function epublish_form_edition($form_state,$edit = NULL,$pid = NULL) {
 			'#title' => t("Page layout"),
 			'#default_value' => $edit->layout_page,
 			'#options' => $layouts,
-			'#description' => t("Select a page layout for this edition. If none is selected, the default !settings will be used.", array('!settings' => l(t('layout for this publication'), 'admin/epublish/edit/publication/' . $edit->pid))),
+			'#description' => t("Select a page layout for this edition. If none is selected, the default %settings will be used.", array('%settings' => l(t('layout for this publication'), 'admin/epublish/edit/publication/' . $edit->pid))),
 		);
 		$layouts = epublish_layouts('list', TRUE);
 		$form["layout_list"] = array(
@@ -2592,8 +2592,9 @@ function epublish_form_edition($form_state,$edit = NULL,$pid = NULL) {
 			  '#delta' => 30, '#attributes' => array('onchange'=>'onChangeWeight(' . $node->nid . ')'));
 		}
 		$form['nodes'] = array('#type' => 'checkboxes', '#options' => $nodes);
+		
+		drupal_set_title(t('edit ') . check_plain($publication->name).", ". theme('epublish_edition_reference', $edition));
 
-		drupal_set_title(t('edit ') . "$publication->name, " . theme('epublish_edition_reference', $edition));
 	} else {
 		$form['published'] = array(
 			'#type' => 'checkbox',
@@ -2702,12 +2703,12 @@ $edit = $form_state['values'];
 					}
 				}
 			}
-			drupal_set_message(t('The "!title" edition has been updated.', array('!title' => $edit['dateline'])));
+			drupal_set_message(t('The "%title" edition has been updated.', array('%title' => $edit['dateline'])));
 		}
 	} else {
 		$edit['eid'] = db_last_insert_id('epublish_edition','eid');
 		db_query("INSERT INTO {epublish_edition} (eid, pid, dateline, description, volume, number, pubdate, layout_list, layout_page, sid, published) VALUES ('%d', '%d', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%d', '%d')", $edit['eid'], $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'].$edit['month'].$edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published']);
-		drupal_set_message(t('The "!title" edition has been added.', array('!title' => $edit['dateline'])));
+		drupal_set_message(t('The "%title" edition has been added.', array('%title' => $edit['dateline'])));
 	}
 	if ($edit['make_current']) {
 		db_query("UPDATE {epublish_publication} SET current_eid = '%d' WHERE pid = '%d'", $edit['eid'], $edit['pid']);
@@ -2738,7 +2739,7 @@ function epublish_edition_confirm_delete(&$form_state,$eid){
 
                 $form['eid'] = array('#type' => 'value', '#value' => $edition->eid);
 
-                return confirm_form($form, t('Are you sure you want to delete the "!edition" edition from publication "!publication"?',array('!edition' => $edition->dateline, '!publication' => $publication->name)),'admin/epublish','This action cannot be undone.',t('Delete'), t('Cancel'));
+                return confirm_form($form, t('Are you sure you want to delete the "%edition" edition from publication "%publication"?',array('%edition' => $edition->dateline, '%publication' => $publication->name)),'admin/epublish','This action cannot be undone.',t('Delete'), t('Cancel'));
 
 }
 function epublish_edition_confirm_delete_submit($form,&$form_state){
@@ -2753,7 +2754,7 @@ function epublish_edition_confirm_delete_submit($form,&$form_state){
 
 		db_query("DELETE FROM {epublish_edition} WHERE eid = '%d'", $edition->eid);
 		db_query("DELETE FROM {epublish_edition_node} WHERE eid = '%d'", $edition->eid);
-		drupal_set_message(t('Deleted "!edition" edition from publication "!publication."', array('!edition' => $edition->dateline, '!publication' => $publication->name)));
+		drupal_set_message(t('Deleted "%edition" edition from publication "%publication."', array('%edition' => $edition->dateline, '%publication' => $publication->name)));
 		
   
                 drupal_set_message(t('The edition no longer exists.'));
@@ -2815,7 +2816,7 @@ function epublish_admin_volume_edit($pid = NULL, $volume = NULL) {
 function epublish_form_volume($form_state,$edit = NULL) {
 	$edit = (object) $edit;
 	$publication = epublish_get_pub($edit->pid);
-	$form[] = array('#value' => '<h3>' . t('Volume !vol of publication "!pub"', array('!vol' => $edit->volume, '!pub' => l($publication->name, "admin/epublish/edit/publication/$publication->pid"))) . "</h3>\n");
+	$form[] = array('#value' => '<h3>' . t('Volume @vol of publication "!pub"', array('@vol' => $edit->volume, '!pub' => l($publication->name, "admin/epublish/edit/publication/$publication->pid"))) . "</h3>\n");
 	$form["pid"] = array(
 		'#type' => 'hidden',
 		'#value' => $edit->pid,
@@ -2869,7 +2870,7 @@ $edit = $form_state['values'];
 			$edit['pid'], $edit['volume']);
 		db_query("INSERT INTO {epublish_volume} (pid, volume, dateline) VALUES ('%d', '%d', '%s')",
 			$edit['pid'], $edit['volume'], $edit['dateline']);
-		drupal_set_message(t('The volume name "!title" has been updated.', array('!title' => $edit['dateline'])));
+		drupal_set_message(t('The volume name "%title" has been updated.', array('%title' => $edit['dateline'])));
 	}
 	
 	$form_state['redirect'] = 'admin/epublish';
@@ -2894,7 +2895,7 @@ function epublish_volume_confirm_delete(&$form_state,$pid,$volume) {
       $form['pid'] = array('#type' => 'value', '#value' => $pid);
       $form['volume']=array('#type' => 'value', '#value' => $volume);
 
-      return confirm_form($form, t('Are you sure you want to remove volume name !volume from publication !publication?',	 array('!volume' => $vol->dateline, '!publication' => $publication->name)),
+      return confirm_form($form, t('Are you sure you want to remove volume name %volume from publication %publication?',	 array('%volume' => $vol->dateline, '%publication' => $publication->name)),
 				 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'));
 }
 function epublish_volume_confirm_delete_submit($form,&$form_state){
@@ -2907,7 +2908,7 @@ function epublish_volume_confirm_delete_submit($form,&$form_state){
 	$vol = epublish_get_volume($pid, $volume);
 
 		db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", $pid, $volume);
-		drupal_set_message(t('Removed volume name "!volume" from publication "!publication."', array('!volume' => $vol->dateline, '!publication' => $publication->name)));
+		drupal_set_message(t('Removed volume name "%volume" from publication "%publication."', array('%volume' => $vol->dateline, '%publication' => $publication->name)));
 		drupal_goto("admin/epublish");
 
 
@@ -3043,7 +3044,7 @@ function epublish_admin_node() {
 	$form['pager'] = array('#value' => theme('pager', NULL, 50, 0));
 	$form[] = array('#value' => '<h3>' . $filters[$filter][0] . '</h3>');
 
-	drupal_set_title(t('Add Posts to !pub', array('!pub' => "$publication->name, " . theme('epublish_edition_reference', $edition))));
+	drupal_set_title(t('Add Posts to %pub', array('%pub' => "$publication->name, " . theme('epublish_edition_reference', $edition))));
 
 	return $form;
 
