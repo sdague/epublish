@@ -1,3 +1,11 @@
+07/06/2008
+  - #227482 - Breadcrumb shows up on search page for edition node
+  - #199009 
+  - #232217
+  - #176896
+  - #160468
+  
+
 19/08/2007
   - #151195 - Previous/Next Story Not Working bug fix
   - NEW FEATURE: URL aliases for epublish edition
