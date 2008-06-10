@@ -1,2 +1,3 @@
+10 June 2008 - clean up code, #262426, #258385, #227209
 10 Jan 2008
   - New Release:Port to Drupal 6
