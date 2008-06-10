@@ -24,15 +24,17 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
   if ($params['description']) {
     $description = '<div class="description">' . $params['description'] . '</div>';
   }
-    $output = '	<div class="epublish"><div class="one_two">' . "$description\n";
+  $output = '	<div class="epublish"><div class="one_two">' . "$description\n";
   if ($topics) {
     $topic = array_shift($topics);
     foreach ($topic->nodes as $nid) {
-			if (module_exists('translation')) {
- 				$lang = i18n_get_lang();
-			 	$transnid .= translation_node_nid($nid, $lang);
-				if ($transnid) { $nid = $transnid; $transnid = '';}
-			}
+      if (module_exists('i18n')) {
+	$lang = i18n_get_lang();
+	$transnid .= translation_node_nid($nid, $lang);
+	if ($transnid) {
+	  $nid = $transnid; $transnid = '';
+	}
+      }
       $node = node_load($nid);
       $output .= '<div class="title">' . l(t($node->title), "node/$nid") . "</div>\n";
       $output .= '<div class="user">' . t('By') . ' ' . '<span class="all_caps">' . $node->name . "</span></div>\n";
@@ -57,12 +59,14 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
       $position++;
       $output .= '    		  <div class="topic">' . $topic->name . "</div>\n";
       foreach ($topic->nodes as $nid) {
-			if (module_exists('translation')) {
-				$lang = i18n_get_lang();
-				$transnid = translation_node_nid($nid, $lang);
-				if ($transnid) { $nid = $transnid; $transnid = ''; }
-			}
-	    $node = node_load($nid);
+	if (module_exists('i18n')) {
+	  $lang = i18n_get_lang();
+	  $transnid = translation_node_nid($nid, $lang);
+	  if ($transnid) {
+	    $nid = $transnid; $transnid = '';
+	  }
+	}
+	$node = node_load($nid);
         $output .= '<div class="topic_title">' . l(t($node->title), "node/$nid") . "</div>\n";
       }
     }
@@ -74,4 +78,3 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
   $output .= "</div></div>\n";
   return $output;
 }
-?>

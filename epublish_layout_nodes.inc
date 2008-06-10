@@ -33,27 +33,31 @@ function theme_epublish_layout_nodes($topics, $params=NULL) {
           $output .= '<div class="topic">' . $topic->name . "</div>\n";
         }
         foreach ($topic->nodes as $nid) {
-					if (module_exists('translation')) {
- 						$lang = i18n_get_lang();
-			 			$transnid .= translation_node_nid($nid, $lang);
-						if ($transnid) { $nid = $transnid; $transnid = '';}
-					}
+	  if (module_exists('i18n')) {
+	    $lang = i18n_get_lang();
+	    $transnid .= translation_node_nid($nid, $lang);
+	    if ($transnid) {
+	      $nid = $transnid; $transnid = '';
+	    }
+	  }
           $output .= node_view(node_load($nid), 1);
         }
       }
     }
-  } else {
+  }
+  else {
     foreach ($topics as $topic) {
       foreach ($topic->nodes as $nid) {
-	 			if (module_exists('translation')) {
-					$lang = i18n_get_lang();
-					$transnid = translation_node_nid($nid, $lang);
-					if ($transnid) { $nid = $transnid; $transnid = ''; }
-				}
+	if (module_exists('i18n')) {
+	  $lang = i18n_get_lang();
+	  $transnid = translation_node_nid($nid, $lang);
+	  if ($transnid) {
+	    $nid = $transnid; $transnid = '';
+	  }
+	}
         $output .= node_view(node_load($nid), 1);
       }
     }
   }
   return '<div class="epublish"><div class="nodes">' . $description . $output . "</div></div>";
 }
-?>

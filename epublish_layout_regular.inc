@@ -19,7 +19,6 @@ $context = 'page';
  *   An HTML-formatted list of topics and their nodes.
  */
 function theme_epublish_layout_regular($topics, $params=NULL) {
-
   if ($params['description']) {
     $description = '<div class="description">' . $params['description'] . '</div>';
   }
@@ -28,17 +27,19 @@ function theme_epublish_layout_regular($topics, $params=NULL) {
       $subsection = epublish_get_section_by_title($topic->name);
       if ($subsection->sid) {
         $output .= '<div class="topic">' . l(t($topic->name), "headlines/" . $subsection->sid) . "</div>\n";
-      } else {
+      }
+      else {
         $output .= '<div class="topic">' . $topic->name . "</div>\n";
       }
       foreach ($topic->nodes as $nid) {
-				if (module_exists('translation')) {
- 					$lang = i18n_get_lang();
-		 			$transnid .= translation_node_nid($nid, $lang);
-					if ($transnid) { $nid = $transnid; $transnid = '';}
-				}
+	if (module_exists('i18n')) {
+	  $lang = i18n_get_lang();
+	  $transnid .= translation_node_nid($nid, $lang);
+	  if ($transnid) {
+	    $nid = $transnid; $transnid = '';
+	  }
+	}
         $node = node_load($nid);
-
         $output .= '<div class="title">' . l(t($node->title), "node/$nid") . "</div>\n";
         $output .= '<div class="user">' . t('by') . ' ' . l($node->name, "blog/" . $node->uid) . "</div>\n";
         if ($node->epublish_abstract) {
@@ -49,4 +50,3 @@ function theme_epublish_layout_regular($topics, $params=NULL) {
   }
   return '<div class="epublish"><div class="regular">' . $description . $output . '</div></div>';
 }
-?>

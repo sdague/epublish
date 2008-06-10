@@ -28,11 +28,13 @@ function theme_epublish_layout_list($topics, $params=NULL) {
   $output = '<div class="pub_list">' . $description . '<ul>';
   foreach ($topics as $topic) {
     foreach ($topic->nodes as $nid) {
-			if (module_exists('translation')) {
- 				$lang = i18n_get_lang();
-	 			$transnid .= translation_node_nid($nid, $lang);
-				if ($transnid) { $nid = $transnid; $transnid = '';}
-			}
+      if (module_exists('i18n')) {
+	$lang = i18n_get_lang();
+	$transnid .= translation_node_nid($nid, $lang);
+	if ($transnid) {
+	  $nid = $transnid; $transnid = '';
+	}
+      }
       $node = node_load($nid);
       $output .= "<li>" . l(t($node->title), "node/$nid");
       if ($node->epublish_abstract) {
@@ -44,4 +46,3 @@ function theme_epublish_layout_list($topics, $params=NULL) {
   $output .= "</ul></div>\n";
   return $output;
 }
-?>
