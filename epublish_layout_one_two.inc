@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * layout_one_two.inc.
+ */
 $description = 'one- and two-column';
 $context = 'page';
 
@@ -22,31 +26,31 @@ $context = 'page';
  */
 function theme_epublish_layout_one_two($topics, $params=NULL) {
   if ($params['description']) {
-    $description = '<div class="description">' . $params['description'] . '</div>';
+    $description = '<div class="description">'. $params['description'] .'</div>';
   }
-  $output = '	<div class="epublish"><div class="one_two">' . "$description\n";
+  $output = '	<div class="epublish"><div class="one_two">'."$description\n";
   if ($topics) {
     $topic = array_shift($topics);
     foreach ($topic->nodes as $nid) {
       if (module_exists('i18n')) {
-	$lang = i18n_get_lang();
-	$transnid .= translation_node_nid($nid, $lang);
-	if ($transnid) {
-	  $nid = $transnid; $transnid = '';
-	}
+        $lang = i18n_get_lang();
+        $transnid .= translation_node_nid($nid, $lang);
+        if ($transnid) {
+          $nid = $transnid; $transnid = '';
+        }
       }
       $node = node_load($nid);
-      $output .= '<div class="title">' . l(t($node->title), "node/$nid") . "</div>\n";
-      $output .= '<div class="user">' . t('By') . ' ' . '<span class="all_caps">' . $node->name . "</span></div>\n";
+      $output .= '<div class="title">'. l(t($node->title), "node/$nid") ."</div>\n";
+      $output .= '<div class="user">'. t('By') .' '.'<span class="all_caps">'. $node->name ."</span></div>\n";
       if ($node->epublish_abstract) {
-        $output .= '<div class="abstract">' . check_markup($node->epublish_abstract, $node->format) . "</div>\n";
+        $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format) ."</div>\n";
       }
     }
     $output .= "\n";
     $output .= '      <div class="other_heads">
 	      <table width="100%">
 	        <tr>
-		      <td width="50%" valign="top">' . "\n";
+		      <td width="50%" valign="top">'."\n";
     $count = count($topics);
     $position = 1;
     foreach ($topics as $topic) {
@@ -54,20 +58,20 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
         $position = 0;
         $output .= '            </td>
 			<td width="12"><img width="12" height="1"></td>
-			<td width="50%" valign="top">' . "\n";
+			<td width="50%" valign="top">'."\n";
       }
       $position++;
-      $output .= '    		  <div class="topic">' . $topic->name . "</div>\n";
+      $output .= '    		  <div class="topic">'. $topic->name ."</div>\n";
       foreach ($topic->nodes as $nid) {
-	if (module_exists('i18n')) {
-	  $lang = i18n_get_lang();
-	  $transnid = translation_node_nid($nid, $lang);
-	  if ($transnid) {
-	    $nid = $transnid; $transnid = '';
-	  }
-	}
-	$node = node_load($nid);
-        $output .= '<div class="topic_title">' . l(t($node->title), "node/$nid") . "</div>\n";
+        if (module_exists('i18n')) {
+          $lang = i18n_get_lang();
+          $transnid = translation_node_nid($nid, $lang);
+          if ($transnid) {
+            $nid = $transnid; $transnid = '';
+          }
+        }
+        $node = node_load($nid);
+        $output .= '<div class="topic_title">'. l(t($node->title), "node/$nid") ."</div>\n";
       }
     }
     $output .= '            </td>

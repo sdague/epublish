@@ -1,5 +1,9 @@
 <?php
 // $Id$
+/**
+ * @file
+ * epublish_layout_indexed.inc
+ */
 
 $description = 'node views';
 $context = 'page';
@@ -20,7 +24,7 @@ $context = 'page';
  */
 function theme_epublish_layout_nodes($topics, $params=NULL) {
   if ($params['description']) {
-    $description = '<div class="description">' . $params['description'] . '</div>';
+    $description = '<div class="description">'. $params['description'] .'</div>';
   }
   // The default assumption for this layout is that topics are NOT shown
   if ($params['show_topics']) {
@@ -28,18 +32,19 @@ function theme_epublish_layout_nodes($topics, $params=NULL) {
       if (count($topic->nodes)) {
         $subsection = epublish_get_section_by_title($topic->name);
         if ($subsection->sid) {
-          $output .= '<div class="topic">' . l(t($topic->name), 'headlines/' . $subsection->sid) . "</div>\n";
-        } else {
-          $output .= '<div class="topic">' . $topic->name . "</div>\n";
+          $output .= '<div class="topic">'. l(t($topic->name), 'headlines/'. $subsection->sid) ."</div>\n";
+        } 
+        else {
+          $output .= '<div class="topic">'. $topic->name ."</div>\n";
         }
         foreach ($topic->nodes as $nid) {
-	  if (module_exists('i18n')) {
-	    $lang = i18n_get_lang();
-	    $transnid .= translation_node_nid($nid, $lang);
-	    if ($transnid) {
-	      $nid = $transnid; $transnid = '';
-	    }
-	  }
+          if (module_exists('i18n')) {
+            $lang = i18n_get_lang();
+            $transnid .= translation_node_nid($nid, $lang);
+            if ($transnid) {
+              $nid = $transnid; $transnid = '';
+            }
+          }
           $output .= node_view(node_load($nid), 1);
         }
       }
@@ -48,16 +53,16 @@ function theme_epublish_layout_nodes($topics, $params=NULL) {
   else {
     foreach ($topics as $topic) {
       foreach ($topic->nodes as $nid) {
-	if (module_exists('i18n')) {
-	  $lang = i18n_get_lang();
-	  $transnid = translation_node_nid($nid, $lang);
-	  if ($transnid) {
-	    $nid = $transnid; $transnid = '';
-	  }
-	}
+        if (module_exists('i18n')) {
+          $lang = i18n_get_lang();
+          $transnid = translation_node_nid($nid, $lang);
+          if ($transnid) {
+            $nid = $transnid; $transnid = '';
+          }
+        }
         $output .= node_view(node_load($nid), 1);
       }
     }
   }
-  return '<div class="epublish"><div class="nodes">' . $description . $output . "</div></div>";
+  return '<div class="epublish"><div class="nodes">'. $description . $output ."</div></div>";
 }
