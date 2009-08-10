@@ -1,28 +1,22 @@
 <?php
 // $Id$
 
-/*
-  epublish.module - Part of the epublish module for Drupal		
+/**
+ * @file
+ * This module helps organize a group of nodes into a publication, such as
+ * a newspaper, magazine or newsletter. Each publication can have multiple
+ * editions. Within each edition, the epublish module also makes it
+ * possible to organize content by topic, similar to the way news websites
+ * such as the New York Times categorize their content using topics such
+ * as "international," "national," "sports," etc.
+ *
+ * @note
+ * See the module help for usage and administration information.
+ */
 
-  This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or
-  (at your option) any later version.
-
-  This program is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program; if not, write to the Free Software
-  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-*/
-
-/* Updated for Drupal 4.7, 2006/05/28
-   Thanks to Ben Shell http://www.benjaminshell.com
-   for his contributions to the upgrade.
-*/
+/**
+ * Implementation of hook_theme().
+ */
 function epublish_theme() {
   $filename = array();
   $dyn_arr = array();
@@ -75,21 +69,8 @@ function epublish_theme() {
 }
 
 /**
- * @file epublish.module
- * This module helps organize a group of nodes into a publication, such as
- * a newspaper, magazine or newsletter. Each publication can have multiple
- * editions. Within each edition, the epublish module also makes it
- * possible to organize content by topic, similar to the way news websites
- * such as the New York Times categorize their content using topics such
- * as "international," "national," "sports," etc.
- *
- * @note See the module help for usage and administration information.
- */
-
-/**
  * Implementation of hook_help().
  */
-
 function epublish_help($path, $arg) {
   switch ($path) {
     case 'admin/modules#description':
@@ -216,39 +197,34 @@ Volume 22
 }
 
 /**
- * hook_perm: Define user permissions for module epublish
+ * Implementation of hook_perm().
  */
 function epublish_perm() {
   return array('administer publications');
 }
 
 /**
- * Implementation of hook_menu: Define menu links.
- *
- *	 - epublish -> publications page
- * @note See hook_menu for a description of parameters and return values.
+ * Implementation of hook_menu().
  */
 function epublish_menu() {
   $items['epublish'] = array(
     'title' => 'Publications',
     'page callback' => 'epublish_pub_page',
-    'access callback' => 'user_access',//'access content',
+    'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_SUGGESTED_ITEM,
   );
-    // headlines
   $items['headlines'] = array(
     'title' => 'Headlines',
     'page callback' => 'epublish_headlines_page',
-    'access callback' => 'user_access',//'access content',
+    'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
-  // admin/epublish
   $items['admin/epublish'] = array(
     'title' => 'Epublish',
     'page callback' => 'epublish_pub_list',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
   );
   $items['admin/epublish/list'] = array(
@@ -259,77 +235,77 @@ function epublish_menu() {
   $items['admin/epublish/add/publication'] = array(
     'title' => 'Add publication',
     'page callback' => 'epublish_admin_publication_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_LOCAL_TASK
   );
   $items['admin/epublish/edit/publication'] = array(
     'title' => 'Edit publication',
     'page callback' => 'epublish_admin_publication_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/add/edition'] = array(
     'title' => 'Add edition',
     'page callback' => 'epublish_admin_edition_add',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/edit/edition'] = array(
     'title' => 'Edit edition',
     'page callback' => 'epublish_admin_edition_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/sections'] = array(
     'title' => 'Sections and Topics',
     'page callback' => 'epublish_sections_table',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_LOCAL_TASK
   );
   $items['admin/epublish/add/section'] = array(
     'title' => 'Add section',
     'page callback' => 'epublish_admin_section_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/edit/section'] = array(
     'title' => 'Edit section',
     'page callback' => 'epublish_admin_section_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/add/topic'] = array(
     'title' => 'Add topic',
     'page callback' => 'epublish_admin_topic_add',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/edit/topic'] = array(
     'title' => 'Edit topic',
     'page callback' => 'epublish_admin_topic_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/headlines'] = array(
     'title' => 'Add headlines',
     'page callback' => 'epublish_admin_node_head',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
   $items['admin/epublish/edit/volume'] = array( 
     'title' => 'Edit volume name',
     'page callback' => 'epublish_admin_volume_edit',
-    'access callback' => 'user_access',//'administer publications',
+    'access callback' => 'user_access',
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
@@ -338,9 +314,9 @@ function epublish_menu() {
     'description' => 'Describes what the settings generally do.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('epublish_admin_settings'),
-    'access callback' => 'user_access',//'administer site configuration',
+    'access callback' => 'user_access',
     'access arguments' => array('administer site configuration'),
-    'type' => MENU_NORMAL_ITEM, // optional
+    'type' => MENU_NORMAL_ITEM,
   );
   $path = drupal_get_path('module', 'epublish');
   if (variable_get('epublish_css', 1)) {
@@ -465,7 +441,7 @@ function epublish_form_alter(&$form, $form_state, $form_id) {
       '#title' => t('Has abstract'),
       '#return_value' => 1,
       '#default_value' => variable_get('epublish_abstract_'. $form['#node_type']->type, TRUE),
-      '#description' => t('Users can enter a brief abstract summarizing the 						   content of each node.'),
+      '#description' => t('Users can enter a brief abstract summarizing the content of each node.'),
     );
   }
   else if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
@@ -2448,7 +2424,6 @@ function theme_epublish_form_edition($form) {
  *	 the same array, with modifications if a new record is created
  */
  // ($edit, $make_current = FALSE)
-
 function epublish_form_edition_submit($form, &$form_state) {
   $edit = $form_state['values'];
   if ($edit['eid'] && $edit['action'] != 'delete') {
@@ -2525,7 +2500,6 @@ function epublish_edition_confirm_delete_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/epublish';
 }
 
-
 /*******************************************
  *	 VOLUMES
  ******************************************/
@@ -2550,7 +2524,6 @@ function epublish_get_volume($pid, $volume) {
   }
   return $vol;
 }
-
 
 /**
  * Page to add or edit an edition
@@ -2943,7 +2916,6 @@ function _epublish_topics_node_count(&$topics) {
   return $count;
 }
 
-
 /**
  * Prepares both the custom breadcrumb trail and the forward/backward
  * navigation for a node presented as part of an epublish edition.
@@ -3004,4 +2976,3 @@ function epublish_next($node, $topics) {
   }
   return NULL;
 }
-
