@@ -1,10 +1,6 @@
 ; $Id$
 name = Epublish
-description = "Enables users to organize the contents of their site into publications with multiple editions, like a magazine or newspaper."
+description = Enables users to organize the contents of their site into publications with multiple editions, like a magazine or newspaper.
 package = Epublish
 core = 6.x
-
-; Information added by drupal.org packaging script on 2007-09-20
-project = "epublish"
-datestamp = "1190246637"
-
+dependencies[] = taxonomy
