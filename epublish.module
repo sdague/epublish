@@ -15,6 +15,18 @@
  */
 
 /**
+ * Implementation of hook_init().
+ * Special thanks to Stefan Engstrom.
+ */
+function epublish_init() {
+  $path = drupal_get_path('module', 'epublish');
+  if (variable_get('epublish_css', 1)) {
+    drupal_add_css($path .'/epublish.css');
+  }
+  drupal_add_js($path .'/epublish.js');
+}
+
+/**
  * Implementation of hook_theme().
  */
 function epublish_theme() {
