@@ -113,7 +113,7 @@ function epublish_schema() {
     ),
   );
   
-  
+  // When upgrading from v5.x, these tables may already exist!
   if (!db_table_exists('epublish_publication') || 
   !db_table_exists('epublish_abstract') ||  
   !db_table_exists('epublish_edition') || 
