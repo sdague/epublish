@@ -113,11 +113,48 @@ function epublish_schema() {
     ),
   );
   
-  return $schema;
+  
+  if (!db_table_exists('epublish_publication') || 
+  !db_table_exists('epublish_abstract') ||  
+  !db_table_exists('epublish_edition') || 
+  !db_table_exists('epublish_edition_node') || 
+  !db_table_exists('epublish_section') || 
+  !db_table_exists('epublish_topic') || 
+  !db_table_exists('epublish_volume') ) {
+    return $schema;
+  }
+  
+  return array();
 }
- 
 
+
+
+/**
+ * Legacy update from Drupal 5.x version
+ * 
+ */
 function epublish_update_1() {
   return _system_update_utf8(array('epublish_abstract', 'epublish_edition', 'epublish_edition_node', 'epublish_publication', 'epublish_section', 'epublish_topic', 'epublish_volume'));
 }
+
+
+/**
+ * Update for those coming from Drupal 5.x
+ */
+
+function epublish_update_6000() {
+  $ret = array();
+  db_drop_primary_key($ret, 'epublish_edition');
+  db_drop_index($ret, 'epublish_edition', 'pid');
+  db_change_field($ret, 'epublish_edition', 'eid', 'eid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('eid'), 'indexes' => array('pid' => array('pid'))));
+ 
+  db_drop_primary_key($ret, 'epublish_publication');
+  db_change_field($ret, 'epublish_publication', 'pid', 'pid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('pid')));
+ 
+  db_drop_primary_key($ret, 'epublish_section');
+  db_change_field($ret, 'epublish_section', 'sid', 'sid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('sid')));
+ 
+  return $ret;
+}
+
 
