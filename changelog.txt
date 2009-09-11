@@ -1,3 +1,4 @@
-19/08/2007
-  - #151195 - Previous/Next Story Not Working bug fix
-  - NEW FEATURE: URL aliases for epublish edition
+14 Nov 2008 - Drag and drop facility #327937,  #289096
+10 June 2008 - clean up code, #262426, #258385, #227209
+10 Jan 2008
+  - New Release:Port to Drupal 6

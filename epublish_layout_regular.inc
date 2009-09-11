@@ -1,6 +1,10 @@
 <?php
 // $Id$
 
+/**
+ * @file
+ * epublish_layout_regular.inc
+ */
 $description = 'regular';
 $context = 'page';
 
@@ -20,32 +24,33 @@ $context = 'page';
  */
 function theme_epublish_layout_regular($topics, $params=NULL) {
   if ($params['description']) {
-    $description = '<div class="description">' . $params['description'] . '</div>';
+    $description = '<div class="description">'. $params['description'] .'</div>';
   }
   foreach ($topics as $topic) {
     if (count($topic->nodes)) {
       $subsection = epublish_get_section_by_title($topic->name);
       if ($subsection->sid) {
-        $output .= '<div class="topic">' . l(t($topic->name), "headlines/" . $subsection->sid) . "</div>\n";
-      } else {
-        $output .= '<div class="topic">' . $topic->name . "</div>\n";
+        $output .= '<div class="topic">'. l(t($topic->name), "headlines/". $subsection->sid) ."</div>\n";
+      }
+      else {
+        $output .= '<div class="topic">'. $topic->name ."</div>\n";
       }
       foreach ($topic->nodes as $nid) {
-				if (module_exists('translation')) {
- 					$lang = i18n_get_lang();
-		 			$transnid .= translation_node_nid($nid, $lang);
-					if ($transnid) { $nid = $transnid; $transnid = '';}
-				}
+        if (module_exists('i18n')) {
+          $lang = i18n_get_lang();
+          $transnid .= translation_node_nid($nid, $lang);
+          if ($transnid) {
+           $nid = $transnid; $transnid = '';
+          }
+        }
         $node = node_load($nid);
-
-        $output .= '<div class="title">' . l(t($node->title), "node/$nid") . "</div>\n";
-        $output .= '<div class="user">' . t('by') . ' ' . l($node->name, "blog/" . $node->uid) . "</div>\n";
+        $output .= '<div class="title">'. l(t($node->title), "node/$nid") ."</div>\n";
+        $output .= '<div class="user">'. t('by') .' '. l($node->name, "blog/". $node->uid) ."</div>\n";
         if ($node->epublish_abstract) {
-          $output .= '<div class="abstract">' . check_markup($node->epublish_abstract, $node->format) . "</div>\n";
+          $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format) ."</div>\n";
         }
       }
     }
   }
-  return '<div class="epublish"><div class="regular">' . $description . $output . '</div></div>';
+  return '<div class="epublish"><div class="regular">'. $description . $output .'</div></div>';
 }
-?>
