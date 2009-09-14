@@ -2220,7 +2220,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     $edit->month = substr($edit->pubdate, 4, 2);
     $edit->day = substr($edit->pubdate, 6, 2);
   }
-  $years = drupal_map_assoc(range(date("Y", time())-15, date("Y", time())+1));
+  $years = drupal_map_assoc(range(date("Y", time())-40, date("Y", time())+1));
   $months = array('01' => t("January"), '02' => t("February"), '03' => t("March"), '04' => t("April"), '05' => t("May"), '06' => t("June"), '07' => t("July"), '08' => t("August"), '09' => t("September"), '10' => t("October"), '11' => t("November"), '12' => t("December"));
   $days = array('01' => '1', '02' => '2', '03' => '3', '04' => '4', '05' => '5', '06' => '6', '07' => '7', '08' => '8', '09' => '9', '10' => '10',
                 '11' => '11', '12' => '12', '13' => '13', '14' => '14', '15' => '15', '16' => '16', '17' => '17', '18' => '18', '19' => '19', '20' => '20',
