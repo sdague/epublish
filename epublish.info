@@ -4,3 +4,10 @@ description = Enables users to organize the contents of their site into publicat
 package = Epublish
 core = 6.x
 dependencies[] = taxonomy
+
+; Information added by drupal.org packaging script on 2009-08-12
+version = "6.x-1.2"
+core = "6.x"
+project = "epublish"
+datestamp = "1250071830"
+

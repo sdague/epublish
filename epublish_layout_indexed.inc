@@ -67,9 +67,9 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
       foreach ($topic->nodes as $nid) { // beigin of foreach (one)
         if (module_exists('i18n')) {
           $lang = i18n_get_lang();
-          $transnid .= translation_node_nid($nid, $lang);
-          if ($transnid) {
-            $nid = $transnid; $transnid = '';
+          $transnids = translation_node_get_translations($nid);
+          if ($transnids[$lang]) {
+            $nid = $transnids[$lang]->nid;
           }
         }
         $node = node_load((array('nid' => $nid)));

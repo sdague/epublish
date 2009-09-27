@@ -189,4 +189,3 @@ through the list of topics, using logic such as the following:
      }
    }
 
-Questions? Contact Sheldon Rampton (sheldon@prwatch.org).
