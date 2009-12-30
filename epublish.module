@@ -16,6 +16,7 @@
 
 /**
  * Implementation of hook_init().
+ * @credits
  * Special thanks to Stefan Engstrom.
  */
 function epublish_init() {
