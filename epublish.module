@@ -103,10 +103,10 @@ function epublish_help($path, $arg) {
       "<li>Create a taxonomy vocabulary in !taxonomy.</li>".
       "<li>Create in !taxcreate at least one term in your new taxonomy. Each posting can be associated with a taxonomy term and grouped by topic within a headlines \"section\" (see below).</li>".
       "<li>Set the appropriate access right in !access<br />The access right is <b>administer publications</b>.</li></ul>",
-      array('!modules' => l(t("administer &raquo; modules"), "admin/modules", array(), NULL, NULL, FALSE, TRUE),
-      '!taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/taxonomy/add/vocabulary", array(), NULL, NULL, FALSE, TRUE),
-      '!taxcreate' => l(t("administer &raquo; topics"), "admin/taxonomy", array(), NULL, NULL, FALSE, TRUE),
-      '!access' => l(t("administer &raquo; access"), "admin/access", array(), NULL, NULL, FALSE, TRUE))) .
+      array('!modules' => l(t("administer &raquo; modules"), "admin/modules", array('html' => TRUE)),
+      '!taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/taxonomy/add/vocabulary", array('html' => TRUE)),
+      '!taxcreate' => l(t("administer &raquo; topics"), "admin/taxonomy", array('html' => TRUE)),
+      '!access' => l(t("administer &raquo; access"), "admin/access", array('html' => TRUE)))) .
       t("<h3>Creating and administering publications</h3>".
       "<p>The epublish module deals with three objects, which can be created or edited using !admin:</p>".
       "<ul><li>A \"<b>publication</b>\" could be a newsletter or magazine -- something that appears in multiple editions, either on a regular or sporadic basis, according to a publication schedule that you specify.</li>".
@@ -121,12 +121,12 @@ function epublish_help($path, $arg) {
       "where {eid} is the edition ID number. As an alternative to {eid}, the path can also specify editions by their volume and number using the syntax \"v{volume}n{number}\". For example, the path ".
       "\"epublish/Monthly%20News/v3n14\" would show volume 3, number 14 of the publication named \"Monthly News.\" Or, the path \"epublish/4/v3\" would show all editions of volume 3 of the publication ".
       "with {pid} 4. The path \"epublish/{pid}/current\" specifies a publication's current edition.</p>\n",
-      array('!admin' => l(t("administer &raquo; epublish"), "admin/epublish", array(), NULL, NULL, FALSE, TRUE),
+      array('!admin' => l(t("administer &raquo; epublish"), "admin/epublish", array('html' => TRUE)),
       '!epublish' => l(t('epublish'), "epublish"),
-      '!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array(), NULL, NULL, FALSE, TRUE))) .
+      '!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array('html' => TRUE)))) .
       t("<h3>URL Aliases for publication edition</h3>".
       "<p>The Publication edition can have custom URL aliases. To enable the URL aliases, one must enable the 'path' module from the !modules.</p>",
-      array('!modules' => l(t("module list"), "admin/build/modules", array(), NULL, NULL, FALSE, TRUE))) .
+      array('!modules' => l(t("module list"), "admin/build/modules", array('html' => TRUE)))) .
       t("<h3>Viewing latest headlines</h3>".
       "<p>In addition to displaying postings that have been collected into specific editions of a publication, you can also view a list of the most recent postings in each topic section ".
       "at \"epublish/headlines/{sid}\" where {sid} is a numeric section ID. \"Topics\" use taxonomy terms to organize content according to the following rules:</p>\n".
@@ -137,7 +137,7 @@ function epublish_help($path, $arg) {
       "The \"miscellaneous\" topic appears at the bottom of each section. (If, however, you set its \"automatically-included headlines limit\" to zero, no miscellanous headlines will be displayed.)</li>\n") .
       t("<h3>Publications and headlines blocks</h3>".
       "<p>The epublish module creates a sidebar block for each section, as well as an \"epublish\" block that lists all publications. To make blocks visible on your pages, use !blocks.</p>",
-      array('!blocks' => l(t("administer &raquo; blocks"), "admin/block", array(), NULL, NULL, FALSE, TRUE))) .
+      array('!blocks' => l(t("administer &raquo; blocks"), "admin/block", array('html' => TRUE)))) .
       t("<h3>Customizing layouts</h3>\n".
       "<p>The epublish module comes with several standard \"layouts\" that make it possible to customize the layout of publication pages. The \"node views,\" \"one- and two-column\" and \"regular\" layouts are different ".
       "page layouts for displaying nodes from a single edition. The \"simple list of headlines only\" layout is used on pages that list multiple editions of a publication.</p>\n".
@@ -724,7 +724,7 @@ function theme_epublish_abstract($abstract) {
  * @return
  *	 An HTML-formatted list of headlines.
  */
-function theme_epublish_topics(&$topics, $sid, &$edition, $context='page') {
+function theme_epublish_topics($topics, $sid, $edition, $context='page') {
   $params = array();
   if ($edition->description) {
     $params['description'] = $edition->description;
@@ -767,7 +767,7 @@ function theme_epublish_volume_reference($pid, $volume) {
  * @return
  *	 A text string describing the edition.
  */
-function theme_epublish_edition_reference(&$edition) {
+function theme_epublish_edition_reference($edition) {
   $reference = array();
   if ($edition->dateline) {
     $reference[] = t($edition->dateline);
@@ -856,7 +856,7 @@ function epublish_pub_page() {
  * @param $volume
  *	 A volume number (used only if a single edition is not specified)
  */
-function theme_epublish_pub_page(&$output, &$publication, &$edition, $volume=NULL) {
+function theme_epublish_pub_page($output, $publication, $edition, $volume=NULL) {
   if ($publication) {
     $breadcrumb[] = l(t('Home'), NULL);
     $breadcrumb[] = l(t($publication->name), "epublish/$publication->pid"); 
@@ -963,7 +963,7 @@ function theme_epublish_format_volume($volume, $pid, $edition_blocks = array()) 
  * @return
  *	 An HTML-formatted display showing the reference name of the edition and a list of its headlines.
  */
-function theme_epublish_format_edition(&$edition) {
+function theme_epublish_format_edition($edition) {
   $sid = epublish_assign_section($edition);
   $topics = epublish_section_topics($sid, $edition->eid);
   if (is_numeric($edition->volume) && is_numeric($edition->number) && $edition->volume > 0 && $edition->number > 0) {
@@ -1021,7 +1021,7 @@ function theme_epublish_format_pub() {
  * @return
  *	 the name of the layout to use
  */
-function epublish_assign_layout($sid, &$edition, $context) {
+function epublish_assign_layout($sid, $edition, $context) {
   $layout = "layout_$context";
   if (variable_get('epublish_custom_layouts', '0')) {
     $section = epublish_get_section($sid);
@@ -1155,7 +1155,7 @@ function epublish_sections_table() {
   $header = array(t('sections/topics'), array("data" => t("operations"), "colspan" => 2));
   while ($section = db_fetch_object($result)) {
     $topics = epublish_topic_selection_list($section->sid);
-    $rows[] = array(l( t($section->title) , "headlines/$section->sid", array(), NULL, NULL, FALSE, TRUE),
+    $rows[] = array(l( t($section->title) , "headlines/$section->sid", array('html' => TRUE)),
       l(t("edit"), "admin/epublish/edit/section/$section->sid"),
       l(t("add topic"), "admin/epublish/add/topic/$section->sid"),
     );
@@ -1840,7 +1840,7 @@ function epublish_pub_list() {
   $header = array(t('publication/editions'), array("data" => t("operations"), "colspan" => 2));
 
   while ($publication = db_fetch_object($publications)) {
-    $rows[] = array(l(t($publication->name), "epublish/$publication->pid", array(), NULL, NULL, FALSE, TRUE), l(t("edit publication"), "admin/epublish/edit/publication/$publication->pid"),
+    $rows[] = array(l(t($publication->name), "epublish/$publication->pid", array('html' => TRUE)), l(t("edit publication"), "admin/epublish/edit/publication/$publication->pid"),
                     l(t("add edition"), "admin/epublish/add/edition/$publication->pid"));
     $result = db_query("SELECT * FROM {epublish_edition} WHERE pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
     $previous_volume = -1;
