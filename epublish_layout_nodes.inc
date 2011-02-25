@@ -1,5 +1,4 @@
 <?php
-// $Id$
 /**
  * @file
  * epublish_layout_indexed.inc

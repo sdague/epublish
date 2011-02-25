@@ -1,4 +1,3 @@
-; $Id$
 name = Epublish
 description = Enables users to organize the contents of their site into publications with multiple editions, like a magazine or newspaper.
 package = Epublish
