@@ -2457,15 +2457,20 @@ function epublish_form_edition_submit($form, &$form_state) {
     // Handle operations:
     if (isset($edit['operation']) && isset($edit['nodes'])) {
       foreach ($edit['nodes'] as $nid => $value) {
-        if ($nid) {  //barinder: replaced $value with $nid
-          switch ($edit['operation']) {
-            case 'add':
-              epublish_add_node($edit['eid'], $nid, $edit['weight_'. $nid], $edit['tid_'. $nid]);
-            break;
-            case 'del':
-              epublish_del_node($edit['eid'], $nid);
-            break;
-          }
+        // We don't expect the user to check all the boxes to drag items
+        // around for reordering, so when dealing witht the add case (which is
+        // actually add or reorder) use $nid which have a value for every node
+        // in the edition.
+        //
+        // We do however need the user to have checked the nodes they want
+        // deleted, otherwise everything is deleted, so for the delete case
+        // use $value which will only have a value if the node was checked.
+        if ($nid && $edit['operation'] == "add") {
+          epublish_add_node($edit['eid'], $nid, $edit['weight_'. $nid], $edit['tid_'. $nid]);
+        }
+
+        if ($value && $edit['operation'] == "del") {
+          epublish_del_node($edit['eid'], $value);
         }
       }
       drupal_set_message(t('The "%title" edition has been updated.', array('%title' => $edit['dateline'])));
