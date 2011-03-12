@@ -409,6 +409,14 @@ function epublish_admin_settings() {
     '#options' => $layouts,
     '#description' => t("Select a layout to control the display of headline listings."),
   );
+  $layouts = epublish_layouts('email');
+  $form['layouts']['epublish_global_layout_email'] = array(
+    '#type' => 'select',
+    '#title' => t("Email layout"),
+    '#default_value' => variable_get('epublish_global_layout_email', 'email'),
+    '#options' => $layouts,
+    '#description' => t("Select a layout to control the display of email."),
+  );
   $form['layouts']['epublish_custom_layouts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Custom layouts?'),
@@ -651,7 +659,7 @@ function epublish_sections($include_default = FALSE) {
  *	 A text string indicating the context in which the layout should appear. Possible contexts include:
  *		--> 'list'	=> a listing (for example, a list of headlines within an edition)
  *		--> 'page'	=> the entire contents of a page
- *		--> 'email' => the text of an email (currently not used)
+ *		--> 'email' => the text of an email
  *		--> 'rss'	 => an RSS feed (currently not used)
  *
  * @return
@@ -1036,8 +1044,9 @@ function epublish_assign_layout($sid, &$edition, $context) {
   }
   if ($context == 'page') {
     return variable_get('epublish_global_layout_page', 'regular');
-  }
-  else {
+  } else if ($context == 'email') {
+    return variable_get('epublish_global_layout_email', 'email');
+  } else {
     return variable_get('epublish_global_layout_list', 'list');
   }
 }
