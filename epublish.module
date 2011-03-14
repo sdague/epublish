@@ -26,6 +26,16 @@ function epublish_init() {
 }
 
 /**
+ * Implementation of hook_views_api().
+ */
+function epublish_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'epublish'),
+  );
+}
+
+/**
  * Implementation of hook_theme().
  */
 function epublish_theme() {
