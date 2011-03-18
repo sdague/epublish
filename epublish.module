@@ -36,7 +36,7 @@ function epublish_theme() {
     $dyn_arr[$fname->name] = array(
       'file' => $fname->basename,
       'arguments' => array('topics' => NULL, 'params' => NULL),
-    );  
+    );
   }
     $static_arr = array(
     'epublish_edition_reference' => array(
@@ -52,7 +52,7 @@ function epublish_theme() {
       'arguments' => array('pid' => NULL, 'volume' => NULL),
     ),
     'epublish_pub_page' => array(
-      'arguments' => array('output' => 0, 'publication' => 0, 'edition' => 0, 'volume' => NULL),
+      'arguments' => array('output' => NULL, 'publication' => NULL, 'edition' => NULL, 'volume' => NULL),
     ),
     'epublish_format_volume' => array(
       'arguments' => array('volume' => NULL, 'pid' => NULL, 'edition_blocks' => array()),
@@ -313,7 +313,7 @@ function epublish_menu() {
     'access arguments' => array('administer publications'),
     'type' => MENU_CALLBACK
   );
-  $items['admin/epublish/edit/volume'] = array( 
+  $items['admin/epublish/edit/volume'] = array(
     'title' => 'Edit volume name',
     'page callback' => 'epublish_admin_volume_edit',
     'access callback' => 'user_access',
@@ -540,7 +540,7 @@ function epublish_block($op = 'list', $delta = 0) {
       $sid = epublish_assign_section($edition);
       $topics = epublish_section_topics($sid, $edition->eid);
       $items = array();
-      foreach ($topics as $topic) { 
+      foreach ($topics as $topic) {
         foreach ($topic->nodes as $nid) {
           $node = node_load($nid);
           $items[] = l($node->title, "node/$nid");
@@ -631,7 +631,7 @@ function epublish_sections($include_default = FALSE) {
   if ($include_default) {
     $sections[0] = t('<default>');
   }
-  $result = db_query("SELECT * FROM {epublish_section}"); 
+  $result = db_query("SELECT * FROM {epublish_section}");
   while ($section = db_fetch_object($result)) {
     $sections[$section->sid] = $section->title;
   }
@@ -722,7 +722,7 @@ function theme_epublish_abstract($abstract) {
  * @return
  *	 An HTML-formatted list of headlines.
  */
-function theme_epublish_topics(&$topics, $sid, &$edition, $context='page') {
+function theme_epublish_topics($topics, $sid, $edition, $context='page') {
   $params = array();
   if ($edition->description) {
     $params['description'] = $edition->description;
@@ -765,7 +765,7 @@ function theme_epublish_volume_reference($pid, $volume) {
  * @return
  *	 A text string describing the edition.
  */
-function theme_epublish_edition_reference(&$edition) {
+function theme_epublish_edition_reference($edition) {
   $reference = array();
   if ($edition->dateline) {
     $reference[] = t($edition->dateline);
@@ -854,10 +854,10 @@ function epublish_pub_page() {
  * @param $volume
  *	 A volume number (used only if a single edition is not specified)
  */
-function theme_epublish_pub_page(&$output, &$publication, &$edition, $volume=NULL) {
+function theme_epublish_pub_page($output, $publication, $edition, $volume=NULL) {
   if ($publication) {
     $breadcrumb[] = l(t('Home'), NULL);
-    $breadcrumb[] = l(t($publication->name), "epublish/$publication->pid"); 
+    $breadcrumb[] = l(t($publication->name), "epublish/$publication->pid");
     $title = $publication->name;
   }
   if ($edition->volume) {
@@ -961,7 +961,7 @@ function theme_epublish_format_volume($volume, $pid, $edition_blocks = array()) 
  * @return
  *	 An HTML-formatted display showing the reference name of the edition and a list of its headlines.
  */
-function theme_epublish_format_edition(&$edition) {
+function theme_epublish_format_edition($edition) {
   $sid = epublish_assign_section($edition);
   $topics = epublish_section_topics($sid, $edition->eid);
   if (is_numeric($edition->volume) && is_numeric($edition->number) && $edition->volume > 0 && $edition->number > 0) {
@@ -1090,7 +1090,7 @@ function epublish_assign_section(&$edition) {
 function epublish_topic_selection_list($sid) {
   $result = db_query("SELECT et.tid, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid);
   $topics = array();
-  while ($topic = db_fetch_object($result)) { 
+  while ($topic = db_fetch_object($result)) {
 // condition added to handle additional default topic
     if ($topic->tid == -2) {
       $topic->name = variable_get('epublish_advertisement', t('advertisement'));
@@ -1158,7 +1158,7 @@ function epublish_sections_table() {
       l(t("add topic"), "admin/epublish/add/topic/$section->sid"),
     );
     $lines = array();
-    foreach ($topics as $tid => $name) { 
+    foreach ($topics as $tid => $name) {
       $lines[] = "-$name (". l(t('edit topic'), "admin/epublish/edit/topic/$section->sid/$tid") .')';
     }
     $rows[] = array(implode('<br />', $lines), array('data' => '', 'colspan' => 2));
@@ -1413,7 +1413,7 @@ function epublish_form_section_submit($form, &$form_state) {
   if ($form_state['title'] == 'default') {
   }
   else {
-    $form_state = $form_state['values']; 
+    $form_state = $form_state['values'];
   }
   if (!$form_state['node_types']) {
     $form_state['node_types'] = array();
@@ -1484,7 +1484,7 @@ function epublish_section_confirm_delete_submit($form, &$form_state) {
   }
   drupal_set_message(t('The section no longer exists.'));
   $form_state['redirect'] = 'admin/epublish/sections';
-} 
+}
 
 
 /*******************************************
@@ -1599,7 +1599,7 @@ function epublish_form_topic($form_state, $edit = NULL, $sid = NULL) {
   $form['node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Additional Types'),
-    '#default_value' => $types_array, 
+    '#default_value' => $types_array,
     '#options' => $nodetypes,
     '#description' => t('A list of node types you want to associate with this topic. Node types checked here will be included <i>in addition</i> to node types selected for this section.'),
     );
@@ -1662,7 +1662,7 @@ function epublish_form_topic($form_state, $edit = NULL, $sid = NULL) {
     '#type' => 'submit',
     '#value' => t("Submit"),
     );
-  
+
   return $form;
 }
 
@@ -1857,7 +1857,7 @@ function epublish_pub_list() {
       $rows[] = array(implode('<br />', $editions), array('data' => t('volume name: ') . l(theme('epublish_volume_reference', $publication->pid, $previous_volume), "admin/epublish/edit/volume/$publication->pid/$previous_volume"), 'colspan' => 2));
     }
   }
-  
+
   $output = theme("table", $header, $rows);
   return $output;
 }
@@ -2017,7 +2017,7 @@ function epublish_pub() {
  */
 function epublish_form_pub_submit($form, &$form_state) {
   $edit = $form_state['values'];
-  
+
   if ($edit['pid'] && $edit['action'] != 'delete') {
     db_query("UPDATE {epublish_publication} SET name = '%s', description = '%s', schedule = '%s', current_eid = '%d',layout_list = '%s', layout_page = '%s', sid = '%s' WHERE pid = '%d'", $edit['name'], $edit['description'], $edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['pid']);
     drupal_set_message(t('The publication "%title" has been updated.', array('%title' => $edit['name'])));
@@ -2157,7 +2157,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     '#maxlength' => 128,
     '#description' => t('A textual representation of the publication date, e.g., "March 2003" or "April 11-17, 2004."'),
     );
-  
+
   $form[] = array('#value' => '<div class="container-inline">');
   $form['volume'] = array(
     '#type' => 'textfield',
@@ -2176,7 +2176,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     '#prefix' => '<strong>'. t('Number') .': </strong>',
     );
   $form[] = array('#value' => '</div>');
-  
+
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
@@ -2184,7 +2184,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     '#cols' => 70,
     '#rows' => 8,
     );
-  
+
   if (module_exists('path')) {
     $path = $form['#node']->path;
     $form['path'] = array(
@@ -2225,7 +2225,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
                 '11' => '11', '12' => '12', '13' => '13', '14' => '14', '15' => '15', '16' => '16', '17' => '17', '18' => '18', '19' => '19', '20' => '20',
                 '21' => '21', '22' => '22', '23' => '23', '24' => '24', '25' => '25', '26' => '26', '27' => '27', '28' => '28', '29' => '29', '30' => '30',
                 '31' => '31');
-  
+
   $form[] = array('#value' => '<div class="container-inline">');
   $form["month"] = array(
     '#type' => 'select',
@@ -2327,7 +2327,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
       '#value' => t("Delete"),
     );
     // headlines
-    $form[] = array('#value' => '<hr /><a name="manageheadlines"></a>', '#weight' => 2);  
+    $form[] = array('#value' => '<hr /><a name="manageheadlines"></a>', '#weight' => 2);
     $form['headlines'] = array(
       '#type' => 'fieldset', '#title' => t('Manage headlines'),
       );
@@ -2369,7 +2369,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
       '#return_value' => 1,
       '#default_value' => 1,
       );
-    
+
     $form['make_current'] = array(
       '#type' => 'checkbox',
       '#title' => t('Make current?'),
@@ -2412,7 +2412,7 @@ function theme_epublish_form_edition($form) {
     $rows[] = array(array('data' => t('No posts available.'), 'colspan' => '6'));
   }
   $header = array(NULL, t('Title'), t('Type'), t('Topic'), t('Status'), t('Weight'));
-  $table_content = theme('table', $header, $rows, array('id' => 'epublish-table-id')); 
+  $table_content = theme('table', $header, $rows, array('id' => 'epublish-table-id'));
   drupal_add_tabledrag('epublish-table-id', 'order', 'sibling', 'epublish-weight-class'); //barinder
 
   // put the table content inside the headlines fieldset
@@ -2444,8 +2444,8 @@ function epublish_form_edition_submit($form, &$form_state) {
       $pnid = $edit['path'];
       $pthid = $edit['pthid'];
       if ($edit['path']) {
-        if ($pthid) {  
-          path_set_alias("epublish/$ppid/$peid", $pnid, $pthid);  
+        if ($pthid) {
+          path_set_alias("epublish/$ppid/$peid", $pnid, $pthid);
         }
         else {
           path_set_alias("epublish/$ppid/$peid", $pnid);
@@ -2710,8 +2710,8 @@ function epublish_admin_node() {
   $edition = epublish_get_edition($eid);
   $sid = epublish_assign_section($edition);
   $form['eid'] = array(
-    '#type' => 'hidden', 
-    '#value' => $eid,  
+    '#type' => 'hidden',
+    '#value' => $eid,
   );
   $publication = epublish_get_pub($edition->pid);
   $exclusions = _epublish_build_node_exclusions(epublish_get_edition_nodes($eid));
@@ -2807,12 +2807,12 @@ function epublish_admin_node_submit($form, &$form_state) {
     foreach ($edit['nodes'] as $nid => $checked) {
       if ($checked) {
         epublish_add_node($edit['eid'], $nid, $edit['weight_'. $nid], $edit['tid_'. $nid]);
-        $nodes_added++; 
+        $nodes_added++;
       }
     }
     if ($nodes_added) {
       drupal_set_message(format_plural($nodes_added, 'One headline was added to this edition.', '@count headlines were added to this edition.'));
-      drupal_goto('admin/epublish/edit/edition/'. $edit['eid']); 
+      drupal_goto('admin/epublish/edit/edition/'. $edit['eid']);
     }
     else {
       drupal_set_message(t('The update has been performed.'));
