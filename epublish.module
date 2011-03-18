@@ -497,7 +497,8 @@ function epublish_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
         db_query("INSERT INTO {epublish_abstract} (nid, epublish_abstract) VALUES ('%d', '%s')", $node->nid, $node->epublish_abstract);
       }
-    break;
+      break;
+
     case 'update':
       if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
         db_query("DELETE FROM {epublish_abstract} WHERE nid = '%d'", $node->nid);
@@ -505,28 +506,36 @@ function epublish_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
           db_query("INSERT INTO {epublish_abstract} (nid, epublish_abstract) VALUES ('%d', '%s')", $node->nid, $node->epublish_abstract);
         }
       }
-    break;
+      break;
+
     case 'delete':
-    db_query("DELETE FROM {epublish_edition_node} WHERE nid = '%d'", $node->nid);
-    if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
-      db_query("DELETE FROM {epublish_abstract} WHERE nid = '%d'", $node->nid);
-    }
-    break;
+      db_query("DELETE FROM {epublish_edition_node} WHERE nid = '%d'", $node->nid);
+      if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
+        db_query("DELETE FROM {epublish_abstract} WHERE nid = '%d'", $node->nid);
+      }
+      break;
+
     case 'load':
       if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
         $object = db_fetch_object(db_query("SELECT epublish_abstract FROM {epublish_abstract} WHERE nid = '%d'", $node->nid));
         return array('epublish_abstract' => $object->epublish_abstract);
       }
-    break;
+      break;
+
     case 'view':
       // append epublish navigation to all nodes that belong to an edition
       if (!$a3) {
-        $eid = db_result(db_query('SELECT eid FROM {epublish_edition_node} een WHERE nid = %d', $node->nid));
-        if ($eid) {
-          $node = theme('epublish_navigation', $node, $eid);
+        $result = db_query('SELECT eid FROM {epublish_edition_node} een WHERE nid = %d', $node->nid);
+        $editions = array();
+        while ($ed = db_fetch_object($result)) {
+          $editions[] = $ed->eid;
+        }
+        if (count($editions)) {
+          $node = theme('epublish_navigation', $node, $editions);
         }
       }
-    break;
+      break;
+
   }
 }
 
@@ -2960,19 +2969,28 @@ function _epublish_topics_node_count(&$topics) {
  * @ingroup themeable
  */
 
-function theme_epublish_navigation($node, $eid) {
-  if ($node->nid) {
+function theme_epublish_navigation($node, $editions) {
+  if (!$node->nid || count($editions) == 0) {
+    return $node;
+  }
+
+  $node->breadcrumb = array();
+  $output = '';
+  foreach ($editions as $eid) {
     $output .= '<div class="epublish_navigation">';
     $edition = epublish_get_edition($eid);
     $publication = epublish_get_pub($edition->pid);
     $sid = epublish_assign_section($edition);
     $topics = epublish_section_topics($sid, $edition->eid);
-    // Construct the breadcrumb:
-    $node->breadcrumb = array();
-    $node->breadcrumb[] = l(t($publication->name), "epublish/$publication->pid");
-    $node->breadcrumb[] = l(t(theme('epublish_edition_reference', $edition)), "epublish/$edition->pid/$edition->eid");
-    $node->breadcrumb[] = l(t($node->title), "node/$node->nid");
-    drupal_set_breadcrumb($node->breadcrumb);
+
+    // Construct the breadcrumb only for the first item
+    if (!count($node->breadcrumb)) {
+      $node->breadcrumb[] = l(t($publication->name), "epublish/$publication->pid");
+      $node->breadcrumb[] = l(t(theme('epublish_edition_reference', $edition)), "epublish/$edition->pid/$edition->eid");
+      $node->breadcrumb[] = l(t($node->title), "node/$node->nid");
+      drupal_set_breadcrumb($node->breadcrumb);
+    }
+
     if ($prev = epublish_prev($node, $topics)) {
       $links[] = t("Previous story: ") . l($prev->title, 'node/'. $prev->nid);
     }
