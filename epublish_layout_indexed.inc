@@ -1,4 +1,4 @@
-<?php
+<?php // -*- drupal -*-
 
 /**
  * @file
@@ -86,20 +86,20 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
         // Add Abstract
         if ($node->epublish_abstract) {
           if ( ($topic->weight != 99) && ($topic->weight != (-99)) && ($topic->weight != (-98))) {
-            $o_detail .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract .' <span class="morelink"> '. l("[more..]", "node/$nid")  .' </span>', $node->format) ." </div>\n";
+            $o_detail .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract .' <span class="morelink"> '. l("[more..]", "node/$nid")  .' </span>', $node->format, FALSE) ." </div>\n";
           }
           else {
           // Footer
             if ( ($topic->weight == 99) ) {
-              $o_footer .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract, $node->format) ."</div>\n";
+              $o_footer .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
             }
          // Header
             if ( $topic->weight == (-99)) {
-              $o_header .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract, $node->format) ."</div>\n";
+              $o_header .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
             }
          // Advertisement
             if ( ($topic->weight == (-98)) ) {
-              $o_advertisement .= ''. check_markup($node->epublish_abstract, $node->format );
+              $o_advertisement .= ''. check_markup($node->epublish_abstract, $node->format, FALSE);
             }
           }
         } // end of if for abstract
@@ -112,7 +112,7 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
       $o_detail .= '<div>'. l( "Top", arg(0) ."/". arg(1) ."/". arg(2), array(), NULL, '', FALSE, TRUE) .' </div>' ;
     }
   } //end of foreach (two)
-  
+
   if ( $o_advertisement ) {
     $o_advertisement = '<div class="advertisement" >'. $o_advertisement ."</div>\n";
   }
@@ -124,7 +124,7 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
   if ( $o_footer ) {
     $o_footer = '<hr/>'. $o_footer ;
   }
-  
+
   $output .= $o_header . $o_advertisement  . $o_index . $o_detail . $o_footer  ;
   $output = '<div class="epublish">'.'<div class="regular">'. $description . $output .'</div>'.'</div>';
   return $output ;

@@ -7,7 +7,7 @@
 $description = 'simple list of headlines only';
 $context = 'list';
 
-/** 
+/**
  * theme_epublish_layout_list: A themeable function to show a simple list of headlines.
  * This layout lists headlines only, and does not show topic names. The list layout is
  * designed for use by epublish.module, which can use it to control the order in which
@@ -41,7 +41,7 @@ function theme_epublish_layout_list($topics, $params=NULL) {
       $node = node_load($nid);
       $output .= "<li>" . l(t($node->title), "node/$nid");
       if ($node->epublish_abstract) {
-        $output .= ': '. check_markup($node->epublish_abstract, $node->format);
+          $output .= ': '. check_markup($node->epublish_abstract, $node->format, FALSE);
       }
       $output .= "</li>\n";
     }

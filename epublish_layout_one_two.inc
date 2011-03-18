@@ -1,4 +1,4 @@
-<?php
+<?php // -*- drupal -*-
 
 /**
  * @file
@@ -7,7 +7,7 @@
 $description = 'one- and two-column';
 $context = 'page';
 
-/** 
+/**
  * theme_epublish_layout_one_two: A themeable function to produce a list of section topics and their headlines.
  * This layout lists the first topic and its headlines in larger type, along with author bylines for each
  * headline.  Subsequent topics appear in smaller type in a two-column layout that shows headlines only.
@@ -42,7 +42,7 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
       $output .= '<div class="title">'. l(t($node->title), "node/$nid") ."</div>\n";
       $output .= '<div class="user">'. t('By') .' '.'<span class="all_caps">'. $node->name ."</span></div>\n";
       if ($node->epublish_abstract) {
-        $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format) ."</div>\n";
+        $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
       }
     }
     $output .= "\n";

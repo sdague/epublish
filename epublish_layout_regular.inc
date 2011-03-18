@@ -1,4 +1,4 @@
-<?php
+<?php // -*- drupal -*-
 
 /**
  * @file
@@ -7,7 +7,7 @@
 $description = 'regular';
 $context = 'page';
 
-/** 
+/**
  * theme_epublish_layout_regular: A themeable function to produce a list of section topics and their nodes.
  *
  * @param $topics
@@ -46,7 +46,7 @@ function theme_epublish_layout_regular($topics, $params=NULL) {
         $output .= '<div class="title">'. l(t($node->title), "node/$nid") ."</div>\n";
         $output .= '<div class="user">'. t('by') .' '. l($node->name, "blog/". $node->uid) ."</div>\n";
         if ($node->epublish_abstract) {
-          $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format) ."</div>\n";
+          $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
         }
       }
     }
