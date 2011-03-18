@@ -1783,7 +1783,7 @@ function epublish_topic_confirm_delete_submit($form, &$form_state) {
  */
 function epublish_section_topics($sid, $eid) {
   $section = epublish_get_section($sid);
-  $result = db_query("SELECT DISTINCT(n.nid), een.tid, et.weight FROM {node} n LEFT JOIN {epublish_edition_node} een USING (nid) LEFT JOIN {epublish_topic} et ON et.tid=een.tid WHERE eid='$eid' AND et.sid='$sid' ORDER BY et.weight, een.weight, n.changed DESC");
+  $result = db_query("SELECT DISTINCT(n.nid), een.tid, et.weight FROM {node} n LEFT JOIN {epublish_edition_node} een USING (nid) LEFT JOIN {epublish_topic} et ON et.tid=een.tid WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed, een.tid DESC", $eid, $sid);
   $last_tid = NULL;
   $topics = array();
   $topic = NULL;
