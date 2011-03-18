@@ -62,7 +62,7 @@ function epublish_theme() {
       'arguments' => array('pid' => NULL, 'volume' => NULL),
     ),
     'epublish_pub_page' => array(
-      'arguments' => array('output' => 0, 'publication' => 0, 'edition' => 0, 'volume' => NULL),
+      'arguments' => array('output' => NULL, 'publication' => NULL, 'edition' => NULL, 'volume' => NULL),
     ),
     'epublish_format_volume' => array(
       'arguments' => array('volume' => NULL, 'pid' => NULL, 'edition_blocks' => array()),
@@ -740,7 +740,7 @@ function theme_epublish_abstract($abstract) {
  * @return
  *	 An HTML-formatted list of headlines.
  */
-function theme_epublish_topics(&$topics, $sid, &$edition, $context='page') {
+function theme_epublish_topics($topics, $sid, $edition, $context='page') {
   $params = array();
   if ($edition->description) {
     $params['description'] = $edition->description;
@@ -783,7 +783,7 @@ function theme_epublish_volume_reference($pid, $volume) {
  * @return
  *	 A text string describing the edition.
  */
-function theme_epublish_edition_reference(&$edition) {
+function theme_epublish_edition_reference($edition) {
   $reference = array();
   if ($edition->dateline) {
     $reference[] = t($edition->dateline);
@@ -872,7 +872,7 @@ function epublish_pub_page() {
  * @param $volume
  *	 A volume number (used only if a single edition is not specified)
  */
-function theme_epublish_pub_page(&$output, &$publication, &$edition, $volume=NULL) {
+function theme_epublish_pub_page($output, $publication, $edition, $volume=NULL) {
   if ($publication) {
     $breadcrumb[] = l(t('Home'), NULL);
     $breadcrumb[] = l(t($publication->name), "epublish/$publication->pid");
@@ -979,7 +979,7 @@ function theme_epublish_format_volume($volume, $pid, $edition_blocks = array()) 
  * @return
  *	 An HTML-formatted display showing the reference name of the edition and a list of its headlines.
  */
-function theme_epublish_format_edition(&$edition) {
+function theme_epublish_format_edition($edition) {
   $sid = epublish_assign_section($edition);
   $topics = epublish_section_topics($sid, $edition->eid);
   if (is_numeric($edition->volume) && is_numeric($edition->number) && $edition->volume > 0 && $edition->number > 0) {
