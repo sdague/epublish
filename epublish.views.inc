@@ -46,9 +46,9 @@ function _epublish_define_edition_node_table(&$data) {
     )
   );
 
-  _epublish_define_view_reference($data, 'epublish_edition_node', 'nid', 'Node Id', 'bar', 'node', 'nid');
+  _epublish_define_view_reference($data, 'epublish_edition_node', 'nid', 'Node Id', 'Node Id included in an edition', 'node', 'nid');
 
-  _epublish_define_view_reference($data, 'epublish_edition_node', 'eid', 'Edition Id', 'foo', 'epublish_edition', 'eid');
+  _epublish_define_view_reference($data, 'epublish_edition_node', 'eid', 'Edition Id', 'Id of the edition', 'epublish_edition', 'eid');
 }
 
 
