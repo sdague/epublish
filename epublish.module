@@ -2991,6 +2991,7 @@ function theme_epublish_navigation($node, $editions) {
       drupal_set_breadcrumb($node->breadcrumb);
     }
 
+    $links = array();
     if ($prev = epublish_prev($node, $topics)) {
       $links[] = t("Previous story: ") . l($prev->title, 'node/'. $prev->nid);
     }
