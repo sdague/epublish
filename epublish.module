@@ -829,6 +829,8 @@ function epublish_pub_page() {
     $volume = $match[2] ? (" AND volume=" . $match[2]) : '';
     $number = $match[4] ? (" AND number=" . $match[4]) : '';
     //$num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
+
+    // TODO: this really needs to be unwound so that we can get rid of the strings in here
     $num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid));
     $editions = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
     if ($num_editions == 1) {
@@ -1783,7 +1785,7 @@ function epublish_topic_confirm_delete_submit($form, &$form_state) {
  */
 function epublish_section_topics($sid, $eid) {
   $section = epublish_get_section($sid);
-  $result = db_query("SELECT DISTINCT(n.nid), een.tid, et.weight FROM {node} n LEFT JOIN {epublish_edition_node} een USING (nid) LEFT JOIN {epublish_topic} et ON et.tid=een.tid WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed, een.tid DESC", $eid, $sid);
+  $result = db_query("SELECT DISTINCT(n.nid), een.tid, et.weight FROM {node} n LEFT JOIN {epublish_edition_node} een USING (nid) LEFT JOIN {epublish_topic} et ON et.tid=een.tid WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed DESC, een.tid", $eid, $sid);
   $last_tid = NULL;
   $topics = array();
   $topic = NULL;
@@ -2157,7 +2159,7 @@ function epublish_admin_edition_add($pid = NULL) {
  */
 function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
   $urlquery = 'epublish/'. $edit->pid .'/'. $edit->eid;
-  $urlres= db_result(db_query("SELECT dst FROM {url_alias} WHERE src = '". $urlquery ."'"));
+  $urlres= db_result(db_query("SELECT dst FROM {url_alias} WHERE src = '%s'", $urlquery));
   $edit = (object) $edit;
   if ($pid) {
     $edit->pid = $pid;
@@ -2223,7 +2225,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
       );
     $form['path']['pthid'] = array(
       '#type' => 'hidden',
-      '#value' => db_result(db_query("SELECT pid FROM {url_alias} WHERE dst ='". $urlres ."'"))
+      '#value' => db_result(db_query("SELECT pid FROM {url_alias} WHERE dst ='%s'", $urlres))
       );
   }
 
@@ -2367,7 +2369,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, n.changed, n.status, n.type, een.weight, een.tid
                                       FROM {node} n LEFT JOIN {epublish_edition_node} een ON n.nid = een.nid
                                       LEFT JOIN {epublish_topic} et ON et.tid=een.tid
-                                      WHERE eid='". $edit->eid ."' AND et.sid='". $sid ."' ORDER BY et.weight, een.weight, n.changed DESC"));
+                                      WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed DESC", $edit->eid, $sid ));
     while ($node = db_fetch_object($result)) {
       $nodes[$node->nid] = '';
       $form['title'][$node->nid] = array('#value' => l($node->title, 'node/'. $node->nid) .' '. theme('mark', node_mark($node->nid, $node->changed)));
