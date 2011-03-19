@@ -473,7 +473,7 @@ function epublish_form_alter(&$form, $form_state, $form_id) {
       '#description' => t('Users can enter a brief abstract summarizing the content of each node.'),
     );
   }
-  else if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
+  elseif (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id) {
     if (variable_get('epublish_abstract_'. $form['type']['#value'], TRUE)) {
       $node = $form['#node'];
       $form['epublish_abstract'] = array(
@@ -547,7 +547,7 @@ function epublish_block($op = 'list', $delta = 0) {
     $blocks = array();
     $blocks[0]['info'] = t('E-Publish List of Publications');
     foreach (epublish_sections() as $sid => $title) {
-      $blocks[$sid]['info'] = t('E-publish section: ') . t($title);
+      $blocks[$sid]['info'] = t('E-publish section:') . " " . t($title);
     }
     $publications = db_query("SELECT * FROM {epublish_publication}");
     while ($publication = db_fetch_object($publications)) {
@@ -556,7 +556,7 @@ function epublish_block($op = 'list', $delta = 0) {
     }
     return $blocks;
   }
-  else if ($op == 'view') {
+  elseif ($op == 'view') {
     // publication blocks
     if (substr($delta, 0, 12) == 'cur_edition_') {
       $pid = substr($delta, 12);
@@ -576,7 +576,7 @@ function epublish_block($op = 'list', $delta = 0) {
       $data['content'] = theme('item_list', $items);
       return $data;
     }
-    else if (substr($delta, 0, 4) == 'pub_') {
+    elseif (substr($delta, 0, 4) == 'pub_') {
       $pid = substr($delta, 4);
       $publication = epublish_get_pub($pid);
       $data['subject'] = t($publication->name);
@@ -593,7 +593,7 @@ function epublish_block($op = 'list', $delta = 0) {
       return $data;
       // section blocks
     }
-    else if ($delta) {
+    elseif ($delta) {
       $section = epublish_get_section($delta);
       $topics = epublish_topic_selection_list($delta);
       $data['subject'] = l(t($section->title), "headlines/$delta");
@@ -815,7 +815,7 @@ function epublish_pub_page() {
   if (is_numeric($pub)) {
     $publication = epublish_get_pub($pub);
   }
-  else if ($pub) {
+  elseif ($pub) {
     $publication = epublish_get_pub_by_name($pub);
   }
   if ($publication) {
@@ -893,7 +893,7 @@ function theme_epublish_pub_page($output, $publication, $edition, $volume=NULL) 
     $breadcrumb[] = l(theme('epublish_volume_reference', $edition->pid, $edition->volume), "epublish/$edition->pid/v$edition->volume");
     $title = "$publication->name, " . theme('epublish_volume_reference', $edition->pid, $edition->volume);
   }
-  else if ($volume) {
+  elseif ($volume) {
     $breadcrumb[] = l(t(theme('epublish_volume_reference', $publication->pid, $volume)), "epublish/$publication->pid/v$volume");
     $title = "$publication->name, " . theme('epublish_volume_reference', $publication->pid, $volume);
   }
@@ -933,11 +933,11 @@ function epublish_headlines_page() {
       $topic->name = variable_get('epublish_advertisement', t('advertisement'));
       $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
     }
-    else if ($topic->tid == -1) {
+    elseif ($topic->tid == -1) {
       $topic->name = variable_get('epublish_top_stories', t('top stories'));
       $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
     }
-    else if ($topic->tid == 0) {
+    elseif ($topic->tid == 0) {
       $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
       $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
     }
@@ -1065,7 +1065,7 @@ function epublish_assign_layout($sid, &$edition, $context) {
   }
   if ($context == 'page') {
     return variable_get('epublish_global_layout_page', 'regular');
-  } else if ($context == 'email') {
+  } elseif ($context == 'email') {
     return variable_get('epublish_global_layout_email', 'email');
   } else {
     return variable_get('epublish_global_layout_list', 'list');
@@ -1125,10 +1125,10 @@ function epublish_topic_selection_list($sid) {
     if ($topic->tid == -2) {
       $topic->name = variable_get('epublish_advertisement', t('advertisement'));
     }
-    else if ($topic->tid == -1) {
+    elseif ($topic->tid == -1) {
       $topic->name = variable_get('epublish_top_stories', t('top stories'));
     }
-    else if ($topic->tid == 0) {
+    elseif ($topic->tid == 0) {
       $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
     }
     $topics[$topic->tid] = $topic->name;
@@ -1239,7 +1239,7 @@ function epublish_admin_section_edit($sid = NULL) {
   if ($_POST['op'] == t('Delete') || $_POST['edit']['confirm']) {
     return drupal_get_form('epublish_section_confirm_delete', $sid);
   }
-  else if ($sid) {
+  elseif ($sid) {
     $section = epublish_get_section($sid);
   }
   $output = drupal_get_form('epublish_form_section', $section);
@@ -1735,7 +1735,7 @@ function epublish_form_topic_submit($form, &$edit) {
       }
     }
   }
-  else if ($edit['action'] == 'delete') {
+  elseif ($edit['action'] == 'delete') {
     return epublish_del_topic($edit['sid'], $edit['tid']);
   }
    $edit['redirect'] = 'admin/epublish/sections';
@@ -1807,10 +1807,10 @@ function epublish_section_topics($sid, $eid) {
       if ($topic->tid == -2) {
         $topic->name = variable_get('epublish_advertisement', t('advertisement'));
       }
-      else if ($topic->tid == -1) {
+      elseif ($topic->tid == -1) {
         $topic->name = variable_get('epublish_top_stories', t('top stories'));
       }
-      else if ($topic->tid == 0) {
+      elseif ($topic->tid == 0) {
         $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
       }
       $last_tid = $node->tid;
@@ -2244,7 +2244,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     $edit->month = date('m', time());
     $edit->day = date('d', time());
   }
-  else if (!$edit->year) {
+  elseif (!$edit->year) {
     $edit->year = substr($edit->pubdate, 0, 4);
     $edit->month = substr($edit->pubdate, 4, 2);
     $edit->day = substr($edit->pubdate, 6, 2);
@@ -2878,7 +2878,7 @@ function epublish_get_term($tid, $sid) {
     $term = db_fetch_object(db_query("SELECT vid FROM {vocabulary} WHERE vid = '%d'", $vid));
     $term->name = variable_get('epublish_advertisement', t('advertisement'));
   }
-  else if ($tid == -1) {
+  elseif ($tid == -1) {
     $term = db_fetch_object(db_query("SELECT vid FROM {vocabulary} WHERE vid = '%d'", $vid));
     $term->name = variable_get('epublish_top_stories', t('top stories'));
   }
