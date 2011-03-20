@@ -491,7 +491,7 @@ function epublish_form_alter(&$form, $form_state, $form_id) {
 /**
  * Implementation of hook_nodeapi().
  */
-function epublish_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+function epublish_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'insert':
       if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
@@ -524,7 +524,7 @@ function epublish_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
     case 'view':
       // append epublish navigation to all nodes that belong to an edition
-      if (!$a3) {
+      if ($page) {
         $result = db_query('SELECT eid FROM {epublish_edition_node} een WHERE nid = %d', $node->nid);
         $editions = array();
         while ($ed = db_fetch_object($result)) {
