@@ -582,7 +582,7 @@ function epublish_block($op = 'list', $delta = 0) {
       $data['subject'] = t($publication->name);
       $items = array();
       $order = variable_get('epublish_edition_order', 'DESC');
-      $result = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order LIMIT 10", $publication->pid);
+      $result = db_query_range("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d' ORDER BY volume %s, number %s, pubdate %s, eid %s", $publication->pid, $order, $order, $order, $order, 10);
       while (($edition = db_fetch_object($result)) && $i++ < 10) {
         $items[] = l(theme('epublish_edition_reference', $edition), "epublish/$publication->pid/$edition->eid");
       }
