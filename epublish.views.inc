@@ -11,10 +11,40 @@
    */
 function epublish_views_data() {
   $data;
+  _epublish_define_publication_table($data);
   _epublish_define_edition_table($data);
   _epublish_define_edition_node_table($data);
 
   return $data;
+
+}
+
+function _epublish_define_publication_table(&$data) {
+  $data['epublish_publication']['table']['group'] = t('Epublish');
+
+  $data['epublish_publication']['table']['base'] = array(
+    'field' => 'pid',
+    'title' => t('Epublish Publication'),
+    'help' => t('An epublish publication')
+  );
+
+  $data['epublish_publication']['table']['join']['node'] = array(
+    'left_table' => 'epublish_edition',
+    'left_field' => 'pid',
+    'field' => 'pid',
+  );
+
+  _epublish_define_view_number($data, 'epublish_publication', 'pid', 'Publication Id', 'Unique id associated with the publication');
+
+  _epublish_define_view_text_field($data, 'epublish_publication', 'name', 'Name', 'Name of the publication');
+
+  _epublish_define_view_text_field($data, 'epublish_publication', 'description', 'Description', 'Description of the publication');
+
+  _epublish_define_view_number($data, 'epublish_publication', 'current_eid', 'Current Edition', 'Used to figure out the current edition of a publication');
+
+  _epublish_define_view_text_field($data, 'epublish_publication', 'layout_list', 'Listing Layout', 'Layout used for the listing view');
+
+  _epublish_define_view_text_field($data, 'epublish_publication', 'layout_node', 'Node Layout', 'Layout used for the node view');
 
 }
 
@@ -28,7 +58,7 @@ function _epublish_define_edition_table(&$data) {
     'help' => t('An edition of an epublish publication'),
   );
 
-  _epublish_define_view_reference($data, 'epublish_edition', 'pid', 'Publication Id', 'Publication that includes the edition', 'epublish_publication', 'pid');
+  _epublish_define_view_reference($data, 'epublish_edition', 'pid', 'Publication Id', 'Publication that includes the edition, for use in relationships', 'epublish_publication', 'pid');
 
   _epublish_define_view_number($data, 'epublish_edition', 'eid', 'Edition Id', 'Unique id associated with the edition');
 
@@ -40,14 +70,19 @@ function _epublish_define_edition_table(&$data) {
 
   _epublish_define_view_boolean_field($data, 'epublish_edition', 'published', 'Published', 'Whether or not the edition is published');
 
-  _epublish_define_view_text_field($data, 'epublish_edition', 'dateline', 'Dateline');
+  _epublish_define_view_text_field($data, 'epublish_edition', 'dateline', 'Dateline', 'User specified dateline for the edition');
 
-  _epublish_define_view_text_field($data, 'epublish_edition', 'description', 'Description of Edition');
+  _epublish_define_view_text_field($data, 'epublish_edition', 'description', 'Description', 'User specified description for the edition');
+
 
   $data['epublish_edition']['table']['join']['node'] = array(
     'left_table' => 'epublish_edition_node',
     'left_field' => 'eid',
     'field' => 'eid',
+  );
+  $data['epublish_edition']['table']['join']['epublish_publication'] = array(
+    'left_field' => 'pid',
+    'field' => 'pid',
   );
 }
 
