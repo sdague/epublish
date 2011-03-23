@@ -142,8 +142,23 @@ function epublish_schema() {
  *
  */
 function epublish_update_1() {
+  return _system_update_utf8(array('epublish_abstract', 'epublish_edition', 'epublish_edition_node', 'epublish_publication', 'epublish_section', 'epublish_topic', 'epublish_volume'));
+}
+
+
+/**
+ * Update for those coming from Drupal 5.x
+ */
+
+function epublish_update_6000() {
   $ret = array();
   db_drop_primary_key($ret, 'epublish_edition');
+  if (!$ret[0]['success']) {
+    // just bail out, this means we're already on Drupal 6
+    $ret[0]['success'] = TRUE;
+    return $ret;
+  }
+
   db_drop_index($ret, 'epublish_edition', 'pid');
   db_change_field($ret, 'epublish_edition', 'eid', 'eid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('eid'), 'indexes' => array('pid' => array('pid'))));
 
@@ -153,9 +168,7 @@ function epublish_update_1() {
   db_drop_primary_key($ret, 'epublish_section');
   db_change_field($ret, 'epublish_section', 'sid', 'sid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('sid')));
 
-  return _system_update_utf8(array('epublish_abstract', 'epublish_edition', 'epublish_edition_node', 'epublish_publication', 'epublish_section', 'epublish_topic', 'epublish_volume'));
+  return $ret;
 }
-
-
 
 
