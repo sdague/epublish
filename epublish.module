@@ -2740,6 +2740,17 @@ function epublish_admin_node_head() {
   return $output;
 }
 
+/***
+ * UI url : /admin/epublish/headlines/EID/FILTER
+ *
+ * This displays the interface to add nodes to and edition. It has to exclude
+ * nodes that are already in the edition then build a pager list.
+ *
+ * TODO: there should be more advanced filters, we should be able to filter
+ * based on type.
+ *
+ * TODO: does anyone use the existing filters?
+ */
 function epublish_admin_node() {
   $eid = arg(3);
   $filter = arg(4) ? arg(4) : 0;
