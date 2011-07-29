@@ -121,18 +121,7 @@ function epublish_schema() {
     ),
   );
 
-
-  if (!db_table_exists('epublish_publication') ||
-    !db_table_exists('epublish_abstract') ||
-    !db_table_exists('epublish_edition') ||
-    !db_table_exists('epublish_edition_node') ||
-    !db_table_exists('epublish_section') ||
-    !db_table_exists('epublish_topic') ||
-    !db_table_exists('epublish_volume') ) {
-    return $schema;
-  }
-
-  return array();
+  return $schema;
 }
 
 
@@ -142,12 +131,17 @@ function epublish_schema() {
 
 function epublish_update_6000() {
   $ret = array();
-  db_drop_primary_key($ret, 'epublish_edition');
-  if (!$ret[0]['success']) {
-    // just bail out, this means we're already on Drupal 6
+  // db_drop_index($ret, 'epublish_edition');
+  $schema = drupal_get_schema('epublish_edition', TRUE);
+
+  if ($schema["fields"]["eid"]["type"] == "serial") {
+    print("Already on Drupal 6 version, nothing to see here\n\n");
+    // ok, we're on drupal 6, don't worry about anything
     $ret[0]['success'] = TRUE;
     return $ret;
   }
+
+  print("If you are on Drupal 6 already and you now see warnings, it is safe to ignore. It probably means that you did an update without the module being enabled\n\n");
 
   db_drop_index($ret, 'epublish_edition', 'pid');
   db_change_field($ret, 'epublish_edition', 'eid', 'eid', array('type' => 'serial', 'not null' => TRUE), array('primary key' => array('eid'), 'indexes' => array('pid' => array('pid'))));
