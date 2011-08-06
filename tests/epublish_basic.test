@@ -37,12 +37,23 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
    * Create a simpletest_example node using the node form.
    */
   public function testEpublishPublicationCreate() {
-    // Create node to edit.
+    // Create 3 publications to make sure it works
     $edit = array();
     $edit['name'] = $this->randomName(8);
     $edit['description'] = $this->randomName(16);
     $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
     $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+
+    $edit['name'] = $this->randomName(8);
+    $edit['description'] = $this->randomName(16);
+    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
+    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+
+    $edit['name'] = $this->randomName(8);
+    $edit['description'] = $this->randomName(16);
+    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
+    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+
   }
 
 
