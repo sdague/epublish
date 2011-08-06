@@ -2051,15 +2051,12 @@ function epublish_form_pub_submit($form, &$form_state) {
   if ($edit['pid'] && $edit['action'] != 'delete') {
     db_query("UPDATE {epublish_publication} SET name = '%s', description = '%s', schedule = '%s', current_eid = '%d',layout_list = '%s', layout_page = '%s', sid = '%s' WHERE pid = '%d'", $edit['name'], $edit['description'], $edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['pid']);
     drupal_set_message(t('The publication "%title" has been updated.', array('%title' => $edit['name'])));
-  }
-  else {
-    $edit['pid'] = db_last_insert_id('epublish_publication', 'pid');
-    db_query("INSERT INTO {epublish_publication} (pid, name, description, schedule, current_eid, layout_list, layout_page, sid)
-             VALUES ('%d', '%s', '%s', '%s', '%d', '%s', '%s', '%s')", $edit['pid'], $edit['name'], $edit['description'], $edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid']);
+  } else {
+    db_query("INSERT INTO {epublish_publication} (name, description, schedule, current_eid, layout_list, layout_page, sid)
+             VALUES ('%s', '%s', '%s', '%d', '%s', '%s', '%s')", $edit['name'], $edit['description'], $edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid']);
     drupal_set_message(t('The publication "%title" has been added.', array('%title' => $edit['name'])));
   }
   $form_state['redirect'] = 'admin/epublish';
-  $form_state['nid'] = $node->nid;
 }
 
 
