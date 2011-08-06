@@ -1,0 +1,51 @@
+<?php
+/**
+ * Basic sanity testing for epublish
+ */
+
+
+class EPublishBasicTestCase extends DrupalWebTestCase {
+  /**
+   * User with rights to post SimpleTest Example content.
+   */
+  protected $privileged_user;
+
+  /**
+   * getInfo() returns properties that are displayed in the test selection form.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Epublish Basic Test',
+      'description' => 'Ensure that epublish has minimal functionality for release',
+      'group' => 'EPublish',
+    );
+  }
+
+  /**
+   * setUp() performs any pre-requisite tasks that need to happen.
+   */
+  public function setUp() {
+    // Enable any modules required for the test.
+    parent::setUp('epublish');
+
+    // Create and log in our privileged user.
+    $this->privileged_user = $this->drupalCreateUser( array('administer publications'));
+    $this->drupalLogin($this->privileged_user);
+}
+
+  /**
+   * Create a simpletest_example node using the node form.
+   */
+  public function testEpublishPublicationCreate() {
+    // Create node to edit.
+    $edit = array();
+    $edit['name'] = $this->randomName(8);
+    $edit['description'] = $this->randomName(16);
+    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
+    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+  }
+
+
+}
+
+?>
