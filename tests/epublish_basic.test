@@ -4,11 +4,13 @@
  */
 
 
+
 class EPublishBasicTestCase extends DrupalWebTestCase {
   /**
    * User with rights to post SimpleTest Example content.
    */
   protected $privileged_user;
+  protected $epubs;
 
   /**
    * getInfo() returns properties that are displayed in the test selection form.
@@ -33,30 +35,65 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->drupalLogin($this->privileged_user);
 }
 
+  private function _createRandomPublication() {
+    $edit = array();
+    $edit['name'] = $this->randomName(8);
+    $edit['description'] = $this->randomName(16);
+    $this->epubs[] = $edit;
+
+    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
+    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+
+}
+
+  /**
+   * Based on the number of items in publication, we'll figure out which links should exist here.
+   */
+  private function _checkFrontPage() {
+    $this->drupalGet("epublish");
+    for($i = 0; $i < 4; $i++) {
+      $n = $i + 1;
+      if ($i < count($this->epubs)) {
+        $this->assertPattern("|epublish/$n|", "Link to the epublish edition exists");
+        $this->assertLink($this->epubs[$i]['name'], 0, "Link name for epublish edition exists");
+      } else {
+        $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition does not exist");
+      }
+    }
+}
+
+  private function _checkEditables() {
+    for($i = 0; $i < 4; $i++) {
+      $n = $i + 1;
+      if ($i < count($this->epubs)) {
+        $this->drupalGet("admin/epublish/edit/publication/$n");
+        $this->assertFieldById("edit-name", $this->epubs[$i]['name'], "checking the name was there");
+        $this->assertFieldById("edit-description", $this->epubs[$i]['description'], "checking the name was there");
+      } else {
+        // Eventually we want to check that these things don't exist, but that's actually broken right now
+        // $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition exists");
+      }
+    }
+
+}
+
   /**
    * Create a simpletest_example node using the node form.
    */
   public function testEpublishPublicationCreate() {
     // Create 3 publications to make sure it works
-    $edit = array();
-    $edit['name'] = $this->randomName(8);
-    $edit['description'] = $this->randomName(16);
-    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
-    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+    // $this->_checkFrontPage();
 
-    $edit['name'] = $this->randomName(8);
-    $edit['description'] = $this->randomName(16);
-    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
-    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+    $this->_createRandomPublication();
+    $this->_checkFrontPage();
 
-    $edit['name'] = $this->randomName(8);
-    $edit['description'] = $this->randomName(16);
-    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
-    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+    $this->_createRandomPublication();
+    $this->_checkFrontPage();
 
-  }
-
-
+    $this->_createRandomPublication();
+    $this->_checkFrontPage();
+    $this->_checkEditables();
+}
 }
 
 ?>
