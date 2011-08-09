@@ -93,6 +93,10 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->_createRandomPublication();
     $this->_checkFrontPage();
     $this->_checkEditables();
+
+    // now we know that we've got 3 publications, lets actually add editions
+    // to one of them.
+
 }
 }
 

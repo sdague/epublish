@@ -1868,8 +1868,17 @@ function epublish_pub_list() {
   $header = array(t('publication/editions'), array("data" => t("operations"), "colspan" => 2));
 
   while ($publication = db_fetch_object($publications)) {
-    $rows[] = array(l(t($publication->name), "epublish/$publication->pid", array(), NULL, NULL, FALSE, TRUE), l(t("edit publication"), "admin/epublish/edit/publication/$publication->pid"),
-                    l(t("add edition"), "admin/epublish/add/edition/$publication->pid"));
+    $rows[] = array(
+      l(t($publication->name), "epublish/$publication->pid",
+        array("attributes" =>
+          array("label" => "view-publication-$publication->pid"))),
+      l(t("edit publication"), "admin/epublish/edit/publication/$publication->pid",
+        array("attributes" =>
+          array("label" => "edit-publication-$publication->pid"))),
+      l(t("add edition"), "admin/epublish/add/edition/$publication->pid",
+        array("attributes" =>
+          array("label" => "add-edition-to-publication-$publication->pid")))
+    );
     $result = db_query("SELECT * FROM {epublish_edition} WHERE pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
     $previous_volume = -1;
     $editions = array();
