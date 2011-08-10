@@ -62,6 +62,23 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     }
 }
 
+  /**
+   * Check for the existance of links on the front page based on state that
+   * we've generated so far
+   */
+
+  private function _checkEpublishLinks() {
+    $this->drupalGet("admin/epublish");
+    for ($i = 0; $i < 4; $i++) {
+      $n = $i + 1;
+      if ($i < count($this->epubs)) {
+        $this->assertLinkLabel("view-publication-$n", 0, "Check for the existance of the view link for epub #$n");
+        $this->assertLinkLabel("edit-publication-$n", 0, "Check for the existance of the view link for epub #$n");
+        $this->assertLinkLabel("add-edition-to-publication-$n", 0, "Check for the existance of the view link for epub #$n");
+      }
+    }
+}
+
   private function _checkEditables() {
     for($i = 0; $i < 4; $i++) {
       $n = $i + 1;
@@ -76,6 +93,12 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     }
 
 }
+
+  protected function assertLinkLabel($label, $index = 0, $message = '', $group = 'Other') {
+    $links = $this->xpath('//a[@label="' . $label . '"]');
+    $message = ($message ?  $message : t('Link with label "!label" found.', array('!label' => $label)));
+    return $this->assert(isset($links[$index]), $message, $group);
+  }
 
   /**
    * Create a simpletest_example node using the node form.
@@ -92,10 +115,14 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
     $this->_createRandomPublication();
     $this->_checkFrontPage();
-    $this->_checkEditables();
 
+
+    $this->_checkEditables();
+    $this->_checkEpublishLinks();
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
+
+
 
 }
 }
