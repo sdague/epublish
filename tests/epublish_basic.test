@@ -73,8 +73,11 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
       $n = $i + 1;
       if ($i < count($this->epubs)) {
         $this->assertLinkLabel("view-publication-$n", 0, "Check for the existance of the view link for epub #$n");
+        $this->assertLink($this->epubs[$i]['name'], 0, "Check that the name of the view link is correct");
         $this->assertLinkLabel("edit-publication-$n", 0, "Check for the existance of the view link for epub #$n");
+        $this->assertLink(t('edit publication'), $i, "Check that the edit link is good");
         $this->assertLinkLabel("add-edition-to-publication-$n", 0, "Check for the existance of the view link for epub #$n");
+        $this->assertLink(t('add edition'), $i, "Check that the add edition link is good");
       }
     }
 }
@@ -92,6 +95,12 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
       }
     }
 
+}
+
+  private function _createEdition($pub, $index) {
+    $this->clickLink("add edition", $index);
+
+    $this->assertText("Edition of publication @title", array("@title" => $pub['name']));
 }
 
   /**
@@ -121,13 +130,11 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->_createRandomPublication();
     $this->_checkFrontPage();
 
-
     $this->_checkEditables();
     $this->_checkEpublishLinks();
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
-
-
+    $this->_createEdition($this->epubs[0], 0);
 
 }
 }
