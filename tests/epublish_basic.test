@@ -94,6 +94,11 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
 }
 
+  /**
+   * This tests to ensure that I've created the links that I expect using the
+   * label attribute on them. It's a bit nicer than the text checking.
+   */
+
   protected function assertLinkLabel($label, $index = 0, $message = '', $group = 'Other') {
     $links = $this->xpath('//a[@label="' . $label . '"]');
     $message = ($message ?  $message : t('Link with label "!label" found.', array('!label' => $label)));
