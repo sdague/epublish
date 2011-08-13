@@ -11,6 +11,7 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
    */
   protected $privileged_user;
   protected $epubs;
+  protected $eds;
 
   /**
    * getInfo() returns properties that are displayed in the test selection form.
@@ -97,10 +98,26 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
 }
 
+  /**
+   *
+   *  Create an edition for a publication by index
+   *
+   */
+
   private function _createEdition($pub, $index) {
     $this->clickLink("add edition", $index);
-
     $this->assertText("Edition of publication @title", array("@title" => $pub['name']));
+
+    $num = $index + 1;
+    $ed = array();
+    $ed['pid'] = $num;
+
+    $ed['dateline'] = $this->randomName(20);
+    $ed['volume'] = '2011';
+    $ed['number'] = $num;
+    $ed['description'] = $this->randomString(100);
+
+    $this->drupalPost("/admin/epublish/add/edition/$num", $ed, t('Submit'));
 }
 
   /**
