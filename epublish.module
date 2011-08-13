@@ -2384,8 +2384,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
     $result = db_query(db_rewrite_sql("SELECT n.nid, n.title, n.changed, n.status, n.type, een.weight, een.tid
                                       FROM {node} n LEFT JOIN {epublish_edition_node} een ON n.nid = een.nid
                                       LEFT JOIN {epublish_topic} et ON et.tid=een.tid
-                                      WHERE eid='". $edit->eid ."' AND et.sid='". $sid ."' ORDER BY et.weight, een.weight, n.changed DESC"));
-    //                                      WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed DESC", $edit->eid, $sid ));
+                                      WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed DESC"), $edit->eid, $sid );
     while ($node = db_fetch_object($result)) {
       $nodes[$node->nid] = '';
       $form['title'][$node->nid] = array('#value' => l($node->title, 'node/'. $node->nid) .' '. theme('mark', node_mark($node->nid, $node->changed)));

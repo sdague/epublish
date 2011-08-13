@@ -42,7 +42,9 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $edit['description'] = $this->randomName(16);
     $this->epubs[] = $edit;
 
+    #$this->clickLink(t("Add publication"), 0);
     $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
+    #$this->drupalPost(NULL, $edit, t('Submit'));
     $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
 
 }
@@ -117,7 +119,14 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $ed['number'] = $num;
     $ed['description'] = $this->randomString(100);
 
-    $this->drupalPost("/admin/epublish/add/edition/$num", $ed, t('Submit'));
+    $this->eds[] = $ed;
+
+    $this->drupalPost(NULL, $ed, t('Submit'));
+    $this->assertText("-@title", array("@title" => $ed['dateline']));
+
+    $this->clickLink("edit edition", 0);
+
+
 }
 
   /**
