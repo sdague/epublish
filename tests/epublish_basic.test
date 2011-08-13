@@ -107,6 +107,9 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
    */
 
   private function _createEdition($pub, $index) {
+    $this->drupalGet("admin/epublish");
+    $this->assertText("Epublish");
+
     $this->clickLink("add edition", $index);
     $this->assertText("Edition of publication @title", array("@title" => $pub['name']));
 
@@ -118,6 +121,7 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $ed['volume'] = '2011';
     $ed['number'] = $num;
     $ed['description'] = $this->randomString(100);
+    $ed['sid'] = 1;
 
     $this->eds[] = $ed;
 
