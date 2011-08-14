@@ -3,7 +3,7 @@
  * Basic sanity testing for epublish
  */
 
-
+include "epublish_classes.php";
 
 class EPublishBasicTestCase extends DrupalWebTestCase {
   /**
@@ -37,16 +37,14 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 }
 
   private function _createRandomPublication() {
-    $edit = array();
-    $edit['name'] = $this->randomName(8);
-    $edit['description'] = $this->randomName(16);
-    $this->epubs[] = $edit;
+    $edition = new EpubPub($this);
+    $edition->createRandom();
+    $this->epubs[] = $edition;
 
-    #$this->clickLink(t("Add publication"), 0);
-    $this->drupalPost('admin/epublish/add/publication', $edit, t('Submit'));
-    #$this->drupalPost(NULL, $edit, t('Submit'));
-    $this->assertText(t('The publication "@title" has been added.', array('@title' => $edit['name'])));
+    // TODO: I should probably move this into the helper class, howerver the
+    // visibility is wrong
 
+    // $this->assertText(t('The publication "@title" has been added.', array('@title' => $edition->name)), "Checking that the title '" . $edition->name . "' for the publication was found" );
 }
 
   /**
@@ -57,10 +55,14 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     for($i = 0; $i < 4; $i++) {
       $n = $i + 1;
       if ($i < count($this->epubs)) {
-        $this->assertPattern("|epublish/$n|", "Link to the epublish edition exists");
-        $this->assertLink($this->epubs[$i]['name'], 0, "Link name for epublish edition exists");
+        $epub = $this->epubs[$i];
+        $link = $epub->viewLink();
+
+        $this->assertPattern("|$link|", "Link to the epublish edition exists");
+        $this->assertLink($epub->name, 0, "Link name for epublish edition exists");
       } else {
-        $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition does not exist");
+        // TODO: this makes an assumption that we start at one and order up, which is fine, but might be fragile.
+        $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition should not exist");
       }
     }
 }
@@ -73,25 +75,29 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
   private function _checkEpublishLinks() {
     $this->drupalGet("admin/epublish");
     for ($i = 0; $i < 4; $i++) {
-      $n = $i + 1;
       if ($i < count($this->epubs)) {
+        $epub = $this->epubs[$i];
+        $n = $epub->id;
         $this->assertLinkLabel("view-publication-$n", 0, "Check for the existance of the view link for epub #$n");
-        $this->assertLink($this->epubs[$i]['name'], 0, "Check that the name of the view link is correct");
+        $this->assertLink($epub->name, 0, "Check that the name of the view link is correct");
         $this->assertLinkLabel("edit-publication-$n", 0, "Check for the existance of the view link for epub #$n");
         $this->assertLink(t('edit publication'), $i, "Check that the edit link is good");
         $this->assertLinkLabel("add-edition-to-publication-$n", 0, "Check for the existance of the view link for epub #$n");
         $this->assertLink(t('add edition'), $i, "Check that the add edition link is good");
+      } else {
+        // assertNoLink
       }
     }
 }
 
   private function _checkEditables() {
     for($i = 0; $i < 4; $i++) {
-      $n = $i + 1;
       if ($i < count($this->epubs)) {
-        $this->drupalGet("admin/epublish/edit/publication/$n");
-        $this->assertFieldById("edit-name", $this->epubs[$i]['name'], "checking the name was there");
-        $this->assertFieldById("edit-description", $this->epubs[$i]['description'], "checking the name was there");
+        $epub = $this->epubs[$i];
+        $n = $epub->id;
+        $this->drupalGet($epub->editLink());
+        $this->assertFieldById("edit-name", $epub->name, "checking the name was there");
+        $this->assertFieldById("edit-description", $epub->description, "checking the name was there");
       } else {
         // Eventually we want to check that these things don't exist, but that's actually broken right now
         // $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition exists");
@@ -106,7 +112,7 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
    *
    */
 
-  private function _createEdition($pub, $index) {
+  private function _createEdition($pub, $index, $index2) {
     $this->drupalGet("admin/epublish");
     $this->assertText("Epublish");
 
@@ -127,9 +133,13 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
     $this->drupalPost(NULL, $ed, t('Submit'));
     $this->assertText("-@title", array("@title" => $ed['dateline']));
+    // TODO: I want to move where this goes to, so this is going to change.
+}
 
-    $this->clickLink("edit edition", 0);
-
+  private function _createEditions() {
+    $this->_createEdition($this->epubs[0], 0);
+    $this->_createEdition($this->epubs[0], 0);
+    $this->_createEdition($this->epubs[0], 0);
 
 }
 
@@ -138,11 +148,12 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
    * label attribute on them. It's a bit nicer than the text checking.
    */
 
-  protected function assertLinkLabel($label, $index = 0, $message = '', $group = 'Other') {
+  public function assertLinkLabel($label, $index = 0, $message = '', $group = 'Other') {
     $links = $this->xpath('//a[@label="' . $label . '"]');
     $message = ($message ?  $message : t('Link with label "!label" found.', array('!label' => $label)));
     return $this->assert(isset($links[$index]), $message, $group);
   }
+
 
   /**
    * Create a simpletest_example node using the node form.
@@ -164,9 +175,30 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->_checkEpublishLinks();
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
-    $this->_createEdition($this->epubs[0], 0);
 
 }
+
+  /**
+   *  These are utility functions for the subclasses to use
+   */
+
+  public function Post($one, $two, $three)
+  {
+    return $this->drupalPost($one, $two, $three);
+}
+
+  public function getEpubId($name) {
+    $this->drupalGet("admin/epublish");
+    $links = $this->xpath('//a[text()="' . $name . '"]');
+    foreach($links[0]->attributes() as $n => $v) {
+      if ($n == "href") {
+        preg_match("/(\d+)$/", $v, $matches);
+        return $matches[0];
+      }
+    }
+    return 0;
+}
+
 }
 
 ?>
