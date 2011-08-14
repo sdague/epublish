@@ -213,6 +213,8 @@ Volume 22
       22file that comes included with this module.</p>",
       array('!settings' => l(t("epublish settings"), "admin/settings/epublish")));
       break;
+    default:
+      $output = "";
       }
     return $output;
 }
