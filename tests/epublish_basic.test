@@ -119,6 +119,16 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     }
 }
 
+  private function _deleteEditionsCheck() {
+    $pub = $this->epubs[1];
+    foreach ($pub->eds as $tmp) {
+      $ed = $pub->deleteEd($tmp->id);
+      $link = $ed->editLink();
+      $this->drupalGet("admin/epublish");
+      $this->assertNoPattern("|$link|", "Ensure we've deleted things appropriately");
+    }
+}
+
   /**
    *
    *  Create an edition for a publication by index
@@ -172,6 +182,8 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->_createEdition($this->epubs[2]);
 
     $this->_checkEditions();
+
+    $this->_deleteEditionsCheck();
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
 

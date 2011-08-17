@@ -44,6 +44,20 @@ class EpubPub {
         return $ed;
     }
 
+    public function deleteEd($eid) {
+        $neweds = array();
+        $ret = NULL;
+        foreach ($this->eds as $ed) {
+            if ($ed->id == $eid) {
+                $ret = $ed;
+            } else {
+                $neweds[] = $ed;
+            }
+        }
+        $this->eds = $neweds;
+        return $ret;
+    }
+
 }
 
 class EpubEdition {
@@ -92,6 +106,12 @@ class EpubEdition {
         return $data;
     }
 
+    public function delete() {
+        $test->Get($this->editLink());
+        // twice because of the confirmation screen
+        $test->Post(NULL, array(), t("Delete"));
+        $test->Post(NULL, array(), t("Delete"));
+    }
 
 }
 
