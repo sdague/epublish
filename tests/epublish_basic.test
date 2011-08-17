@@ -112,37 +112,12 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
    *
    */
 
-  private function _createEdition($pub, $index, $index2) {
+  private function _createEdition($pub) {
+    $ed = $pub->createRandomEd();
     $this->drupalGet("admin/epublish");
-    $this->assertText("Epublish");
-
-    $this->clickLink("add edition", $index);
-    $this->assertText("Edition of publication @title", array("@title" => $pub['name']));
-
-    $num = $index + 1;
-    $ed = array();
-    $ed['pid'] = $num;
-
-    $ed['dateline'] = $this->randomName(20);
-    $ed['volume'] = '2011';
-    $ed['number'] = $num;
-    $ed['description'] = $this->randomString(100);
-    $ed['sid'] = 1;
-
-    $this->eds[] = $ed;
-
-    $this->drupalPost(NULL, $ed, t('Submit'));
-    $this->assertText("-@title", array("@title" => $ed['dateline']));
+    $this->assertText("-@title", array("@title" => $ed->dateline));
     // TODO: I want to move where this goes to, so this is going to change.
 }
-
-  private function _createEditions() {
-    $this->_createEdition($this->epubs[0], 0);
-    $this->_createEdition($this->epubs[0], 0);
-    $this->_createEdition($this->epubs[0], 0);
-
-}
-
   /**
    * This tests to ensure that I've created the links that I expect using the
    * label attribute on them. It's a bit nicer than the text checking.
@@ -173,6 +148,15 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
     $this->_checkEditables();
     $this->_checkEpublishLinks();
+
+    $this->_createEdition($this->epubs[0]);
+    $this->_createEdition($this->epubs[0]);
+    $this->_createEdition($this->epubs[0]);
+
+    $this->_createEdition($this->epubs[1]);
+    $this->_createEdition($this->epubs[1]);
+
+    $this->_createEdition($this->epubs[2]);
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
 
@@ -197,6 +181,12 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
       }
     }
     return 0;
+}
+
+  public function getEpubEdId($name) {
+    $this->drupalGet("admin/epublish");
+    preg_match("/-$name.*?\(<a href=\".*?(\d+)\">edit edition/", $this->content, $matches);
+    return $matches[0];
 }
 
 }
