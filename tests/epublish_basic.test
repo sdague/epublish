@@ -106,6 +106,19 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
 }
 
+  private function _checkEditions() {
+    foreach ($this->epubs as $pub) {
+      foreach ($pub->eds as $ed) {
+        $this->drupalGet($ed->editLink());
+        $this->assertFieldById("edit-dateline", $ed->dateline, "Checking dateline is set correctly");
+        $this->assertFieldById("edit-volume", $ed->volume, "Checking volume is set correctly");
+        $this->assertFieldById("edit-number", $ed->number, "Checking number is set correctly");
+        $this->assertFieldById("edit-description", $ed->description, "Checking description is set correctly");
+        // TODO: need to add pub date
+      }
+    }
+}
+
   /**
    *
    *  Create an edition for a publication by index
@@ -157,6 +170,8 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->_createEdition($this->epubs[1]);
 
     $this->_createEdition($this->epubs[2]);
+
+    $this->_checkEditions();
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
 
@@ -165,6 +180,11 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
   /**
    *  These are utility functions for the subclasses to use
    */
+
+  public function Get($url)
+  {
+    return $this->drupalGet($url);
+}
 
   public function Post($one, $two, $three)
   {
@@ -185,8 +205,11 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
   public function getEpubEdId($name) {
     $this->drupalGet("admin/epublish");
-    preg_match("/-$name.*?\(<a href=\".*?(\d+)\">edit edition/", $this->content, $matches);
-    return $matches[0];
+    if( preg_match("/-$name.*?\(<a href=\".*?(\d+)\">edit edition/", $this->content, $matches) ) {
+      return $matches[1];
+    } else {
+      return 0;
+    }
 }
 
 }

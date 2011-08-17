@@ -64,14 +64,16 @@ class EpubEdition {
 
     public function createRandom($pid, $num) {
         $test = $this->test;
-        $this->pid = $pid;
+        $test->Get("admin/epublish/add/edition/$pid");
+
+        // $this->pid = $pid;
         $this->dateline = $test->randomName(20);
         $this->volume = '2011';
         $this->number = $num;
         $this->description = $test->randomString(100);
         $this->sid = 1;
 
-        $test->Post("admin/epublish/add/edition/$pid", $this->formData(), t('Submit'));
+        $test->Post(NULL, $this->formData(), t('Submit'));
         $this->id = $test->getEpubEdId($this->dateline);
     }
 
@@ -81,7 +83,7 @@ class EpubEdition {
 
     public function formData() {
         $data = array();
-        $data['pid'] = $this->pid;
+        // $data['pid'] = $this->pid;
         $data['dateline'] = $this->dateline;
         $data['volume'] = $this->volume;
         $data['number'] = $this->number;
