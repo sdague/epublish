@@ -34,6 +34,18 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     // Create and log in our privileged user.
     $this->privileged_user = $this->drupalCreateUser( array('administer publications'));
     $this->drupalLogin($this->privileged_user);
+
+    $this->drupalCreateNode(array("title" => "Page 1"));
+    $this->drupalCreateNode(array("title" => "Page 2"));
+    $this->drupalCreateNode(array("title" => "Page 3"));
+    $this->drupalCreateNode(array("title" => "Page 4"));
+    $this->drupalCreateNode(array("title" => "Page 5"));
+
+    $this->drupalCreateNode(array("title" => "Story 1", "type" => "story"));
+    $this->drupalCreateNode(array("title" => "Story 2", "type" => "story"));
+    $this->drupalCreateNode(array("title" => "Story 3", "type" => "story"));
+    $this->drupalCreateNode(array("title" => "Story 4", "type" => "story"));
+    $this->drupalCreateNode(array("title" => "Story 5", "type" => "story"));
 }
 
   private function _createRandomPublication() {
@@ -122,10 +134,17 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
   private function _deleteEditionsCheck() {
     $pub = $this->epubs[1];
     foreach ($pub->eds as $tmp) {
+      // first check to get delete confirmation screen
+      $this->drupalGet($tmp->editLink());
+      $this->drupalPost(NULL, array(), t("Delete"));
+      $this->assertText(t('Are you sure you want to delete the "@dateline" edition from publication "@pubname"?', array("@dateline" => $tmp->dateline, "@pubname" => $pub->name)), "Ensure that we get the confirmation screen for delete");
+
       $ed = $pub->deleteEd($tmp->id);
       $link = $ed->editLink();
+      $this->assertText(t('Deleted "@dateline" edition from publication "@pubname."', array("@dateline" => $tmp->dateline, "@pubname" => $pub->name)), "Ensure that delete works");
       $this->drupalGet("admin/epublish");
       $this->assertNoPattern("|$link|", "Ensure we've deleted things appropriately");
+
     }
 }
 
@@ -138,7 +157,7 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
   private function _createEdition($pub) {
     $ed = $pub->createRandomEd();
     $this->drupalGet("admin/epublish");
-    $this->assertText("-@title", array("@title" => $ed->dateline));
+    $this->assertText(t("-@title", array("@title" => $ed->dateline)), "Ensure the edition is listed correctly on the top edit page");
     // TODO: I want to move where this goes to, so this is going to change.
 }
   /**
