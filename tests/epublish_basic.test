@@ -148,6 +148,32 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     }
 }
 
+  private function _addArticlesCheck() {
+    $pub = $this->epubs[0];
+    $ed = $pub->eds[0];
+    $this->drupalGet($ed->articlesLink());
+
+    $this->assertLink("Page 1", 0, "Ensure Page 1 is listed");
+    $this->assertLink("Page 2", 0, "Ensure Page 2 is listed");
+    $this->assertLink("Page 3", 0, "Ensure Page 3 is listed");
+    $this->assertLink("Page 4", 0, "Ensure Page 4 is listed");
+    $this->assertLink("Page 5", 0, "Ensure Page 5 is listed");
+    $this->assertLink("Story 1", 0,  "Ensure Story 1 is listed");
+    $this->assertLink("Story 2", 0, "Ensure Story 2 is listed");
+    $this->assertLink("Story 3", 0, "Ensure Story 3 is listed");
+    $this->assertLink("Story 4", 0, "Ensure Story 4 is listed");
+    $this->assertLink("Story 5", 0, "Ensure Story 5 is listed");
+
+    $form = array();
+    $form["nodes[1]"] = TRUE;
+    $form["nodes[2]"] = TRUE;
+    $form["nodes[6]"] = TRUE;
+    $form["nodes[7]"] = TRUE;
+
+    $this->drupalPost(NULL, $form, t("Add checked items to this edition"));
+
+}
+
   /**
    *
    *  Create an edition for a publication by index
@@ -205,6 +231,7 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->_deleteEditionsCheck();
     // now we know that we've got 3 publications, lets actually add editions
     // to one of them.
+    $this->_addArticlesCheck();
 
 }
 

@@ -24,7 +24,8 @@ class EpubPub {
         $this->name = $test->randomName(8);
         $this->description = $test->randomString(50);
 
-        $test->Post('admin/epublish/add/publication', $this->formData(), t('Submit'));
+        $test->Get('admin/epublish/add/publication');
+        $test->Post(NULL, $this->formData(), t('Submit'));
         $this->id = $test->getEpubId($this->name);
     }
 
@@ -96,6 +97,10 @@ class EpubEdition {
         return "admin/epublish/edit/edition/" . $this->id;
     }
 
+    public function articlesLink() {
+        return "admin/epublish/headlines/" . $this->id;
+    }
+
     public function formData() {
         $data = array();
         // $data['pid'] = $this->pid;
@@ -103,7 +108,7 @@ class EpubEdition {
         $data['volume'] = $this->volume;
         $data['number'] = $this->number;
         $data['description'] = $this->description;
-        $data['sid'] = $this->sid;
+        // $data['sid'] = $this->sid;
         return $data;
     }
 
