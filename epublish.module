@@ -1461,10 +1461,18 @@ function epublish_form_section_submit($form, &$form_state) {
     }
   }
   else {
-    $form_state['sid'] = db_last_insert_id('epublish_section', 'sid');
-    db_query("INSERT INTO {epublish_section} (sid, title, vid, node_types, timeframe, layout_list, layout_page) VALUES ('%d', '%s', '%d', '%s', '%s', '%s', '%s')", $form_state['sid'], $form_state['title'], $form_state['vid'], implode(',', array_keys($form_state['node_types'])), $form_state['timeframe'], $form_state['layout_list'], $form_state['layout_page']);
-    // Every section has a "miscellaneous" topic that can't be deleted, with a weight of 99 (so it always appears at the bottom of the section)
-    $misc_topic = array('sid' => $form_state['sid'], 'tid' => 0, 'count' => 0, 'weight' => 99, 'node_types' => array());
+    db_query("INSERT INTO {epublish_section} (title, vid, node_types, timeframe, layout_list, layout_page) VALUES ('%s', '%d', '%s', '%s', '%s', '%s')", $form_state['title'], $form_state['vid'], implode(',', array_keys($form_state['node_types'])), $form_state['timeframe'], $form_state['layout_list'], $form_state['layout_page']);
+    /* Every section has a "miscellaneous" topic that can't be deleted, with a
+     * weight of 99 (so it always appears at the bottom of the section) */
+
+    /* I think this is right, it works in the basic test case, but I'm a
+     * little concerned that it's going to act up in the field */
+    $sid = db_result(db_query("SELECT max(sid) FROM {epublish_section}"));
+    /* Holy rusted spin around sideways hackery batman. This overloads the
+     * topic submit, and now explains why many things were acting funky
+     * previously. */
+    $misc_topic = array('values' => array('sid' => $sid, 'tid' => 0, 'count' => 0, 'weight' => 99, 'node_types' => array()));
+
     epublish_form_topic_submit(NULL, $misc_topic);
     if ($form) {
       drupal_set_message(t('The "%title" section has been added.', array('%title' => $form_state['title'])));
@@ -1714,9 +1722,6 @@ function epublish_topic() {
  */
 function epublish_form_topic_submit($form, &$edit) {
   $edit = $edit['values'];
-  if ($edit['tid']==0) {
-    $edit['sid'] = db_last_insert_id('epublish_section', 'sid');
-  }
   if (!$edit['tid']) {
     $edit['tid'] = 0;
   }
@@ -2515,8 +2520,7 @@ function epublish_form_edition_submit($form, &$form_state) {
     }
   }
   else {
-    $edit['eid'] = db_last_insert_id('epublish_edition', 'eid');
-    db_query("INSERT INTO {epublish_edition} (eid, pid, dateline, description, volume, number, pubdate, layout_list, layout_page, sid, published) VALUES ('%d', '%d', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%d', '%d')", $edit['eid'], $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'] . $edit['month'] . $edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published']);
+    db_query("INSERT INTO {epublish_edition} (pid, dateline, description, volume, number, pubdate, layout_list, layout_page, sid, published) VALUES ('%d', '%s', '%s', '%d', '%d', '%d', '%s', '%s', '%d', '%d')", $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'] . $edit['month'] . $edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published']);
     drupal_set_message(t('The "%title" edition has been added.', array('%title' => $edit['dateline'])));
   }
   if ($edit['make_current']) {

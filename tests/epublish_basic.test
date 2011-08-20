@@ -275,7 +275,9 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     // to one of them.
     $this->_addArticlesCheck();
 
-    $this->_fooBar();
+    // If you want to see the state of the database, uncomment below, which
+    // breaks simple test and leaves the database laying around.
+    // $this->_fooBar();
 }
 
   /**
