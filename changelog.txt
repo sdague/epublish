@@ -1,7 +1,17 @@
-28 Jul 2011
+6.x-1.13 - 20 Aug 2011
+ - add a large number of tests using simpletest framework
+ - move one of the final db strings over to using db_query with
+ parameters
+ - remove all instances of db_last_insert_id, as it wasn't being used
+ correctly. Now we rely on database serial fields to keep things working.
+ - fix an issue that might prevent the miscellaneous topic section
+ from being created under some circumstances, which would in
+ turn prevent items from being added.
+
+6.x-1.12 - 28 Jul 2011
  - fix the database upgrade as many users from 1.5 were having issues upgrading.
 
-12 Mar 2011
+6.x-1.6 - 12 Mar 2011
  - enable support for email context in addition to list and page
  context
  - Safely handle the delete case which will currently delete all articles
