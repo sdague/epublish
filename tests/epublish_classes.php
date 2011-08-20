@@ -16,15 +16,20 @@ class EpubPub {
         $data = array();
         $data['name'] = $this->name;
         $data['description'] = $this->description;
+        // TODO: we shouldn't need these, but apparently we do
+        $data['layout_page'] = '0';
+        $data['layout_list'] = '0';
+        $data['sid'] = '0';
         return $data;
     }
 
     public function createRandom() {
         $test = $this->test;
+        $test->Get('admin/epublish/add/publication');
+
         $this->name = $test->randomName(8);
         $this->description = $test->randomString(50);
 
-        $test->Get('admin/epublish/add/publication');
         $test->Post(NULL, $this->formData(), t('Submit'));
         $this->id = $test->getEpubId($this->name);
     }
@@ -82,7 +87,7 @@ class EpubEdition {
         $test = $this->test;
         $test->Get("admin/epublish/add/edition/$pid");
 
-        // $this->pid = $pid;
+        $this->pid = $pid;
         $this->dateline = $test->randomName(20);
         $this->volume = '2011';
         $this->number = $num;
@@ -108,7 +113,7 @@ class EpubEdition {
         $data['volume'] = $this->volume;
         $data['number'] = $this->number;
         $data['description'] = $this->description;
-        // $data['sid'] = $this->sid;
+        $data['sid'] = '0';
         return $data;
     }
 

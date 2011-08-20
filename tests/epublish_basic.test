@@ -48,6 +48,25 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->drupalCreateNode(array("title" => "Story 5", "type" => "story"));
 }
 
+
+  private function _checkPublicationForm() {
+    $this->drupalGet("admin/epublish/add/publication");
+    $this->assertFieldById("edit-name", '', "Name field exists");
+    $this->assertFieldById("edit-description", '', "Description field exists");
+    $this->assertFieldById("edit-schedule", '', "Hidden schedule field exists");
+    $this->assertField("edit-current-eid", "Current eid field exists");
+    $this->assertField("edit-layout-page", "Layout field exists");
+    $this->assertField("edit-layout-list", "Layout list field exists");
+    $this->assertField("edit-sid", "Section field exists");
+}
+
+  private function _checkSectionsForm() {
+    $this->drupalGet("admin/epublish/sections");
+    $this->assertLink("default", 0, "Ensure default topic exists");
+    $this->assertText("-miscellaneous", "Ensure misc section exists");
+    $this->assertLink("edit topic", 0, "Ensure that misc edit link exists");
+}
+
   private function _createRandomPublication() {
     $edition = new EpubPub($this);
     $edition->createRandom();
@@ -151,7 +170,8 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
   private function _addArticlesCheck() {
     $pub = $this->epubs[0];
     $ed = $pub->eds[0];
-    $this->drupalGet($ed->articlesLink());
+    $this->drupalGet($ed->editLink());
+    $this->drupalPost(NULL, array(), t("Add more headlines"));
 
     $this->assertLink("Page 1", 0, "Ensure Page 1 is listed");
     $this->assertLink("Page 2", 0, "Ensure Page 2 is listed");
@@ -171,6 +191,24 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $form["nodes[7]"] = TRUE;
 
     $this->drupalPost(NULL, $form, t("Add checked items to this edition"));
+
+    $this->assertField("edit-nodes-1", "Check for Page 1");
+    $this->assertField("edit-nodes-2", "Check for Page 2");
+    $this->assertField("edit-nodes-6", "Check for Page 6");
+    $this->assertField("edit-nodes-7", "Check for Page 7");
+
+    $this->drupalPost(NULL, array(), t("Add more headlines"));
+
+    $this->assertNoLink("Page 1", "Ensure Page 1 is listed");
+    $this->assertNoLink("Page 2", "Ensure Page 2 is listed");
+    $this->assertLink("Page 3", 0, "Ensure Page 3 is listed");
+    $this->assertLink("Page 4", 0, "Ensure Page 4 is listed");
+    $this->assertLink("Page 5", 0, "Ensure Page 5 is listed");
+    $this->assertNoLink("Story 1", "Ensure Story 1 is listed");
+    $this->assertNoLink("Story 2", "Ensure Story 2 is listed");
+    $this->assertLink("Story 3", 0, "Ensure Story 3 is listed");
+    $this->assertLink("Story 4", 0, "Ensure Story 4 is listed");
+    $this->assertLink("Story 5", 0, "Ensure Story 5 is listed");
 
 }
 
@@ -205,8 +243,12 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     // Create 3 publications to make sure it works
     // $this->_checkFrontPage();
 
+    $this->_checkPublicationForm();
+    $this->_checkSectionsForm();
+
     $this->_createRandomPublication();
     $this->_checkFrontPage();
+    $this->_checkSectionsForm();
 
     $this->_createRandomPublication();
     $this->_checkFrontPage();
@@ -233,6 +275,7 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     // to one of them.
     $this->_addArticlesCheck();
 
+    $this->_fooBar();
 }
 
   /**
