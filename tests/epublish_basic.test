@@ -46,7 +46,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
     $this->drupalCreateNode(array("title" => "Story 3", "type" => "story"));
     $this->drupalCreateNode(array("title" => "Story 4", "type" => "story"));
     $this->drupalCreateNode(array("title" => "Story 5", "type" => "story"));
-}
+  }
 
 
   private function _checkPublicationForm() {
@@ -58,14 +58,14 @@ class EPublishBasicTestCase extends EPublishTestCase {
     $this->assertField("edit-layout-page", "Layout field exists");
     $this->assertField("edit-layout-list", "Layout list field exists");
     $this->assertField("edit-sid", "Section field exists");
-}
+  }
 
   private function _checkSectionsForm() {
     $this->drupalGet("admin/epublish/sections");
     $this->assertLink("default", 0, "Ensure default topic exists");
     $this->assertText("-miscellaneous", "Ensure misc section exists");
     $this->assertLink("edit topic", 0, "Ensure that misc edit link exists");
-}
+  }
 
   private function _createRandomPublication() {
     $edition = new EpubPub($this);
@@ -76,7 +76,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
     // visibility is wrong
 
     // $this->assertText(t('The publication "@title" has been added.', array('@title' => $edition->name)), "Checking that the title '" . $edition->name . "' for the publication was found" );
-}
+  }
 
   /**
    * Based on the number of items in publication, we'll figure out which links should exist here.
@@ -96,7 +96,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
         $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition should not exist");
       }
     }
-}
+  }
 
   /**
    * Check for the existance of links on the front page based on state that
@@ -119,7 +119,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
         // assertNoLink
       }
     }
-}
+  }
 
   private function _checkEditables() {
     for($i = 0; $i < 4; $i++) {
@@ -134,8 +134,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
         // $this->assertNoPattern("|epublish/$n|", "Link to the epublish edition exists");
       }
     }
-
-}
+  }
 
   private function _checkEditions() {
     foreach ($this->epubs as $pub) {
@@ -148,7 +147,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
         // TODO: need to add pub date
       }
     }
-}
+  }
 
   private function _deleteEditionsCheck() {
     $pub = $this->epubs[1];
@@ -163,9 +162,8 @@ class EPublishBasicTestCase extends EPublishTestCase {
       $this->assertText(t('Deleted "@dateline" edition from publication "@pubname."', array("@dateline" => $tmp->dateline, "@pubname" => $pub->name)), "Ensure that delete works");
       $this->drupalGet("admin/epublish");
       $this->assertNoPattern("|$link|", "Ensure we've deleted things appropriately");
-
     }
-}
+  }
 
   private function _addArticlesCheck() {
     $pub = $this->epubs[0];
@@ -210,7 +208,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
     $this->assertLink("Story 4", 0, "Ensure Story 4 is listed");
     $this->assertLink("Story 5", 0, "Ensure Story 5 is listed");
 
-}
+  }
 
   /**
    *
@@ -223,7 +221,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
     $this->drupalGet("admin/epublish");
     $this->assertText(t("-@title", array("@title" => $ed->dateline)), "Ensure the edition is listed correctly on the top edit page");
     // TODO: I want to move where this goes to, so this is going to change.
-}
+  }
 
 
   /**
@@ -268,9 +266,7 @@ class EPublishBasicTestCase extends EPublishTestCase {
     // If you want to see the state of the database, uncomment below, which
     // breaks simple test and leaves the database laying around.
     // $this->_fooBar();
-}
-
-
+  }
 }
 
 ?>
