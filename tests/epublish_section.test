@@ -1,0 +1,34 @@
+<?php
+/**
+ * Basic sanity testing for epublish
+ */
+require_once "epublish_test_case.inc";
+
+class EPublishSectionTestCase extends EPublishTestCase {
+  /**
+   * User with rights to post SimpleTest Example content.
+   */
+  protected $privileged_user;
+  protected $epubs;
+  protected $eds;
+
+  /**
+   * getInfo() returns properties that are displayed in the test selection form.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => 'Epublish Section Test',
+      'description' => 'Ensure that epublish sections work as expected',
+      'group' => 'EPublish',
+    );
+  }
+
+  public function setUp() {
+    parent::setUp('epublish');
+
+    // Create and log in our privileged user.
+    $this->privileged_user = $this->drupalCreateUser( array('administer publications'));
+    $this->drupalLogin($this->privileged_user);
+}
+}
+?>

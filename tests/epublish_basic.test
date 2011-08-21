@@ -3,9 +3,9 @@
  * Basic sanity testing for epublish
  */
 
-include "epublish_classes.php";
+require_once "epublish_test_case.inc";
 
-class EPublishBasicTestCase extends DrupalWebTestCase {
+class EPublishBasicTestCase extends EPublishTestCase {
   /**
    * User with rights to post SimpleTest Example content.
    */
@@ -199,13 +199,13 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
 
     $this->drupalPost(NULL, array(), t("Add more headlines"));
 
-    $this->assertNoLink("Page 1", "Ensure Page 1 is listed");
-    $this->assertNoLink("Page 2", "Ensure Page 2 is listed");
+    $this->assertNoLink("Page 1", "Ensure Page 1 is not listed");
+    $this->assertNoLink("Page 2", "Ensure Page 2 is not listed");
     $this->assertLink("Page 3", 0, "Ensure Page 3 is listed");
     $this->assertLink("Page 4", 0, "Ensure Page 4 is listed");
     $this->assertLink("Page 5", 0, "Ensure Page 5 is listed");
-    $this->assertNoLink("Story 1", "Ensure Story 1 is listed");
-    $this->assertNoLink("Story 2", "Ensure Story 2 is listed");
+    $this->assertNoLink("Story 1", "Ensure Story 1 is not listed");
+    $this->assertNoLink("Story 2", "Ensure Story 2 is not listed");
     $this->assertLink("Story 3", 0, "Ensure Story 3 is listed");
     $this->assertLink("Story 4", 0, "Ensure Story 4 is listed");
     $this->assertLink("Story 5", 0, "Ensure Story 5 is listed");
@@ -224,16 +224,6 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     $this->assertText(t("-@title", array("@title" => $ed->dateline)), "Ensure the edition is listed correctly on the top edit page");
     // TODO: I want to move where this goes to, so this is going to change.
 }
-  /**
-   * This tests to ensure that I've created the links that I expect using the
-   * label attribute on them. It's a bit nicer than the text checking.
-   */
-
-  public function assertLinkLabel($label, $index = 0, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[@label="' . $label . '"]');
-    $message = ($message ?  $message : t('Link with label "!label" found.', array('!label' => $label)));
-    return $this->assert(isset($links[$index]), $message, $group);
-  }
 
 
   /**
@@ -280,40 +270,6 @@ class EPublishBasicTestCase extends DrupalWebTestCase {
     // $this->_fooBar();
 }
 
-  /**
-   *  These are utility functions for the subclasses to use
-   */
-
-  public function Get($url)
-  {
-    return $this->drupalGet($url);
-}
-
-  public function Post($one, $two, $three)
-  {
-    return $this->drupalPost($one, $two, $three);
-}
-
-  public function getEpubId($name) {
-    $this->drupalGet("admin/epublish");
-    $links = $this->xpath('//a[text()="' . $name . '"]');
-    foreach($links[0]->attributes() as $n => $v) {
-      if ($n == "href") {
-        preg_match("/(\d+)$/", $v, $matches);
-        return $matches[0];
-      }
-    }
-    return 0;
-}
-
-  public function getEpubEdId($name) {
-    $this->drupalGet("admin/epublish");
-    if( preg_match("/-$name.*?\(<a href=\".*?(\d+)\">edit edition/", $this->content, $matches) ) {
-      return $matches[1];
-    } else {
-      return 0;
-    }
-}
 
 }
 

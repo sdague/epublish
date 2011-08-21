@@ -125,6 +125,17 @@ class EpubEdition {
         $test->Post(NULL, array(), t("Delete"));
     }
 
+    public function addNodes($nodes) {
+        $test = $this->test;
+        $test->Get($this->editLink());
+        $test->Post(NULL, array(), t("Add more headlines"));
+        $form = array();
+        foreach ($nodes as $n) {
+            $form["nodes[$n]"] = TRUE;
+        }
+        $test->Post(NULL, $form, t("Add checked items to this edition"));
+    }
+
 }
 
 ?>
