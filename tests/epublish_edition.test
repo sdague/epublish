@@ -57,38 +57,56 @@ class EPublishEditionTestCase extends EPublishTestCase {
     $this->ed2->addNodes(array(10));
 }
 
+  private function checkMassLinks($array, $noarray) {
+    foreach ($array as $link) {
+      $this->assertLink($link, 0, "Ensure $link is found");
+    }
+    foreach ($noarray as $link) {
+      $this->assertNoLink($link, "Ensure $link is not found");
+    }
+}
+
   /*
    * This basic test just ensures that the nodes were all in the right
    * places. Consider it a baseline for the rest of the tests.
    */
   public function testCheckNodes() {
     $this->drupalGet($this->ed->editLink());
+    $edlinks = array("Page 1", "Page 4", "Story 2", "Story 5");
+    $ednolinks = array("Page 2", "Page 3", "Page 5", "Story 1", "Story 3", "Story 4");
+    $ed2links = array("Story 5");
+    $ed2nolinks = array("Page 1", "Page 4", "Story 2", "Page 2", "Page 3", "Page 5", "Story 1", "Story 3", "Story 4");
+
+    $this->checkMassLinks($edlinks, $ednolinks);
+
     $this->drupalPost(NULL, array(), t("Add more headlines"));
 
-    $this->assertNoLink("Page 1", "Ensure Page 1 is not listed");
-    $this->assertLink("Page 2", 0, "Ensure Page 2 is listed");
-    $this->assertLink("Page 3", 0, "Ensure Page 3 is listed");
-    $this->assertNoLink("Page 4", "Ensure Page 4 is not listed");
-    $this->assertLink("Page 5", 0, "Ensure Page 5 is listed");
-    $this->assertLink("Story 1", 0,  "Ensure Story 1 is listed");
-    $this->assertNoLink("Story 2", "Ensure Story 2 is not listed");
-    $this->assertLink("Story 3", 0, "Ensure Story 3 is listed");
-    $this->assertLink("Story 4", 0, "Ensure Story 4 is listed");
-    $this->assertNoLink("Story 5", "Ensure Story 5 is not listed");
+    /* the select list shouldn't display selected stories */
+    $this->checkMassLinks($ednolinks, $edlinks);
 
     $this->drupalGet($this->ed2->editLink());
-    $this->drupalPost(NULL, array(), t("Add more headlines"));
+    $this->checkMassLinks($ed2links, $ed2nolinks);
 
-    $this->assertLink("Page 1", 0, "Ensure Page 1 is listed");
-    $this->assertLink("Page 2", 0, "Ensure Page 2 is listed");
-    $this->assertLink("Page 3", 0, "Ensure Page 3 is listed");
-    $this->assertLink("Page 4", 0, "Ensure Page 4 is listed");
-    $this->assertLink("Page 5", 0, "Ensure Page 5 is listed");
-    $this->assertLink("Story 1", 0,  "Ensure Story 1 is listed");
-    $this->assertLink("Story 2", 0, "Ensure Story 2 is listed");
-    $this->assertLink("Story 3", 0, "Ensure Story 3 is listed");
-    $this->assertLink("Story 4", 0, "Ensure Story 4 is listed");
-    $this->assertNoLink("Story 5", "Ensure Story 5 is not listed");
+    $this->drupalPost(NULL, array(), t("Add more headlines"));
+    $this->checkMassLinks($ed2nolinks, $ed2links);
+}
+
+  public function testRemoveNodes() {
+    $this->drupalGet($this->ed->editLink());
+    $form = array("nodes[4]" => TRUE, "nodes[7]" => TRUE, "operation" => "del");
+
+    $this->drupalPost(NULL, $form, t("Update"));
+    $edlinks = array("Page 1", "Story 5");
+    $ednolinks = array("Page 4", "Story 2", "Page 2", "Page 3", "Page 5", "Story 1", "Story 3", "Story 4");
+
+    /* TODO: this should really return to the edit screen for the page */
+    $this->drupalGet($this->ed->editLink());
+    $this->checkMassLinks($edlinks, $ednolinks);
+
+    $this->drupalPost(NULL, array(), t("Add more headlines"));
+    /* the select list shouldn't display selected stories */
+    $this->checkMassLinks($ednolinks, $edlinks);
+
 }
 }
 
