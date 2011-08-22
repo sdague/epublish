@@ -57,7 +57,7 @@ class EPublishEditionTestCase extends EPublishTestCase {
 
     $this->ed->addNodes(array(1, 4, 7, 10));
     $this->ed2->addNodes(array(10));
-}
+  }
 
   private function checkMassLinks($array, $noarray) {
     foreach ($array as $link) {
@@ -66,7 +66,7 @@ class EPublishEditionTestCase extends EPublishTestCase {
     foreach ($noarray as $link) {
       $this->assertNoLink($link, "Ensure $link is not found");
     }
-}
+  }
 
   /*
    * This basic test just ensures that the nodes were all in the right
@@ -91,7 +91,7 @@ class EPublishEditionTestCase extends EPublishTestCase {
 
     $this->drupalPost(NULL, array(), t("Add more headlines"));
     $this->checkMassLinks($ed2nolinks, $ed2links);
-}
+  }
 
   public function testRemoveNodes() {
     $this->drupalGet($this->ed->editLink());
@@ -108,8 +108,14 @@ class EPublishEditionTestCase extends EPublishTestCase {
     $this->drupalPost(NULL, array(), t("Add more headlines"));
     /* the select list shouldn't display selected stories */
     $this->checkMassLinks($ednolinks, $edlinks);
+  }
 
-}
+  public function testArticleOrder() {
+    $this->drupalGet($this->ed->editLink());
+    $links = $this->xpath('//a[@class="headline-link"]');
+    // TODO: this gets all the links, but the order is apparently less expected than I thought
+    // $this->assert(FALSE, print_r($links, TRUE));
+  }
 }
 
 ?>

@@ -2394,7 +2394,8 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
                                       WHERE eid=%d AND et.sid=%d ORDER BY et.weight, een.weight, n.changed DESC"), $edit->eid, $sid );
     while ($node = db_fetch_object($result)) {
       $nodes[$node->nid] = '';
-      $form['title'][$node->nid] = array('#value' => l($node->title, 'node/'. $node->nid) .' '. theme('mark', node_mark($node->nid, $node->changed)));
+      // TODO: should look up path for the article
+      $form['title'][$node->nid] = array('#value' => l($node->title, 'node/'. $node->nid, array('attributes' => array('class' => 'headline-link'))) .' '. theme('mark', node_mark($node->nid, $node->changed)));
       $form['name'][$node->nid] =  array('#value' => node_get_types('name', $node));
       $form['tid']['tid_'. $node->nid] =  array('#type' => 'select', '#default_value' => $node->tid,
                                                  '#options' => $topics, '#attributes' => array('onchange' => 'onChangeTID('. $node->nid .')'));
@@ -2455,7 +2456,7 @@ function theme_epublish_form_edition($form) {
     $rows[] = array(array('data' => t('No posts available.'), 'colspan' => '6'));
   }
   $header = array(NULL, t('Title'), t('Type'), t('Topic'), t('Status'), t('Weight'));
-  $table_content = theme('table', $header, $rows, array('id' => 'epublish-table-id'));
+  $table_content = theme('table', $header, $rows, array('id' => 'epublish-table-id', 'class' => 'epublish-headlines'));
   drupal_add_tabledrag('epublish-table-id', 'order', 'sibling', 'epublish-weight-class'); //barinder
 
   // put the table content inside the headlines fieldset
