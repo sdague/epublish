@@ -162,55 +162,7 @@ function epublish_help($path, $arg) {
       "<li>Otherwise, the globally-specified layout is used.</li></ul>\n".
       "<p>The ability to customize layouts and sections provides considerable flexibility for design purposes, but it can can also make administration of publications more complicated. Most users will probably ".
       "want to leave the \"custom layouts\" option turned off.</p>\n" .
-      "<p>Layouts are also themeable, and additional layouts can be can be added as needed. For an explanation of how to do this, see the README.txt TImes of India
-times desc
-Volume 54
-TImes of India
-times desc
-Volume 54
-
-    *
-      1 edition, Volume 54, No. 534TImes of India
-times desc
-Volume 54
-
-    *
-      1 edition, Volume 54, No. 534
-      435TImes of India
-times desc
-Volume 54
-
-    *
-      1 edition, Volume 54, No. 534
-      435
-
-Volume 22
-
-    *
-      2nd edition, Volume 22, No. 22
-      22
-
-Volume 22
-
-    *
-      2nd edition, Volume 22, No. 22
-      22
-      435
-
-Volume 22
-
-    *
-      2nd edition, Volume 22, No. 22
-      22
-    *
-      1 edition, Volume 54, No. 534
-      435
-
-Volume 22
-
-    *
-      2nd edition, Volume 22, No. 22
-      22file that comes included with this module.</p>",
+      "<p>Layouts are also themeable, and additional layouts can be can be added as needed. For an explanation of how to do this, see the README.txt file that comes included with this module.</p>",
       array('!settings' => l(t("epublish settings"), "admin/settings/epublish")));
       break;
     default:
