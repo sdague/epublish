@@ -93,6 +93,7 @@ function epublish_theme() {
  * Implementation of hook_help().
  */
 function epublish_help($path, $arg) {
+  $output = "";
   switch ($path) {
     case 'admin/modules#description':
       $output = t('<p>Enables users to organize the contents of their site into publications with multiple editions, like a magazine or newspaper.</p>');
@@ -111,10 +112,10 @@ function epublish_help($path, $arg) {
       "<li>Create a taxonomy vocabulary in !taxonomy.</li>".
       "<li>Create in !taxcreate at least one term in your new taxonomy. Each posting can be associated with a taxonomy term and grouped by topic within a headlines \"section\" (see below).</li>".
       "<li>Set the appropriate access right in !access<br />The access right is <b>administer publications</b>.</li></ul>",
-      array('!modules' => l(t("administer &raquo; modules"), "admin/modules", array(), NULL, NULL, FALSE, TRUE),
-      '!taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/taxonomy/add/vocabulary", array(), NULL, NULL, FALSE, TRUE),
-      '!taxcreate' => l(t("administer &raquo; topics"), "admin/taxonomy", array(), NULL, NULL, FALSE, TRUE),
-      '!access' => l(t("administer &raquo; access"), "admin/access", array(), NULL, NULL, FALSE, TRUE))) .
+      array('!modules' => l(t("administer &raquo; modules"), "admin/build/modules", array('html' => TRUE, )),
+      '!taxonomy' => l(t("administer &raquo; topics &raquo; add vocabulary"), "admin/content/taxonomy/add/vocabulary", array('html' => TRUE, )),
+      '!taxcreate' => l(t("administer &raquo; topics"), "admin/content/taxonomy", array('html' => TRUE, )),
+      '!access' => l(t("administer &raquo; access"), "admin/user/permissions", array('html' => TRUE, )))) .
       t("<h3>Creating and administering publications</h3>".
       "<p>The epublish module deals with three objects, which can be created or edited using !admin:</p>".
       "<ul><li>A \"<b>publication</b>\" could be a newsletter or magazine -- something that appears in multiple editions, either on a regular or sporadic basis, according to a publication schedule that you specify.</li>".
@@ -129,12 +130,12 @@ function epublish_help($path, $arg) {
       "where {eid} is the edition ID number. As an alternative to {eid}, the path can also specify editions by their volume and number using the syntax \"v{volume}n{number}\". For example, the path ".
       "\"epublish/Monthly%20News/v3n14\" would show volume 3, number 14 of the publication named \"Monthly News.\" Or, the path \"epublish/4/v3\" would show all editions of volume 3 of the publication ".
       "with {pid} 4. The path \"epublish/{pid}/current\" specifies a publication's current edition.</p>\n",
-      array('!admin' => l(t("administer &raquo; epublish"), "admin/epublish", array(), NULL, NULL, FALSE, TRUE),
+      array('!admin' => l(t("administer &raquo; epublish"), "admin/epublish", array('html' => TRUE, )),
       '!epublish' => l(t('epublish'), "epublish"),
-      '!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array(), NULL, NULL, FALSE, TRUE))) .
+      '!nodes' => l(t("administer &raquo; epublish &raquo; edition contents"), "admin/epublish/", array('html' => TRUE, )))) .
       t("<h3>URL Aliases for publication edition</h3>".
       "<p>The Publication edition can have custom URL aliases. To enable the URL aliases, one must enable the 'path' module from the !modules.</p>",
-      array('!modules' => l(t("module list"), "admin/build/modules", array(), NULL, NULL, FALSE, TRUE))) .
+      array('!modules' => l(t("module list"), "admin/build/modules", array('html' => TRUE, )))) .
       t("<h3>Viewing latest headlines</h3>".
       "<p>In addition to displaying postings that have been collected into specific editions of a publication, you can also view a list of the most recent postings in each topic section ".
       "at \"epublish/headlines/{sid}\" where {sid} is a numeric section ID. \"Topics\" use taxonomy terms to organize content according to the following rules:</p>\n".
@@ -145,7 +146,7 @@ function epublish_help($path, $arg) {
       "The \"miscellaneous\" topic appears at the bottom of each section. (If, however, you set its \"automatically-included headlines limit\" to zero, no miscellanous headlines will be displayed.)</li>\n") .
       t("<h3>Publications and headlines blocks</h3>".
       "<p>The epublish module creates a sidebar block for each section, as well as an \"epublish\" block that lists all publications. To make blocks visible on your pages, use !blocks.</p>",
-      array('!blocks' => l(t("administer &raquo; blocks"), "admin/block", array(), NULL, NULL, FALSE, TRUE))) .
+      array('!blocks' => l(t("administer &raquo; blocks"), "admin/build/block", array('html' => TRUE, )))) .
       t("<h3>Customizing layouts</h3>\n".
       "<p>The epublish module comes with several standard \"layouts\" that make it possible to customize the layout of publication pages. The \"node views,\" \"one- and two-column\" and \"regular\" layouts are different ".
       "page layouts for displaying nodes from a single edition. The \"simple list of headlines only\" layout is used on pages that list multiple editions of a publication.</p>\n".
@@ -1137,7 +1138,7 @@ function epublish_sections_table() {
   $header = array(t('sections/topics'), array("data" => t("operations"), "colspan" => 2));
   while ($section = db_fetch_object($result)) {
     $topics = epublish_topic_selection_list($section->sid);
-    $rows[] = array(l( t($section->title) , "headlines/$section->sid", array(), NULL, NULL, FALSE, TRUE),
+    $rows[] = array(l( t($section->title) , "headlines/$section->sid", array('html' => TRUE, )),
       l(t("edit"), "admin/epublish/edit/section/$section->sid"),
       l(t("add topic"), "admin/epublish/add/topic/$section->sid"),
     );
