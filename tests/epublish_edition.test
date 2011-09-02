@@ -114,6 +114,13 @@ class EPublishEditionTestCase extends EPublishTestCase {
     $this->drupalGet($this->ed->editLink());
     $links = $this->xpath('//a[@class="headline-link"]');
     // TODO: this gets all the links, but the order is apparently less expected than I thought
+
+    $data = array("weight_10" => -10, "weight_7" => -5, "weight_1" => 10);
+    $this->drupalPost(NULL, $data, t("Update"));
+
+    $this->drupalGet($this->ed->editLink());
+    $links = $this->xpath('//a[@class="headline-link"]');
+
     $this->assertEqual($links[0][0], "Story 5", "Check position of Story 5");
     $this->assertEqual($links[1][0], "Story 2", "Check position of Story 2");
     $this->assertEqual($links[2][0], "Page 4", "Check position of Page 4");
