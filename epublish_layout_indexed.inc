@@ -45,19 +45,19 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
         $o_detail .= "<!-- BEGIN : ". t($topic->name) ." Section -->\n" ;
         if ($subsection->sid) {
           if (arg(2)) {
-            $o_index .= '<div class="topic">'. l( $topic->name, "epublish/". arg(1) ."/". arg(2), array(), NULL, 'T'. $sid .'_'. $counter, FALSE, TRUE) ."</div>\n";
+            $o_index .= '<div class="topic">'. l( $topic->name, "epublish/". arg(1) ."/". arg(2), array('fragment'=>"T".$sid.'_'.$counter,'html'=>TRUE,)) ."</div>\n";
           }
           else {
-            $o_index .= '<div class="topic">'. l( $topic->name, "epublish/". arg(1), array(), NULL, 'T'. $sid .'_'. $counter, FALSE, TRUE) ."</div>\n";
+            $o_index .= '<div class="topic">'. l( $topic->name, "epublish/". arg(1), array('fragment'=>"T".$sid.'_'.$counter,'html'=>TRUE,)) ."</div>\n";
           }
             $o_detail .= '<div class="topic">'. l(t($topic->name), "headlines/". $subsection->sid) .'<a name="T'. $sid .'_'. $counter .'">&nbsp;</a>'."</div>\n";
         }
         else {
           if (arg(2)) {
-            $o_index .= "<div class='topic'>". l( $topic->name, 'epublish/'. arg(1) .'/'. arg(2), array(), NULL, 'T'. $sid .'_'. $counter, FALSE, TRUE) ."</div>\n";
+            $o_index .= "<div class='topic'>". l( $topic->name, 'epublish/'. arg(1) .'/'. arg(2), array('fragment'=>"T".$sid.'_'.$counter,'html'=>TRUE,)) ."</div>\n";
           }
           else {
-            $o_index .= '<div class="topic"> '. l( $topic->name, arg(0) ."/". arg(1), array(), NULL, "T". $sid .'_'. $counter, FALSE, TRUE) ."</div>\n";
+            $o_index .= '<div class="topic"> '. l( $topic->name, arg(0) ."/". arg(1), array('fragment'=>"T" . $sid .'_'. $counter,'html'=>TRUE,) ) ."</div>\n";
           }
           $o_detail .= '<div class="topic"><a name="T'. $sid .'_'. $counter .'">&nbsp;</a>'.  $topic->name ."</div>\n";
         }
@@ -75,10 +75,10 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
         // if it is not top or bottom topic add node title
         if (($topic->weight != 99) && ($topic->weight != (-99)) && ($topic->weight != (-98))) {
           if (arg(2)) {
-            $o_index .= '<div class="'. $css_title .'"><span class="bullet">o </span>'. l($node->title, "epublish/". arg(1) ."/". arg(2), array(), NULL, 'N'. $sid .'_'. $counter, FALSE, TRUE) .'</div> ';
+            $o_index .= '<div class="'. $css_title .'"><span class="bullet">o </span>'. l($node->title, "epublish/". arg(1) ."/". arg(2), array('fragment'=>'N'. $sid . '_'. $counter,'html'=>TRUE,)) .'</div> ';
           }
           else {
-            $o_index .= '<div class="'. $css_title .'"><span class="bullet">o </span>'. l($node->title, arg(0) ."/". arg(1), array(), NULL, 'N'. $sid .'_'. $counter, FALSE, TRUE) .'</div> ';
+            $o_index .= '<div class="'. $css_title .'"><span class="bullet">o </span>'. l($node->title, arg(0) ."/". arg(1), array('fragment'=>'N'. $sid . '_'. $counter,'html'=>TRUE,)) .'</div> ';
           }
          $o_detail .= '<div class="'. $css_linktitle .' '. strtolower(preg_replace('|[^a-zA-Z0-9_]+|', '-', $topic->name) ) .'-'.   $css_title .'"><span class="bullet">o </span>'. l(t($node->title), "node/$nid") .'<a name="N'. $sid .'_'. $counter .'">&nbsp;</a>'."</div>\n" ;
         }
@@ -109,7 +109,7 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
     if ( ($topic->weight != 99) && ($topic->weight != (-99)) && ($topic->weight != (-98)) ) {
       $o_index .= "\n<!-- END : " . t($topic->name) ." Links Section -->\n" ;
       $o_detail .= "\n<!-- END : ". t($topic->name) ." Section -->\n" ;
-      $o_detail .= '<div>'. l( "Top", arg(0) ."/". arg(1) ."/". arg(2), array(), NULL, '', FALSE, TRUE) .' </div>' ;
+      $o_detail .= '<div>'. l( "Top", arg(0) ."/". arg(1) ."/". arg(2), array('html'=>TRUE,)) .' </div>' ;
     }
   } //end of foreach (two)
 
