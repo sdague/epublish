@@ -1321,8 +1321,8 @@ function epublish_form_section($form_state, $edit = NULL) {
   $form['rules'][] = array('#value' => t('The automatic selection rules determine which postings will be selected to display in the !heads (where no publication or edition is specified).', array('!heads' => l(t('headlines listing'), 'headlines/'. $edit->sid))));
   $nodetypes = array();
   foreach (node_get_types() as $type => $name_obj) {
-    if (!$node_already_included[$name_obj->name]) {
-      $nodetypes[$name_obj->name] = $name_obj->name;
+    if (!$node_already_included[$type]) {
+      $nodetypes[$type] = $name_obj->name;
     }
   }
   $form['rules']['node_types'] = array(
@@ -1577,8 +1577,8 @@ function epublish_form_topic($form_state, $edit = NULL, $sid = NULL) {
   }
   $nodetypes = array();
   foreach (node_get_types() as $type => $name_obj) {
-    if (!$node_already_included[$name_obj->name]) {
-      $nodetypes[$name_obj->name] = $name_obj->name;
+    if (!$node_already_included[$type]) {
+      $nodetypes[$type] = $name_obj->name;
     }
   }
   // HACK because I can't figure out how to make Drupal 4.7 checkboxes work with default values.
