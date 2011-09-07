@@ -2225,7 +2225,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
   $form[] = array('#value' => '<div class="container-inline">');
   $form["month"] = array(
     '#type' => 'select',
-    '#title' => "Publication date",
+    '#title' => t("Publication date"),
     '#default_value' => $edit->month,
     '#options' => $months
     );
