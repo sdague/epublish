@@ -1086,7 +1086,7 @@ function epublish_topic_selection_list($sid) {
     elseif ($topic->tid == 0) {
       $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
     }
-    $topics[$topic->tid] = $topic->name;
+    $topics[$topic->tid] = t($topic->name);
   }
   return $topics;
 }
