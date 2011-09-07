@@ -886,19 +886,19 @@ function epublish_headlines_page() {
   // Condition to handle another default section
     if ($topic->tid == -2) {
       $topic->name = variable_get('epublish_advertisement', t('advertisement'));
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
+      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1 $timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
     }
     elseif ($topic->tid == -1) {
       $topic->name = variable_get('epublish_top_stories', t('top stories'));
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
+      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1 $timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
     }
     elseif ($topic->tid == 0) {
       $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1$timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
+      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1 $timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
     }
     else {
       $included_terms = _epublish_topic_term_inclusions($topic->tid, $sid);
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {term_node} tn ON n.nid=tn.nid WHERE ($exclusions) AND ($included_node_types) AND ($included_terms) AND n.promote = 1 AND n.status = 1$timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
+      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {term_node} tn ON n.nid=tn.nid WHERE ($exclusions) AND ($included_node_types) AND ($included_terms) AND n.promote = 1 AND n.status = 1 $timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
     }
     $topic->nodes = array();
     while ($node = db_fetch_object($result2)) {
