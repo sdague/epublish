@@ -795,7 +795,7 @@ function epublish_pub_page() {
     //$num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
 
     // TODO: this really needs to be unwound so that we can get rid of the strings in here
-    $num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid));
+    $num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
     $editions = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
     if ($num_editions == 1) {
       $edition = db_fetch_object($editions);
