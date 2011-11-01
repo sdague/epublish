@@ -508,7 +508,6 @@ function epublish_block($op = 'list', $delta = 0) {
     while ($publication = db_fetch_object($publications)) {
       $blocks['pub_'. $publication->pid]['info'] = t($publication->name);
       $blocks['cur_edition_'. $publication->pid]['info'] = t("Current edition of @pub", array('@pub' => $publication->name));
-      $blocks['edi_contents_'. $publication->pid]['info'] = t("E-Publish Edition Article List");
     }
     return $blocks;
   }
@@ -531,31 +530,6 @@ function epublish_block($op = 'list', $delta = 0) {
       }
       $data['content'] = theme('item_list', $items);
       return $data;
-    }
-    elseif (substr($delta, 0, 13) == 'edi_contents_') {
-    $publications = db_rewrite_sql(db_query("SELECT * FROM {epublish_publication}"));
-    $publication = db_fetch_object($publications);
-    $data['subject'] = t("@pub Content", array('@pub' => $publication->name));
-      if (arg(0) && is_numeric(arg(1))) {
-        $nid = arg(1);
-      }
-// perform a query to get the edition associated with the current node using it's nid from the URL
-      $result = db_rewrite_sql(db_query("SELECT een.nid, een.eid FROM {epublish_edition_node} een WHERE een.nid='%d'", $nid));
-      $article = db_fetch_object($result);
-      $eid = $article->eid;
-// perform second query using $eid value obtained from first query to get all nodes associated with this edition
-      $result1 = db_rewrite_sql(db_query("SELECT een.nid, een.eid, een.weight, n.title, n.nid FROM {epublish_edition_node} een LEFT JOIN {node} n USING (nid) WHERE een.eid='%d' ORDER BY een.weight", $eid));
-      $topics = array();
-      $topic->nodes = array();
-      $items = array();
-      while ($node = db_fetch_object($result1)) {
-        $topic->nodes[] = $node->nid;
-      }
-      if (count($topic->nodes)) {
-        $topics[] = $topic;
-      }
-      $data['content'] = theme('epublish_topics', $topics, $sid, $edition, 'item_list');
-       return $data;
     }
     elseif (substr($delta, 0, 4) == 'pub_') {
       $pid = substr($delta, 4);
