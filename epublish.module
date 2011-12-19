@@ -766,7 +766,7 @@ function theme_epublish_edition_reference($edition) {
  */
 function epublish_pub_page() {
   $pub = arg(1);
-  $ed = arg(2) ? arg(2) : 'current';
+  $ed = arg(2);
   if (is_numeric($pub)) {
     $publication = epublish_get_pub($pub);
   }
