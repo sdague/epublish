@@ -57,6 +57,11 @@ class EPublishSectionTestCase extends EPublishTestCase {
     $this->ed2->addNodes(array(10));
   }
 
+  public function testCheckNodes() {
+    $this->drupalGet($this->ed->editLink());
+
+    $this->drupalPost(NULL, array(), t("Add more headlines"));
+  }
 
 }
 ?>
