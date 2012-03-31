@@ -412,6 +412,17 @@ function epublish_admin_settings() {
     '#default_value' => variable_get('epublish_custom_sections', '0'),
     '#description' => t('If checked, each publication and edition can have its own section that overrides the global section selected above.'),
   );
+
+  // Select the node types you want to use. By default Page and Story are included.
+  $options = node_get_types('names');
+  $form['edit']['epublish_node_types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Users may add these content types to epublish editions'),
+    '#options' => $options,
+    '#default_value' => variable_get('epublish_node_types', array('page', 'story')),
+    '#description' => t('These types of content will be shown to be added in the epublish listing'),
+  );
+
   return system_settings_form($form);
 }
 
@@ -2727,12 +2738,13 @@ function epublish_admin_node() {
   );
   $publication = epublish_get_pub($edition->pid);
   $exclusions = _epublish_build_node_exclusions(epublish_get_edition_nodes($eid));
-  $filters[] = array(t('View posts that are new or updated'), "WHERE $exclusions ORDER BY n.changed DESC");
-  $filters[] = array(t('View posts that need approval'), "WHERE ($exclusions) AND (n.status = 0 OR n.moderate = 1) ORDER BY n.changed DESC");
-  $filters[] = array(t('View posts that are promoted'), "WHERE ($exclusions) AND (n.status = 1 AND n.promote = 1) ORDER BY n.changed DESC");
-  $filters[] = array(t('View posts that are not promoted'), "WHERE ($exclusions) AND (n.status = 1 AND n.promote = 0) ORDER BY n.changed DESC");
-  $filters[] = array(t('View posts that are sticky'), "WHERE ($exclusions) AND (n.status = 1 AND n.sticky = 1) ORDER BY n.changed DESC");
-  $filters[] = array(t('View posts that are unpublished'), "WHERE ($exclusions) AND (n.status = 0 AND n.moderate = 0) ORDER BY n.changed DESC");
+
+  $filters[] = array(t('View posts that are new or updated'), "($exclusions)");
+  $filters[] = array(t('View posts that need approval'), "($exclusions) AND (n.status = 0 OR n.moderate = 1)");
+  $filters[] = array(t('View posts that are promoted'), "($exclusions) AND (n.status = 1 AND n.promote = 1)");
+  $filters[] = array(t('View posts that are not promoted'), "($exclusions) AND (n.status = 1 AND n.promote = 0)");
+  $filters[] = array(t('View posts that are sticky'), "($exclusions) AND (n.status = 1 AND n.sticky = 1)");
+  $filters[] = array(t('View posts that are unpublished'), "($exclusions) AND (n.status = 0 AND n.moderate = 0)");
   // Render filter form:
   $options = array();
   foreach ($filters as $key => $value) {
@@ -2750,8 +2762,13 @@ function epublish_admin_node() {
     '#value' => t('Filter'),
   );
   $form[] = array('#value' => '</div>');
-  $result = pager_query("SELECT DISTINCT (n.nid), n.title, n.changed, n.type, n.status FROM {node} n ". $filters[$filter][1], 50);
-  $result1 = pager_query("SELECT DISTINCT (n.nid), n.title, n.changed, n.type, n.status FROM {node} n ". $filters[$filter][1], 50);
+
+  $where = "(" . _epublish_type_inclusion() . ")";
+  $where .= " AND " . $filters[$filter][1];
+
+
+  $result = pager_query("SELECT DISTINCT (n.nid), n.title, n.changed, n.type, n.status FROM {node} n WHERE $where ORDER BY n.changed DESC", 50);
+  $result1 = pager_query("SELECT DISTINCT (n.nid), n.title, n.changed, n.type, n.status FROM {node} n WHERE $where ORDER BY n.changed DESC", 50);
   // Make sure the update controls are disabled if we don't have any rows to select from.
   $disabled = !db_result($result1);
   $form['op'] = array(
@@ -2775,6 +2792,19 @@ function epublish_admin_node() {
   $form[] = array('#value' => '<h3>'. $filters[$filter][0] .'</h3>');
   drupal_set_title(t('Add Posts to %pub', array('%pub' => "$publication->name, " . theme('epublish_edition_reference', $edition))));
   return $form;
+}
+
+function _epublish_type_inclusion() {
+  $clause = "";
+  foreach (variable_get('epublish_node_types', array('page', 'story')) as $type) {
+    if ($type) {
+      if ($clause) {
+        $clause .= " OR ";
+      }
+      $clause .= "(n.type = '$type')";
+    }
+  }
+  return $clause;
 }
 
 function epublish_headlines() {
