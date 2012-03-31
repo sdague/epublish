@@ -1,3 +1,7 @@
+6.x-1.16 - 31 Mar 2012
+ - add an epublish setting to filter which node types are displayed in
+ the mass add panel.
+
 6.x-1.13 - 20 Aug 2011
  - add a large number of tests using simpletest framework
  - move one of the final db strings over to using db_query with

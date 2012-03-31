@@ -415,6 +415,12 @@ function epublish_admin_settings() {
 
   // Select the node types you want to use. By default Page and Story are included.
   $options = node_get_types('names');
+  $form['edit'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Global Filters'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+  );
   $form['edit']['epublish_node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Users may add these content types to epublish editions'),
