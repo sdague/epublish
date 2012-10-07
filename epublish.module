@@ -19,6 +19,7 @@
  */
 function epublish_init() {
   $path = drupal_get_path('module', 'epublish');
+  require_once($path . '/epublish_api.inc');
   if (variable_get('epublish_css', 1)) {
     drupal_add_css($path .'/epublish.css');
   }
@@ -1143,42 +1144,11 @@ function epublish_topic_selection_list($sid) {
  ******************************************/
 
 /**
- * epublish_get_section: get an epublish_section record from the database
- *
- * @param $sid
- *	 A publication section ID
- *
- * @return
- *	 An object containing all of the values for a single record in the
- *	 {epublish_section} table.
- */
-function epublish_get_section($sid) {
-  return db_fetch_object(db_query("SELECT * FROM {epublish_section} WHERE sid='%d'", $sid));
-}
-
-/**
- * epublish_get_section_by_title: get an epublish_section record from the database, based on its title
- *
- * @param $title
- *	 The title of a publication section
- *
- * @return
- *	 An object containing all of the values for a single epublish_section record in the
- *	 {epublish_section} table.
- */
-function epublish_get_section_by_title($title) {
-  return db_fetch_object(db_query("SELECT * FROM {epublish_section} WHERE title='%s'", $title));
-}
-
-
-/**
  * epublish_sections_table: list the sections and topics for admin/epublish/sections
  *
  * @return
  *	 An HTML-formatted table listing each section and its topics
  */
-
-
 function epublish_sections_table() {
   $sections = epublish_sections();
   # API: epublish_list_sections();
@@ -2130,42 +2100,6 @@ function epublish_pub_confirm_delete_submit($form, &$form_state) {
 /*******************************************
  *	 EDITIONS
  ******************************************/
-
-/**
- * epublish_get_edition: get an epublish_edition record from the database
- *
- * @param $eid
- *	 An edition ID number
- *
- * @return
- *	 An object containing all of the values for a single record in the
- *	 {epublish_edition} table.
- */
-function epublish_get_edition($eid) {
-  return db_fetch_object(db_query("SELECT * FROM {epublish_edition} WHERE eid='%d'", $eid));
-}
-
-/**
- * epublish_current_edition: return the current edition ID number for a publication. If no edition is specified, returns the edition with the latest publication date.
- *
- * @param $pid
- *	 A publication ID number
- *
- * @return
- *	 An edition ID number
- */
-function epublish_current_edition($pid=0) {
-  $publication = epublish_get_pub($pid);
-  if ($publication->current_eid) {
-    return $publication->current_eid;
-  }
-  $eid = db_result(db_query("SELECT eid FROM {epublish_edition} WHERE pid='%d' ORDER BY volume DESC, number DESC, pubdate DESC, eid DESC LIMIT 1", $pid));
-  if ($eid) {
-    return $eid;
-  }
-  $eid = db_result(db_query("SELECT eid FROM {epublish_edition} ORDER BY pubdate DESC, volume DESC, number DESC, eid DESC LIMIT 1"));
-  return $eid;
-}
 
 /**
  * Page to add or edit an edition

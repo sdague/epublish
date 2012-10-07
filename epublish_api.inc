@@ -76,16 +76,35 @@ function epublish_delete_publication($id) {
  * Edition Database functions
  *
  *************************************************/
-
+/**
+ * epublish_get_edition: get an epublish_edition record from the database
+ *
+ * @param $eid
+ *	 An edition ID number
+ *
+ * @return
+ *	 An object containing all of the values for a single record in the
+ *	 {epublish_edition} table.
+ */
 function epublish_get_edition($eid) {
   return db_fetch_object(db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE eid=%d", $eid)));
 }
 
+/**
+ * epublish_current_edition: return the current edition ID number for a publication. If no edition is specified, returns the edition with the latest publication date.
+ *
+ * @param $pid
+ *	 A publication ID number
+ *
+ * @return
+ *	 An edition ID number
+ */
 function epublish_get_current_edition($pid) {
   $pub = epublish_get_publication($pid);
   if ($pub->current_eid) {
     return epublish_get_edition($pub->current_eid);
   } else {
+    // return most recent
     return db_fetch_object(db_query(db_rewrite_sql("SELECT eid FROM {epublish_edition} WHERE pid='%d' ORDER BY volume DESC, number DESC, pubdate DESC, eid DESC LIMIT 1", $pid)));
   }
 }
