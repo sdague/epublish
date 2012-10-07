@@ -22,8 +22,34 @@ function epublish_list_publications() {
   return $rows;
 }
 
+
+/**
+ * epublish_get_publication: get a publication record from the database
+ *
+ * @param $pid
+ *	 A publication ID number
+ *
+ * @return
+ *	 An object containing all of the values for a single record in the
+ *	 {epublish_publication} table.
+ */
 function epublish_get_publication($pid) {
   return db_fetch_object(db_query(db_rewrite_sql("SELECT * FROM {epublish_publication} WHERE pid=%d", $pid)));
+}
+
+/**
+ * epublish_get_publication_by_name: get a publication record from the database, based on its name
+ *
+ * @param $name
+ *	 A publication name
+ *
+ * @return
+ *	 An object containing all of the values for a single record in the
+ *	 {epublish_publication} table.
+ */
+function epublish_get_publication_by_name($name) {
+  $name = preg_replace('/_/', ' ', $name);
+  return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE LOWER('%s') LIKE LOWER(name)", trim($name)));
 }
 
 
@@ -77,11 +103,23 @@ function epublish_delete_edition($eid) {
   db_query("DELETE FROM {epublish_edition_node} WHERE eid = %d", $eid);
 }
 
-function epublish_list_editions($pid=0) {
-  $order = variable_get('epublish_edition_order', 'DESC');
+/**
+ * epublish_list_editions: get an edition list either by publication
+ * or by all. Specify sort order
+ *
+ * @param $pid
+ *	 publication id
+ * @param $order
+ *      order for sort, either 'DESC' or 'ASC'
+ *
+ * @return
+ *	 A list of the edition objects sorted accordingly
+ */
+
+function epublish_list_editions($pid=0, $order='DESC') {
   $results = NULL;
   if ($pid != 0) {
-    $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE pid=%d ORDER BY volume %s, number %s, pubdate %s, eid %s", $publication->pid, $order, $order, $order, $order));
+    $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE pid=%d ORDER BY volume %s, number %s, pubdate %s, eid %s", $pid, $order, $order, $order, $order));
   } else {
     $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} ORDER BY volume %s, number %s, pubdate %s, eid %s", $order, $order, $order, $order));
   }
@@ -91,6 +129,29 @@ function epublish_list_editions($pid=0) {
   }
   return $rows;
 }
+
+function epublish_get_published_editions($pid=0, $vid=0, $num=0, $order='DESC') {
+  $results = NULL;
+  $sqlbase = "SELECT * FROM {epublish_edition} WHERE published=1 AND";
+  $sqlorder = "ORDER BY volume %s, number %s, pubdate %s, eid %s";
+
+  if ($pid != 0 and $vid != 0 and $num != 0) {
+    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d AND number=%d $sqlorder",
+                                       $pid, $vid, $num, $order, $order, $order, $order));
+  } elseif ($pid != 0 and $vid != 0) {
+    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d $sqlorder",
+                                       $pid, $vid, $order, $order, $order, $order));
+  } elseif ($pid != 0) {
+    $results = db_query(db_rewrite_sql("$base pid=%d $sqlorder",
+                                       $pid, $order, $order, $order, $order));
+  }
+  $rows = array();
+  while($obj = db_fetch_object($results)) {
+    $rows[] = $obj;
+  }
+  return $rows;
+}
+
 /**
  *  Set the specified edition to be current for that listed publication.
  *
@@ -101,7 +162,73 @@ function epublish_make_edition_current($pid, $eid) {
   epublish_update_publication($record);
 }
 
-/***
+
+/*********************************************************
+ *
+ *  Section Functions
+ *
+ ********************************************************/
+
+/*
+ * epublish_get_sections: get a list of sections as objects
+ */
+function epublish_list_sections() {
+  $result = db_query("SELECT * FROM {epublish_section}");
+  while ($section = db_fetch_object($result)) {
+    $sections[$section->sid] = $section->title;
+  }
+  return $sections;
+}
+
+function epublish_num_sections() {
+  return count(epublish_list_sections());
+}
+
+function epublish_create_default_sections() {
+
+}
+
+/**
+ * epublish_get_section: get an epublish_section record from the database
+ *
+ * @param $sid
+ *	 A publication section ID
+ *
+ * @return
+ *	 An object containing all of the values for a single record in the
+ *	 {epublish_section} table.
+ */
+function epublish_get_section($sid) {
+  return db_fetch_object(db_query("SELECT * FROM {epublish_section} WHERE sid='%d'", $sid));
+}
+
+/**
+ * epublish_get_section_by_title: get an epublish_section record from the database, based on its title
+ *
+ * @param $title
+ *	 The title of a publication section
+ *
+ * @return
+ *	 An object containing all of the values for a single epublish_section record in the
+ *	 {epublish_section} table.
+ */
+function epublish_get_section_by_title($title) {
+  return db_fetch_object(db_query("SELECT * FROM {epublish_section} WHERE title='%s'", $title));
+}
+
+function epublish_create_section($section) {
+  return db_write_record('epublish_section', $section);
+}
+
+function epublish_update_section($section) {
+  return db_write_record('epublish_section', $section, $section->sid);
+}
+
+function epublish_delete_section($sid) {
+  return db_query("DELETE FROM {epublish_section} WHERE sid = '%d'", $sid);
+}
+
+/*********************************************************
  *
  * Epublish functions related to nodes
  *

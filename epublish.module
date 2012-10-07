@@ -435,6 +435,7 @@ function epublish_admin_settings() {
 /**
  * Implementation of hook_form_alter().
  */
+# TODO(sdague) remove abstract functionality
 function epublish_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'node_type_form') {
       $form['submission']['epublish_abstract'] = array(
@@ -463,11 +464,14 @@ function epublish_form_alter(&$form, $form_state, $form_id) {
 /**
  * Implementation of hook_nodeapi().
  */
+# TODO(sdague) remove abstract functionality
 function epublish_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'insert':
       if (variable_get('epublish_abstract_'. $node->type, TRUE)) {
-        db_query("INSERT INTO {epublish_abstract} (nid, epublish_abstract) VALUES ('%d', '%s')", $node->nid, $node->epublish_abstract);
+        if ($node->epublish_abstract) {
+          db_query("INSERT INTO {epublish_abstract} (nid, epublish_abstract) VALUES ('%d', '%s')", $node->nid, $node->epublish_abstract);
+        }
       }
       break;
 
@@ -514,6 +518,9 @@ function epublish_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
 /**
  * Implementation of hook_block().
  */
+# TODO(sdague) remove block functionality, we can think about
+# bringing something back later
+
 function epublish_block($op = 'list', $delta = 0) {
   if ($op == 'list') {
     $blocks = array();
@@ -606,8 +613,10 @@ function epublish_block($op = 'list', $delta = 0) {
  *			form_select($title, $name, $value, epublish_sections(), $description)
  */
 function epublish_sections($include_default = FALSE) {
+  # API - epublish_list_sections followed by epublish_num_sections
   $result = db_query("SELECT COUNT(*) FROM {epublish_section}");
   $sections = array();
+  # API - todo create default sections
   // if no sections exist, create a default section
   if (!db_result($result)) {
     $nodetype = array();
@@ -630,6 +639,7 @@ function epublish_sections($include_default = FALSE) {
   if ($include_default) {
     $sections[0] = t('<default>');
   }
+  # API - epublish_list_sections()
   $result = db_query("SELECT * FROM {epublish_section}");
   while ($section = db_fetch_object($result)) {
     $sections[$section->sid] = $section->title;
@@ -781,6 +791,12 @@ function theme_epublish_edition_reference($edition) {
 /**
  * epublish_pub_page: Display the publication(s).
  */
+# TODO(sdague): the issue here is that this is really 2 different functions,
+# a default display for all the editions in a publication, and one for
+# the specific edition. This needs to be factored out.
+#
+# Also, why in gods name are we letting publication urls have names
+# in them.... sigh
 function epublish_pub_page() {
   $pub = arg(1);
   $ed = arg(2);
@@ -806,12 +822,23 @@ function epublish_pub_page() {
   }
   else {
     $order = variable_get('epublish_edition_order', 'DESC');
+    # TODO(sdague) ok, this is kind of psychotic that we're doing inter string
+    # parsing for the volume and number of the editions. We've got to normalize
+    # this. It should be sitename/epublish/pubid/eid, and forget the rest of it.
+    #
+    # maybe we could do (thinking out loud, don't pay too much attention to
+    # this comment)
+    #
+    # epublish/pubid/eid - show edition
+    # epublish/pubid/volume/volid
+    # epublish/edition/eid
+    #
     preg_match('/(v([0-9]+))?(n([0-9]+))?/i', $ed, $match);
     $volume = $match[2] ? (" AND volume=" . $match[2]) : '';
     $number = $match[4] ? (" AND number=" . $match[4]) : '';
     //$num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
 
-    // TODO: this really needs to be unwound so that we can get rid of the strings in here
+    // API: epublish_get_published_editions($pid, $vid, $num, $order)
     $num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
     $editions = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
     if ($num_editions == 1) {
@@ -825,6 +852,7 @@ function epublish_pub_page() {
       if (!$ed) {
         $output .= '<div class="content">'. $publication->description .'</div>';
       }
+      // API: epublish_get_published_editions($pid, $vid, $num, $order)
       $editions = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
       while ($ed = db_fetch_object($editions)) {
         if ($previous_volume && ($ed->volume != $previous_volume)) {
@@ -883,6 +911,7 @@ function theme_epublish_pub_page($output, $publication, $edition, $volume=NULL) 
 /**
  * epublish_headlines_page: Display the headlines.
  */
+# TODO(sdague) get the SQL deconstruction out of here
 function epublish_headlines_page() {
   $sid = arg(1);
   $sids = epublish_sections();
@@ -1089,6 +1118,7 @@ function epublish_assign_section(&$edition) {
  * @return
  *	 An associative array of topic IDs and their reference names, for use as the $options parameter in form_select function calls
  */
+# TODO: delete the topic support at this point, we might bring it back later
 function epublish_topic_selection_list($sid) {
   $result = db_query("SELECT et.tid, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid);
   $topics = array();
@@ -1151,6 +1181,7 @@ function epublish_get_section_by_title($title) {
 
 function epublish_sections_table() {
   $sections = epublish_sections();
+  # API: epublish_list_sections();
   $result = db_query("SELECT * FROM {epublish_section}");
   $header = array(t('sections/topics'), array("data" => t("operations"), "colspan" => 2));
   while ($section = db_fetch_object($result)) {
@@ -1261,6 +1292,7 @@ function epublish_form_section($form_state, $edit = NULL) {
       '#value' => $edit->sid,
       '#tree' => TRUE,
     );
+    # TODO: strip out all of the topic stuff
     $result2 = db_query("SELECT et.*, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $edit->sid);
     while ($topic = db_fetch_object($result2)) {
   // condition added to handle additional default field
@@ -1330,6 +1362,7 @@ function epublish_form_section($form_state, $edit = NULL) {
       '#value' => $edit->layout_list,
     );
   }
+  # TODO: strip out the rules, this should come as an add in module
   $form[] = array('#value' => "<hr />");
   $form['rules'] = array(
     '#type' => 'fieldset',
@@ -1421,22 +1454,27 @@ function epublish_form_section_submit($form, &$form_state) {
     $form_state['node_types'] = array();
   }
   if ($form_state['sid'] && $form_state['action'] != 'delete') {
+    # API: epublish_create_section
     db_query("UPDATE {epublish_section} SET title = '%s', vid = '%d', node_types = '%s', timeframe='%s', layout_list='%s', layout_page='%s' WHERE sid = '%d'", $form_state['title'], $form_state['vid'], implode(',', $form_state['node_types']), $form_state['timeframe'], $form_state['layout_list'], $form_state['layout_page'], $form_state['sid']);
     // Handle operations:
     if (isset($form_state['weight'])) {
       foreach ($form_state['weight'] as $tid => $value) {
+        # TODO: drop topics
         db_query("UPDATE {epublish_topic} SET weight = '%d' WHERE sid = '%d' AND tid = '%d'", $value, $form_state['sid'], $tid);
       }
       drupal_set_message(t('The "%title" section has been updated.', array('%title' => $form_state['title'])));
     }
   }
   else {
+    # API: epublish_create_section
     db_query("INSERT INTO {epublish_section} (title, vid, node_types, timeframe, layout_list, layout_page) VALUES ('%s', '%d', '%s', '%s', '%s', '%s')", $form_state['title'], $form_state['vid'], implode(',', array_keys($form_state['node_types'])), $form_state['timeframe'], $form_state['layout_list'], $form_state['layout_page']);
     /* Every section has a "miscellaneous" topic that can't be deleted, with a
      * weight of 99 (so it always appears at the bottom of the section) */
 
     /* I think this is right, it works in the basic test case, but I'm a
      * little concerned that it's going to act up in the field */
+
+    # TODO: drop the rest of this crazy stuff
     $sid = db_result(db_query("SELECT max(sid) FROM {epublish_section}"));
     /* Holy rusted spin around sideways hackery batman. This overloads the
      * topic submit, and now explains why many things were acting funky
@@ -1472,11 +1510,16 @@ function epublish_section_confirm_delete_submit($form, &$form_state) {
   $result = db_query("SELECT * FROM {epublish_edition}");
   while ($edition = db_fetch_object($result)) {
     if (epublish_assign_section($edition) == $sid) {
+      # API: can we remove this if we get rid of topics?
       db_query("UPDATE {epublish_edition_node} SET tid=0 WHERE eid = '%d'", $edition->eid);
     }
   }
+
+  # API: epublish_delete_section()
   db_query("DELETE FROM {epublish_section} WHERE sid = '%d'", $sid);
+  # API: delete because we got rid of topics
   db_query("DELETE FROM {epublish_topic} WHERE sid = '%d'", $sid);
+  # TODO(sdague): so confused about global sessions, remove?
   db_query("UPDATE {epublish_edition} SET sid=0 WHERE sid = '%d'", $sid);
   db_query("UPDATE {epublish_publication} SET sid=0 WHERE sid = '%d'", $sid);
   if ($sid == variable_get('epublish_global_sid', 0)) {
@@ -1814,6 +1857,7 @@ function epublish_section_topics($sid, $eid) {
  *	 An object containing all of the values for a single record in the
  *	 {epublish_publication} table.
  */
+# API: remove, this is in the API
 function epublish_get_pub($pid) {
   return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE pid='%d'", $pid));
 }
@@ -1830,6 +1874,7 @@ function epublish_get_pub($pid) {
  */
 function epublish_get_pub_by_name($name) {
   $name = preg_replace('/_/', ' ', $name);
+  # NOTE(sdague) api - epublish_get_publication_by_name
   return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE LOWER('%s') LIKE LOWER(name)", trim($name)));
 }
 
@@ -1841,6 +1886,7 @@ function epublish_get_pub_by_name($name) {
  */
 function epublish_pub_list() {
   $order = variable_get('epublish_edition_order', 'DESC');
+  # NOTE(sdague) api - epublish_list_publications()
   $publications = db_query("SELECT * FROM {epublish_publication}");
   $header = array(t('publication/editions'), array("data" => t("operations"), "colspan" => 2));
 
@@ -1856,6 +1902,7 @@ function epublish_pub_list() {
         array("attributes" =>
           array("label" => "add-edition-to-publication-$publication->pid")))
     );
+    # NOTE (sdague) api - epublish_list_editions($pid, $order)
     $result = db_query("SELECT * FROM {epublish_edition} WHERE pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
     $previous_volume = -1;
     $editions = array();
@@ -1887,6 +1934,7 @@ function epublish_admin_publication_edit($pid = NULL) {
     return drupal_get_form('epublish_pub_confirm_delete', $pid);
   }
   elseif ($pid) {
+    # NOTE(sdague) api - epublish_get_publication
     $publication = epublish_get_pub($pid);
   }
   $output = drupal_get_form('epublish_form_pub', $publication);
@@ -1935,6 +1983,7 @@ function epublish_form_pub($form_state, $edit = NULL) {
     );
   $editions[0] = '<none>';
   if ($edit->pid) {
+    # NOTE(sdague) api - epublish_list_editions
     $result = db_query("SELECT * FROM {epublish_edition} WHERE pid='%d' ORDER BY volume $order, number $order, pubdate $order, eid $order", $edit->pid);
     while ($edition = db_fetch_object($result)) {
       $editions[$edition->eid] = theme('epublish_edition_reference', $edition);
@@ -2034,6 +2083,7 @@ function epublish_pub() {
 function epublish_form_pub_submit($form, &$form_state) {
   $edit = $form_state['values'];
 
+  # TODO(sdague) - will this turn into a write_record cleanly?
   if ($edit['pid'] && $edit['action'] != 'delete') {
     db_query("UPDATE {epublish_publication} SET name = '%s', description = '%s', schedule = '%s', current_eid = '%d',layout_list = '%s', layout_page = '%s', sid = '%s' WHERE pid = '%d'", $edit['name'], $edit['description'], $edit['schedule'], $edit['current_eid'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['pid']);
     drupal_set_message(t('The publication "%title" has been updated.', array('%title' => $edit['name'])));
