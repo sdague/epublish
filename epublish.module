@@ -540,7 +540,7 @@ function epublish_block($op = 'list', $delta = 0) {
     // publication blocks
     if (substr($delta, 0, 12) == 'cur_edition_') {
       $pid = substr($delta, 12);
-      $publication = epublish_get_pub($pid);
+      $publication = epublish_get_publication($pid);
       $data['subject'] = t($publication->name);
       $eid = epublish_current_edition($pid);
       $edition = epublish_get_edition($eid);
@@ -558,7 +558,7 @@ function epublish_block($op = 'list', $delta = 0) {
     }
     elseif (substr($delta, 0, 4) == 'pub_') {
       $pid = substr($delta, 4);
-      $publication = epublish_get_pub($pid);
+      $publication = epublish_get_publication($pid);
       $data['subject'] = t($publication->name);
       $items = array();
       $order = variable_get('epublish_edition_order', 'DESC');
@@ -801,20 +801,21 @@ function theme_epublish_edition_reference($edition) {
 function epublish_pub_page() {
   $pub = arg(1);
   $ed = arg(2);
+
   if (is_numeric($pub)) {
-    $publication = epublish_get_pub($pub);
+    $publication = epublish_get_publication($pub);
+  } elseif ($pub) {
+    $publication = epublish_get_publication_by_name($pub);
   }
-  elseif ($pub) {
-    $publication = epublish_get_pub_by_name($pub);
-  }
+
   if ($publication) {
     if ($ed == t('current')) {
-      $ed = epublish_current_edition($publication->pid);
+      $ed = epublish_get_current_edition_id($publication->pid);
     }
-  }
-  else {
+  } else {
     return theme('epublish_format_pub');
   }
+
   if (is_numeric($ed)) {
     $edition = epublish_get_edition($ed);
     $sid = epublish_assign_section($edition);
@@ -1060,7 +1061,7 @@ function epublish_assign_layout($sid, &$edition, $context) {
     if ($edition->$layout) {
       return $edition->$layout;
     }
-    $publication = epublish_get_pub($edition->pid);
+    $publication = epublish_get_publication($edition->pid);
     if ($publication->$layout) {
       return $publication->$layout;
     }
@@ -1094,7 +1095,7 @@ function epublish_assign_section(&$edition) {
     if ($sids[$edition->sid]) {
       return $edition->sid;
     }
-    $publication = epublish_get_pub($edition->pid);
+    $publication = epublish_get_publication($edition->pid);
     if ($sids[$publication->sid]) {
       return $publication->sid;
     }
@@ -1816,38 +1817,6 @@ function epublish_section_topics($sid, $eid) {
 /*******************************************
  *	 PUBLICATIONS
  ******************************************/
-
-/**
- * epublish_get_pub: get a publication record from the database
- *
- * @param $pid
- *	 A publication ID number
- *
- * @return
- *	 An object containing all of the values for a single record in the
- *	 {epublish_publication} table.
- */
-# API: remove, this is in the API
-function epublish_get_pub($pid) {
-  return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE pid='%d'", $pid));
-}
-
-/**
- * epublish_get_pub_by_name: get a publication record from the database, based on its name
- *
- * @param $name
- *	 A publication name
- *
- * @return
- *	 An object containing all of the values for a single record in the
- *	 {epublish_publication} table.
- */
-function epublish_get_pub_by_name($name) {
-  $name = preg_replace('/_/', ' ', $name);
-  # NOTE(sdague) api - epublish_get_publication_by_name
-  return db_fetch_object(db_query("SELECT * FROM {epublish_publication} WHERE LOWER('%s') LIKE LOWER(name)", trim($name)));
-}
-
 /**
  * epublish_pub_list: list the publications for admin/epublish
  *
@@ -1905,7 +1874,7 @@ function epublish_admin_publication_edit($pid = NULL) {
   }
   elseif ($pid) {
     # NOTE(sdague) api - epublish_get_publication
-    $publication = epublish_get_pub($pid);
+    $publication = epublish_get_publication($pid);
   }
   $output = drupal_get_form('epublish_form_pub', $publication);
   return $output;
@@ -2076,14 +2045,14 @@ function epublish_form_pub_submit($form, &$form_state) {
  *	 A message stating that the publication has been deleted
  */
 function epublish_pub_confirm_delete(&$form_state, $pid) {
-  $publication = epublish_get_pub($pid);
+  $publication = epublish_get_publication($pid);
   $form['pid'] = array('#type' => 'value', '#value' => $publication->pid);
   return confirm_form($form, t('Are you sure you want to delete the publication "%title"?', array('%title' => $publication->name)), 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'), 'confirm');
 }
 
 function epublish_pub_confirm_delete_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
-  $publication = epublish_get_pub($pid);
+  $publication = epublish_get_publication($pid);
   db_query("DELETE FROM {epublish_publication} WHERE pid = '%d'", $pid);
   $result = db_query("SELECT eid from {epublish_edition} WHERE pid = '%d'", $pid);
   while ($edition = db_fetch_object($result)) {
@@ -2140,7 +2109,7 @@ function epublish_form_edition($form_state, $edit = NULL, $pid = NULL) {
   if ($pid) {
     $edit->pid = $pid;
   }
-  $publication = epublish_get_pub($edit->pid);
+  $publication = epublish_get_publication($edit->pid);
   $form[] = array('#value' => '<h3>'. t('Edition of publication ') . l($publication->name, "admin/epublish/edit/publication/$publication->pid") ."</h3>\n");
   $form['pid'] = array(
     '#type' => 'hidden',
@@ -2496,7 +2465,7 @@ function epublish_form_edition_submit($form, &$form_state) {
  */
 function epublish_edition_confirm_delete(&$form_state, $eid) {
   $pid = $form_state['post']['pid'];
-  $publication = epublish_get_pub($pid);
+  $publication = epublish_get_publication($pid);
   $edition = epublish_get_edition($eid);
   $form['eid'] = array('#type' => 'value', '#value' => $edition->eid);
   return confirm_form($form, t('Are you sure you want to delete the "%edition" edition from publication "%publication"?', array('%edition' => $edition->dateline, '%publication' => $publication->name)), 'admin/epublish', 'This action cannot be undone.', t('Delete'), t('Cancel'));
@@ -2505,7 +2474,7 @@ function epublish_edition_confirm_delete(&$form_state, $eid) {
 function epublish_edition_confirm_delete_submit($form, &$form_state) {
   $eid = $form_state['values']['eid'];
   $edition = epublish_get_edition($eid);
-  $publication = epublish_get_pub($edition->pid);
+  $publication = epublish_get_publication($edition->pid);
   db_query("DELETE FROM {epublish_edition} WHERE eid = '%d'", $edition->eid);
   db_query("DELETE FROM {epublish_edition_node} WHERE eid = '%d'", $edition->eid);
   drupal_set_message(t('Deleted "%edition" edition from publication "%publication."', array('%edition' => $edition->dateline, '%publication' => $publication->name)));
@@ -2563,7 +2532,7 @@ function epublish_admin_volume_edit($pid = NULL, $volume = NULL) {
  */
 function epublish_form_volume($form_state, $edit = NULL) {
   $edit = (object) $edit;
-  $publication = epublish_get_pub($edit->pid);
+  $publication = epublish_get_publication($edit->pid);
   $form[] = array('#value' => '<h3>'. t('Volume @vol of publication "!pub"', array('@vol' => $edit->volume, '!pub' => l($publication->name, "admin/epublish/edit/publication/$publication->pid"))) ."</h3>\n");
   $form["pid"] = array(
     '#type' => 'hidden',
@@ -2630,7 +2599,7 @@ function epublish_form_volume_submit($form, &$form_state) {
  *	 A message stating that the volume has been deleted
  */
 function epublish_volume_confirm_delete(&$form_state, $pid, $volume) {
-  $publication = epublish_get_pub($pid);
+  $publication = epublish_get_publication($pid);
   $vol = epublish_get_volume($pid, $volume);
   $form['pid'] = array('#type' => 'value', '#value' => $pid);
   $form['volume']=array('#type' => 'value', '#value' => $volume);
@@ -2641,7 +2610,7 @@ function epublish_volume_confirm_delete(&$form_state, $pid, $volume) {
 function epublish_volume_confirm_delete_submit($form, &$form_state) {
   $pid = $form_state['values']['pid'];
   $volume = $form_state['values']['volume'];
-  $publication = epublish_get_pub($pid);
+  $publication = epublish_get_publication($pid);
   $vol = epublish_get_volume($pid, $volume);
   db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", $pid, $volume);
   drupal_set_message(t('Removed volume name "%volume" from publication "%publication."', array('%volume' => $vol->dateline, '%publication' => $publication->name)));
@@ -2726,7 +2695,7 @@ function epublish_admin_node() {
     '#type' => 'hidden',
     '#value' => $eid,
   );
-  $publication = epublish_get_pub($edition->pid);
+  $publication = epublish_get_publication($edition->pid);
   $exclusions = _epublish_build_node_exclusions(epublish_get_edition_nodes($eid));
 
   $filters[] = array(t('View posts that are new or updated'), "($exclusions)");
@@ -2976,7 +2945,7 @@ function theme_epublish_navigation($node, $editions) {
   foreach ($editions as $eid) {
     $output .= '<div class="epublish_navigation">';
     $edition = epublish_get_edition($eid);
-    $publication = epublish_get_pub($edition->pid);
+    $publication = epublish_get_publication($edition->pid);
     $sid = epublish_assign_section($edition);
     $topics = epublish_section_topics($sid, $edition->eid);
 

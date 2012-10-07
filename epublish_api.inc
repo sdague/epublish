@@ -34,7 +34,7 @@ function epublish_list_publications() {
  *	 {epublish_publication} table.
  */
 function epublish_get_publication($pid) {
-  return db_fetch_object(db_query(db_rewrite_sql("SELECT * FROM {epublish_publication} WHERE pid=%d", $pid)));
+  return db_fetch_object(db_query(db_rewrite_sql("SELECT * FROM {epublish_publication} WHERE pid=%d"), $pid));
 }
 
 /**
@@ -63,7 +63,7 @@ function epublish_update_publication(&$pub) {
 }
 
 function epublish_exists_publication($id) {
-  (db_fetch_object(db_rewrite(db_query("SELECT name FROM {epublish_publication} WHERE pid=%d", $pid)))) ? TRUE : FALSE;
+  (db_fetch_object(db_query(db_rewrite_sql("SELECT name FROM {epublish_publication} WHERE pid=%d"), $pid))) ? TRUE : FALSE;
 }
 
 function epublish_delete_publication($id) {
@@ -87,7 +87,11 @@ function epublish_delete_publication($id) {
  *	 {epublish_edition} table.
  */
 function epublish_get_edition($eid) {
-  return db_fetch_object(db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE eid=%d", $eid)));
+  return db_fetch_object(
+                         db_query(
+                                  db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE eid=%d"),
+                                  $eid)
+                         );
 }
 
 /**
@@ -99,13 +103,17 @@ function epublish_get_edition($eid) {
  * @return
  *	 An edition ID number
  */
-function epublish_get_current_edition($pid) {
+function epublish_get_current_edition_id($pid) {
   $pub = epublish_get_publication($pid);
   if ($pub->current_eid) {
-    return epublish_get_edition($pub->current_eid);
+    return $pub->current_eid;
   } else {
     // return most recent
-    return db_fetch_object(db_query(db_rewrite_sql("SELECT eid FROM {epublish_edition} WHERE pid='%d' ORDER BY volume DESC, number DESC, pubdate DESC, eid DESC LIMIT 1", $pid)));
+    return db_fetch_object(
+                           db_query(
+                                    db_rewrite_sql("SELECT eid FROM {epublish_edition} WHERE pid='%d' ORDER BY volume DESC, number DESC, pubdate DESC, eid DESC LIMIT 1"),
+                                    $pid)
+                           );
   }
 }
 
@@ -138,9 +146,9 @@ function epublish_delete_edition($eid) {
 function epublish_list_editions($pid=0, $order='DESC') {
   $results = NULL;
   if ($pid != 0) {
-    $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE pid=%d ORDER BY volume %s, number %s, pubdate %s, eid %s", $pid, $order, $order, $order, $order));
+    $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} WHERE pid=%d ORDER BY volume %s, number %s, pubdate %s, eid %s"), $pid, $order, $order, $order, $order);
   } else {
-    $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} ORDER BY volume %s, number %s, pubdate %s, eid %s", $order, $order, $order, $order));
+    $results = db_query(db_rewrite_sql("SELECT * FROM {epublish_edition} ORDER BY volume %s, number %s, pubdate %s, eid %s"), $order, $order, $order, $order);
   }
   $rows = array();
   while($obj = db_fetch_object($results)) {
@@ -155,14 +163,14 @@ function epublish_get_published_editions($pid=0, $vid=0, $num=0, $order='DESC') 
   $sqlorder = "ORDER BY volume %s, number %s, pubdate %s, eid %s";
 
   if ($pid != 0 and $vid != 0 and $num != 0) {
-    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d AND number=%d $sqlorder",
-                                       $pid, $vid, $num, $order, $order, $order, $order));
+    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d AND number=%d $sqlorder"),
+                        $pid, $vid, $num, $order, $order, $order, $order);
   } elseif ($pid != 0 and $vid != 0) {
-    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d $sqlorder",
-                                       $pid, $vid, $order, $order, $order, $order));
+    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d $sqlorder"),
+                        $pid, $vid, $order, $order, $order, $order);
   } elseif ($pid != 0) {
-    $results = db_query(db_rewrite_sql("$base pid=%d $sqlorder",
-                                       $pid, $order, $order, $order, $order));
+    $results = db_query(db_rewrite_sql("$base pid=%d $sqlorder"),
+                        $pid, $order, $order, $order, $order);
   }
   $rows = array();
   while($obj = db_fetch_object($results)) {
@@ -254,7 +262,7 @@ function epublish_delete_section($sid) {
  *********************************************************/
 
 function epublish_get_editions_for_node($nid) {
-  $results = db_query(db_rewrite_sql('SELECT * FROM {epublish_edition_node} een WHERE nid = %d', $node->nid));
+  $results = db_query(db_rewrite_sql('SELECT * FROM {epublish_edition_node} een WHERE nid = %d'), $node->nid);
   $rows = array();
   while($obj = db_fetch_object($results)) {
     $rows[] = $obj;
@@ -263,7 +271,7 @@ function epublish_get_editions_for_node($nid) {
 }
 
 function epublish_exists_node_in_edition($nid, $eid) {
-  (db_fetch_object(db_rewrite(db_query("SELECT name FROM {epublish_edition_node} WHERE nid=%d and eid=%d", $nid, $eid)))) ? TRUE : FALSE;
+  (db_fetch_object(db_query(db_rewrite_sql("SELECT name FROM {epublish_edition_node} WHERE nid=%d and eid=%d"), $nid, $eid))) ? TRUE : FALSE;
 }
 
 function epublish_remove_node_from_edition($nid, $eid) {
