@@ -162,14 +162,16 @@ function epublish_get_published_editions($pid=0, $vid=0, $num=0, $order='DESC') 
   $sqlbase = "SELECT * FROM {epublish_edition} WHERE published=1 AND";
   $sqlorder = "ORDER BY volume %s, number %s, pubdate %s, eid %s";
 
-  if ($pid != 0 and $vid != 0 and $num != 0) {
-    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d AND number=%d $sqlorder"),
+  if ($pid and $vid and $num) {
+    $results = db_query(db_rewrite_sql("$sqlbase pid=%d AND volume=%d AND number=%d $sqlorder"),
                         $pid, $vid, $num, $order, $order, $order, $order);
-  } elseif ($pid != 0 and $vid != 0) {
-    $results = db_query(db_rewrite_sql("$base pid=%d AND volume=%d $sqlorder"),
+  } elseif ($pid and $vid) {
+    $results = db_query(
+                        db_rewrite_sql("$sqlbase pid=%d AND volume=%d $sqlorder"),
                         $pid, $vid, $order, $order, $order, $order);
-  } elseif ($pid != 0) {
-    $results = db_query(db_rewrite_sql("$base pid=%d $sqlorder"),
+  } elseif ($pid) {
+    $results = db_query(
+                        db_rewrite_sql("$sqlbase pid=%d $sqlorder"),
                         $pid, $order, $order, $order, $order);
   }
   $rows = array();

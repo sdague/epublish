@@ -789,6 +789,10 @@ function theme_epublish_edition_reference($edition) {
   return implode(', ', $reference);
 }
 
+function epublish_handle_volume_url($path) {
+
+}
+
 /**
  * epublish_pub_page: Display the publication(s).
  */
@@ -821,8 +825,13 @@ function epublish_pub_page() {
     $sid = epublish_assign_section($edition);
     $topics = epublish_section_topics($sid, $edition->eid);
     $output = theme('epublish_topics', $topics, $sid, $edition, 'page');
-  }
-  else {
+  } else {
+    # BUG: this whole chunk of the function is a horrible side distraction, what
+    # we really should have is a set of decisions up front then
+    #
+    # show_edition
+    # show_volume
+
     $order = variable_get('epublish_edition_order', 'DESC');
     # TODO(sdague) ok, this is kind of psychotic that we're doing inter string
     # parsing for the volume and number of the editions. We've got to normalize
@@ -836,27 +845,24 @@ function epublish_pub_page() {
     # epublish/edition/eid
     #
     preg_match('/(v([0-9]+))?(n([0-9]+))?/i', $ed, $match);
-    $volume = $match[2] ? (" AND volume=" . $match[2]) : '';
-    $number = $match[4] ? (" AND number=" . $match[4]) : '';
+    $vid = $match[2];
+    $num = $match[4];
     //$num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
 
     // API: epublish_get_published_editions($pid, $vid, $num, $order)
-    $num_editions = db_result(db_query("SELECT COUNT(*) FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number", $publication->pid));
-    $editions = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
-    if ($num_editions == 1) {
-      $edition = db_fetch_object($editions);
+    $editions = epublish_get_published_editions($publication->pid, $vid, $num, $order);
+
+    if (count($editions) == 1) {
+      $edition = $editions[0];
       $sid = epublish_assign_section($edition);
       $topics = epublish_section_topics($sid, $edition->eid);
       $output = theme('epublish_topics', $topics, $sid, $edition, 'page');
-    }
-    else {
+    } else {
       $edition = NULL;
       if (!$ed) {
         $output .= '<div class="content">'. $publication->description .'</div>';
       }
-      // API: epublish_get_published_editions($pid, $vid, $num, $order)
-      $editions = db_query("SELECT * FROM {epublish_edition} WHERE published=1 AND pid='%d'$volume$number ORDER BY volume $order, number $order, pubdate $order, eid $order", $publication->pid);
-      while ($ed = db_fetch_object($editions)) {
+      foreach ($editions as $ed) {
         if ($previous_volume && ($ed->volume != $previous_volume)) {
           $output .= theme('epublish_format_volume', $previous_volume, $publication->pid, $edition_blocks);
           $edition_blocks = array();
