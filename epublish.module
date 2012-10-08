@@ -191,13 +191,6 @@ function epublish_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_SUGGESTED_ITEM,
   );
-  $items['headlines'] = array(
-    'title' => 'Headlines',
-    'page callback' => 'epublish_headlines_page',
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
   $items['admin/epublish'] = array(
     'title' => 'Epublish',
     'page callback' => 'epublish_pub_list',
@@ -915,58 +908,6 @@ function theme_epublish_pub_page($output, $publication, $edition, $volume=NULL) 
   return $output;
 }
 
-
-/**
- * epublish_headlines_page: Display the headlines.
- */
-# TODO(sdague) get the SQL deconstruction out of here
-function epublish_headlines_page() {
-  $sid = arg(1);
-  $sids = epublish_sections();
-  if (!$sid) {
-    $array_keys = array_keys($sids);
-    $sid = variable_get('epublish_global_sid', array_shift($array_keys));
-  }
-  $section = epublish_get_section($sid);
-  if ($section->timeframe) {
-    $timeframe = " AND (n.created >= '". strtotime('-'. $section->timeframe) ."' OR n.sticky=1)";
-  }
-  $result = db_query("SELECT et.tid, et.count, et.node_types, td.name FROM {epublish_topic} et LEFT JOIN {term_data} td USING (tid) WHERE et.sid='%d' ORDER BY et.weight", $sid);
-  $all_nodes = array();
-  $topics = array();
-  while ($topic = db_fetch_object($result)) {
-    $included_node_types = _epublish_build_node_inclusions(array_unique(array_merge(explode(',', $section->node_types), explode(',', $topic->node_types))));
-    $exclusions = _epublish_build_node_exclusions($all_nodes);
-  // Condition to handle another default section
-    if ($topic->tid == -2) {
-      $topic->name = variable_get('epublish_advertisement', t('advertisement'));
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1 $timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
-    }
-    elseif ($topic->tid == -1) {
-      $topic->name = variable_get('epublish_top_stories', t('top stories'));
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1 $timeframe AND n.sticky = 1 ORDER by n.created DESC LIMIT $topic->count");
-    }
-    elseif ($topic->tid == 0) {
-      $topic->name = variable_get('epublish_miscellaneous', t('miscellaneous'));
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n WHERE ($exclusions) AND ($included_node_types) AND n.promote = 1 AND n.status = 1 $timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
-    }
-    else {
-      $included_terms = _epublish_topic_term_inclusions($topic->tid, $sid);
-      $result2 = db_query("SELECT DISTINCT(n.nid) FROM {node} n INNER JOIN {term_node} tn ON n.nid=tn.nid WHERE ($exclusions) AND ($included_node_types) AND ($included_terms) AND n.promote = 1 AND n.status = 1 $timeframe ORDER by n.sticky DESC, n.created DESC LIMIT $topic->count");
-    }
-    $topic->nodes = array();
-    while ($node = db_fetch_object($result2)) {
-      $topic->nodes[] = $node->nid;
-      $all_nodes[] = $node->nid;
-    }
-    if (count($topic->nodes)) {
-      $topics[] = $topic;
-    }
-  }
-  drupal_set_title(check_plain($section->title));
-  $edition = NULL;
-  return theme('epublish_topics', $topics, $sid, $edition, 'page');
-}
 
 /**
  * theme_epublish_format_volume: A themeable function that lists the issues
