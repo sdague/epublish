@@ -40,9 +40,6 @@ function theme_epublish_layout_list($topics, $params=NULL) {
       }
       $node = node_load($nid);
       $output .= "<li>" . l(t($node->title), "node/$nid");
-      if ($node->epublish_abstract) {
-          $output .= ': '. check_markup($node->epublish_abstract, $node->format, FALSE);
-      }
       $output .= "</li>\n";
     }
   }

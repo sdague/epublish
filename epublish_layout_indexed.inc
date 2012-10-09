@@ -11,7 +11,6 @@ $context = 'page';
 
 /**
  * theme_epublish_layout_indexed: A themeable function to produce a list of section topics and their nodes.
- *                                An Table of content is displayed on top with abstract of each node following
  *                                TOC grouped on topics.
  * @param $topics
  *   An array of topics
@@ -34,7 +33,6 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
   // define class variables
   $css_title = "epub-title";
   $css_linktitle = "link-title" ;
-  $css_abstract = "abstract" ;
   foreach ($topics as $topic) { // begin foreach (two)
     if (count($topic->nodes)) {
       $subsection = epublish_get_section_by_title($topic->name);
@@ -83,26 +81,6 @@ function theme_epublish_layout_indexed($topics, $params=NULL) {
          $o_detail .= '<div class="'. $css_linktitle .' '. strtolower(preg_replace('|[^a-zA-Z0-9_]+|', '-', $topic->name) ) .'-'.   $css_title .'"><span class="bullet">o </span>'. l(t($node->title), "node/$nid") .'<a name="N'. $sid .'_'. $counter .'">&nbsp;</a>'."</div>\n" ;
         }
         // Now detail has got additional information
-        // Add Abstract
-        if ($node->epublish_abstract) {
-          if ( ($topic->weight != 99) && ($topic->weight != (-99)) && ($topic->weight != (-98))) {
-            $o_detail .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract .' <span class="morelink"> '. l("[more..]", "node/$nid")  .' </span>', $node->format, FALSE) ." </div>\n";
-          }
-          else {
-          // Footer
-            if ( ($topic->weight == 99) ) {
-              $o_footer .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
-            }
-         // Header
-            if ( $topic->weight == (-99)) {
-              $o_header .= '<div class="'. $css_abstract .'">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
-            }
-         // Advertisement
-            if ( ($topic->weight == (-98)) ) {
-              $o_advertisement .= ''. check_markup($node->epublish_abstract, $node->format, FALSE);
-            }
-          }
-        } // end of if for abstract
         $counter++ ;
       } // end of foreach statement (one)
     }

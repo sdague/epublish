@@ -53,9 +53,6 @@ function epublish_theme() {
     'epublish_edition_reference' => array(
       'arguments' => array('edition' => 0),
     ),
-    'epublish_abstract' => array(
-      'arguments' => array('abstract' => NULL),
-    ),
     'epublish_topics' => array(
      'arguments' => array('topics' => 0, 'sid' => NULL, 'edition' => 0, 'context' => NULL),
     ),
@@ -101,9 +98,6 @@ function epublish_help($path, $arg) {
     break;
     case 'admin/settings/epublish':
       $output = t('<p>Settings for periodically-issued publications.</p>');
-    break;
-    case 'admin/node/configure/defaults':
-      $output = t('<p>If you want users to be able to enter brief abstracts of postings for displays on headlines and publication pages, check the <em>has abstract</em> box.</p>');
     break;
     case 'admin/help#epublish':
     $output = t("<p>This module helps organize a publication or group of publications, each with multiple editions.</p>".
@@ -430,7 +424,6 @@ function epublish_admin_settings() {
 /**
  * Implementation of hook_nodeapi().
  */
-# TODO(sdague) remove abstract functionality
 function epublish_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
   switch ($op) {
     case 'delete':
@@ -640,14 +633,6 @@ epublish_layouts();
 /*******************************************
  *	 DISPLAY FUNCTIONS
  ******************************************/
-
-
-/**
- * theme_epublish_abstract: A themeable function to display the abstract for an article.
- */
-function theme_epublish_abstract($abstract) {
-  return '<div class="epublish_abstract">'. $abstract .'</div>';
-}
 
 /**
  * theme_epublish_topics: A themeable function to display the headlines from an array of topics.

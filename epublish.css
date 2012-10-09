@@ -15,10 +15,6 @@
   font-family: Times New Roman, Times, serif;
   font-size: 1em;
 }
-.epublish .one_two .abstract {
-  font-family: Times New Roman, Times, serif;
-  font-size: 1.2em;
-}
 .all_caps {
   text-transform: uppercase;
 }
@@ -93,10 +89,6 @@
 	padding: 2px ;
 }
 
-.abstract {
-  font-family: Verdana;
-  font-size: 9 pt;
-}
 .epub-title a {
   font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
   font-size: 11 pt;
@@ -128,20 +120,6 @@
 .ad-title a:hover { color: #990000; }
 .topic{
   color: #000;
-}
-.abstract a {
-  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
-  font-size: 9 pt;
-  color: #069;
-}
-.ad-abstract {
-  font-family: Verdana;
-  font-size: 9 pt;
-}
-.ad-abstract a {
-  font-family: "Verdana", "Arial", "Helvetica", "sans-serif";
-  font-size: 9 pt;
-  color: #990000;
 }
 .bullet {
 	color: #990000;

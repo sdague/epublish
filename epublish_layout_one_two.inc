@@ -41,9 +41,6 @@ function theme_epublish_layout_one_two($topics, $params=NULL) {
       $node = node_load($nid);
       $output .= '<div class="title">'. l(t($node->title), "node/$nid") ."</div>\n";
       $output .= '<div class="user">'. t('By') .' '.'<span class="all_caps">'. $node->name ."</span></div>\n";
-      if ($node->epublish_abstract) {
-        $output .= '<div class="abstract">'. check_markup($node->epublish_abstract, $node->format, FALSE) ."</div>\n";
-      }
     }
     $output .= "\n";
     $output .= '      <div class="other_heads">

@@ -37,17 +37,6 @@ function epublish_schema() {
     'primary key' => array('pid'),
   );
 
-  $schema['epublish_abstract'] = array(
-    'fields' => array(
-      'nid' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
-      'epublish_abstract' => array('type' => 'text', 'not null' => TRUE, 'size' => 'big'),
-      'use_as_teaser' => array('type' => 'int', 'not null' => TRUE, 'default' => 0)
-    ),
-    'unique keys' => array(
-    'nid' => array('nid')
-    ),
-  );
-
   $schema['epublish_edition'] = array(
     'fields' => array(
       'eid' => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
@@ -156,3 +145,7 @@ function epublish_update_6000() {
 }
 
 
+function epublish_update_6200() {
+  $ret = array();
+  db_drop_table($ret, 'epublish_abstract');
+}
