@@ -329,4 +329,27 @@ function epublish_save_volume($vol) {
   }
 }
 
+/*******************************************
+ *	 NODES
+ ******************************************/
+
+/**
+ * epublish_get_edition_nodes: get a list of nodes from an edition
+ *
+ * @param $eid
+ *	 An edition ID
+ *
+ * @return
+ *	 An array containing all of the node IDs from that edition
+ */
+# NOTE(sdague) this is only used to build the admin UI exclusion list
+function epublish_get_edition_nodes($eid) {
+  $result = db_query(db_rewrite_sql("SELECT n.nid FROM {node} n, {epublish_edition_node} een WHERE een.nid = n.nid AND een.eid='%d' AND n.status='1' ORDER BY n.sticky DESC, n.created DESC"), $eid);
+  while ($node = db_fetch_object($result)) {
+    $nodes[] = $node->nid;
+  }
+  return $nodes;
+}
+
+
 ?>

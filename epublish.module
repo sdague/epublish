@@ -2181,6 +2181,19 @@ function theme_epublish_form_edition($form) {
   return $output;
 }
 
+
+function epublish_set_url_alias($values) {
+  $pub_id = $values['pid'];
+  $ed_id = $values['eid'];
+  $path = $values['path'];
+  $path_id = $values['pthid'];
+  if ($path_id) {
+    path_set_alias("epublish/" . $pub_id . "/"  . $ed_id, $path, $path_id);
+  }
+  else {
+    path_set_alias("epublish/" . $pub_id . "/"  . $ed_id, $path);
+  }
+}
 /**
  * epublish_save_edition: save changes to a publication edition
  *
@@ -2196,19 +2209,8 @@ function theme_epublish_form_edition($form) {
 function epublish_form_edition_submit($form, &$form_state) {
   $edit = $form_state['values'];
   if ($edit['eid'] && $edit['action'] != 'delete') {
-    if (module_exists('path')) {
-      $ppid = $edit['pid'];
-      $peid = $edit['eid'];
-      $pnid = $edit['path'];
-      $pthid = $edit['pthid'];
-      if ($edit['path']) {
-        if ($pthid) {
-          path_set_alias("epublish/$ppid/$peid", $pnid, $pthid);
-        }
-        else {
-          path_set_alias("epublish/$ppid/$peid", $pnid);
-        }
-      }
+    if (module_exists('path') && $edit['path']) {
+      epublish_set_url_alias($edit);
     }
 
     db_query("UPDATE {epublish_edition} SET pid='%d', dateline='%s', description='%s', volume='%d', number='%d', pubdate='%d', layout_list='%s', layout_page='%s', sid='%d', published='%d' WHERE eid = '%d'", $edit['pid'], $edit['dateline'], $edit['description'], $edit['volume'], $edit['number'], $edit['year'] . $edit['month'] . $edit['day'], $edit['layout_list'], $edit['layout_page'], $edit['sid'], $edit['published'], $edit['eid']);
@@ -2407,26 +2409,6 @@ function epublish_volume_confirm_delete_submit($form, &$form_state) {
   drupal_goto("admin/epublish");
 }
 
-/*******************************************
- *	 NODES
- ******************************************/
-
-/**
- * epublish_get_edition_nodes: get a list of nodes from an edition
- *
- * @param $eid
- *	 An edition ID
- *
- * @return
- *	 An array containing all of the node IDs from that edition
- */
-function epublish_get_edition_nodes($eid) {
-  $result = db_query(db_rewrite_sql("SELECT n.nid FROM {node} n, {epublish_edition_node} een WHERE een.nid = n.nid AND een.eid='%d' AND n.status='1' ORDER BY n.sticky DESC, n.created DESC"), $eid);
-  while ($node = db_fetch_object($result)) {
-    $nodes[] = $node->nid;
-  }
-  return $nodes;
-}
 
 /**
  * epublish_add_node: add a node to an edition
