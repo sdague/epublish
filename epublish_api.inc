@@ -302,7 +302,31 @@ function epublish_get_nodes_for_edition($eid) {
   return $nodes;
 }
 
+/***********************************************
+ *
+ *  Volumes
+ *
+ **********************************************/
+# TODO(sdague) the old volumes function created volumes secretly as well, might
+# need to add that back
+function epublish_get_volume($pid, $volume) {
+  return db_fetch_object(
+                         db_query(
+                                  db_rewrite_sql("SELECT * FROM {epublish_volume} WHERE pid='%d' AND volume='%d'"),
+                                  $pid, $volume)
+                         );
+}
 
+function epublish_remove_volume($pid, $volume) {
+  return db_query("DELETE FROM {epublish_volume} WHERE pid = '%d' AND volume = '%d'", $edit['pid'], $edit['volume']);
+}
 
+function epublish_save_volume($vol) {
+  if (epublish_get_volume($vol->pid, $vol->volume)) {
+    db_write_record("epublish_volume", $vol, $vol->pid);
+  } else {
+    db_write_record("epublish_volume", $vol);
+  }
+}
 
 ?>
