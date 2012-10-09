@@ -143,9 +143,3 @@ function epublish_update_6000() {
 
   return $ret;
 }
-
-
-function epublish_update_6200() {
-  $ret = array();
-  db_drop_table($ret, 'epublish_abstract');
-}
