@@ -280,6 +280,10 @@ function epublish_remove_node_from_edition($nid, $eid) {
   db_query("DELETE FROM {epublish_edition_node} WHERE eid = '%d' AND nid = '%d'", $eid, $nid);
 }
 
+function epublish_remove_node_from_all_editions($nid) {
+  return db_query("DELETE FROM {epublish_edition_node} WHERE nid = '%d'", $eid, $nid);
+}
+
 function epublish_add_node_to_edition($eid, $nid, $weight=0, $tid=0) {
   $data = (object) array("eid" => $eid, "nid" => $nid, "weight" => $weight, "tid" => $tid);
   epublish_remove_node_from_edition($eid, $nid);
